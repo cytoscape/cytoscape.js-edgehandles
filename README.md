@@ -100,7 +100,6 @@ cy.on('cyedgehandles.start', 'node', function(e){
  * `$('#cy').cytoscapeEdgehandles('enable')` : disable the plugin
  * `$('#cy').cytoscapeEdgehandles('option', 'preview', false)` : set individual option (e.g. `'preview'`)
  * `$('#cy').cytoscapeEdgehandles('option', { /* options */ })` : set all options
- * `$('#cy').cytoscapeEdgehandles('option', 'preview', false)` : set individual option (e.g. `'preview'`)
  * `$('#cy').cytoscapeEdgehandles('option', 'preview')` : get option value (e.g. `'preview'`)
  * `$('#cy').cytoscapeEdgehandles('destroy')` : destroy the plugin instance
  * `$('#cy').cytoscapeEdgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
