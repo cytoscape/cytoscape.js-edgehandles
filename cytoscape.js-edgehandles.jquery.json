@@ -1,0 +1,28 @@
+{
+	"name": "cytoscape.js-edgehandles",
+	"version": "1.0.0",
+	"description": "Handles placed on nodes that allow for edges to be created between nodes.",
+	"title": "Cytoscape.js Edge Handles",
+	"keywords": [
+		"cytoscape.js",
+		"cytoscape",
+		"graph",
+		"edge",
+		"handle"
+	],
+	"dependencies": {
+		"jquery": ">=1.4",
+		"cytoscape": ">=2.0"
+	}, 
+	"licenses": [
+		{
+			"type": "LGPLv3",
+			"url": "http://www.gnu.org/licenses/lgpl.html"
+		}
+	],
+	"author": {
+		"name": "Max Franz",
+		"email": "maxkfranz@gmail.com",
+		"url": "http://maxfranz.com"
+	}
+}

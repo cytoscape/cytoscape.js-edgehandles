@@ -1,0 +1,111 @@
+<!DOCTYPE>
+
+<html>
+
+	<head>
+		<title>[jquery.cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles</title>
+
+		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+		<script src="jquery.cytoscape.js-edgehandles.js"></script>
+
+		<style>
+			body {
+				font-family: helvetica;
+				font-size: 14px;
+			}
+			#cy {
+				width: 600px;
+				height: 600px;
+				border: 1px solid #888;
+			}
+		</style>
+
+		<script>
+			$(function(){
+				$('#cy').cytoscape({
+					style: [
+						{
+							selector: 'node',
+							css: {
+								'content': 'data(name)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							css: {
+								'target-arrow-shape': 'triangle'
+							}
+						},
+
+						// some style for the plugin
+
+						{
+							selector: '.edgehandles-hover',
+							css: {
+								'background-color': 'red'
+							}
+						},
+
+						{
+							selector: '.edgehandles-source',
+							css: {
+								'border-width': 2,
+								'border-color': 'red'
+							}
+						},
+
+						{
+							selector: '.edgehandles-target',
+							css: {
+								'border-width': 2,
+								'border-color': 'red'
+							}
+						},
+
+						{
+							selector: '.edgehandles-preview',
+							css: {
+								'line-color': 'red',
+								'target-arrow-color': 'red',
+								'source-arrow-color': 'red'
+							}
+						}
+					],
+
+					elements: {
+						nodes: [
+							{ data: { id: 'j', name: 'Jerry' } },
+							{ data: { id: 'e', name: 'Elaine' } },
+							{ data: { id: 'k', name: 'Kramer' } },
+							{ data: { id: 'g', name: 'George' } }
+						],
+						edges: [
+							{ data: { source: 'j', target: 'e' } },
+							{ data: { source: 'j', target: 'k' } },
+							{ data: { source: 'j', target: 'g' } },
+							{ data: { source: 'e', target: 'j' } },
+							{ data: { source: 'e', target: 'k' } },
+							{ data: { source: 'k', target: 'j' } },
+							{ data: { source: 'k', target: 'e' } },
+							{ data: { source: 'k', target: 'g' } },
+							{ data: { source: 'g', target: 'j' } }
+						]
+					},
+				});
+
+				$('#cy').cytoscapeEdgehandles({
+					// options go here
+				});
+			});
+		</script>
+	</head>
+
+	<body>
+		<h1>[jquery.cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles Demo</h1>
+
+		<div id="cy"></div>
+	</body>
+
+</html>
