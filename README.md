@@ -1,7 +1,7 @@
 cytoscape.js-edgehandles
 ========================
 
-
+![Preview](https://raw2.github.com/cytoscape/cytoscape.js-edgehandles/master/img/preview.png)
 
 
 ## Description
