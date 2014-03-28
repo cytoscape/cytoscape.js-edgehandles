@@ -1,6 +1,6 @@
 {
 	"name": "cytoscape.js-edgehandles",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Handles placed on nodes that allow for edges to be created between nodes.",
 	"title": "Cytoscape.js Edge Handles",
 	"keywords": [
@@ -12,7 +12,7 @@
 	],
 	"dependencies": {
 		"jquery": ">=1.4",
-		"cytoscape": ">=2.0"
+		"cytoscape": ">=2.2"
 	}, 
 	"licenses": [
 		{

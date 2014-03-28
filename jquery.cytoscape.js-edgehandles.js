@@ -3,15 +3,15 @@
 	var defaults = {
 		preview: true, // whether to show added edges preview before releasing selection
 		handleSize: 10, // the size of the edge handle put on nodes
-		handleColor: "#ff0000", // the colour of the handle and the line drawn from it
-		handleLineType: "straight", // can be "straight" for a straight line or "draw" for a draw-as-you-go line
+		handleColor: '#ff0000', // the colour of the handle and the line drawn from it
+		handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
 		handleLineWidth: 1, // width of handle line in pixels
 		hoverDelay: 150, // time spend over a target node before it is considered a target selection
 		enabled: true, // whether to start the plugin in the enabled state
 		edgeType: function( sourceNode, targetNode ){
-			// can return "flat" for flat edges between nodes or "node" for intermediate node between them
+			// can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
 			// returning null/undefined means an edge can't be added between the two nodes
-			return "flat"; 
+			return 'flat'; 
 		},
 		loopAllowed: function( node ){
 			// for the specified node, return whether edges from itself to itself are allowed
@@ -44,21 +44,21 @@
 		var functions = {
 			destroy: function(){
 				var $container = $(this);
-				var data = $container.data("cyedgehandles");
+				var data = $container.data('cyedgehandles');
 				
 				if( data == null ){
 					return;
 				}
 				
 				data.unbind();
-				$container.data("cyedgehandles", {});
+				$container.data('cyedgehandles', {});
 				
 				return $container;
 			},
 			
 			option: function(name, value){
 				var $container = $(this);
-				var data = $container.data("cyedgehandles");
+				var data = $container.data('cyedgehandles');
 				
 				if( data == null ){
 					return;
@@ -78,20 +78,27 @@
 					options[ name ] = value;
 				}
 				
-				$container.data("cyedgehandles", data);
+				$container.data('cyedgehandles', data);
 
 				return $container;
 			},
 
 			disable: function(){
-				return functions.option.apply(this, ["enabled", false]);
+				return functions.option.apply(this, ['enabled', false]);
 			},
 
 			enable: function(){
-				return functions.option.apply(this, ["enabled", true]);
+				return functions.option.apply(this, ['enabled', true]);
 			},
 				
+			resize: function(){
+				var $container = $(this);
+
+				$container.trigger('cyedgehandles.resize');
+			},
+
 			init: function(){
+				var self = this;
 				var opts = $.extend(true, {}, defaults, params); 
 				var $container = $(this);
 				var cy;
@@ -104,6 +111,9 @@
 				var hx, hy, hr;
 				var hoverTimeout;
 				var drawsClear = true;
+				var ghostNode;
+				var ghostEdge;
+				var sourceNode;
 
 				$container.append( $canvas );
 
@@ -123,18 +133,21 @@
 					sizeCanvas();
 				});
 
+				$container.bind('cyedgehandles.resize', function(){
+					sizeCanvas();
+				});
 
-				var ctx = $canvas[0].getContext("2d"); 
+				var ctx = $canvas[0].getContext('2d'); 
 				
 				// write options to data
-				var data = $container.data("cyedgehandles");
+				var data = $container.data('cyedgehandles');
 				if( data == null ){
 					data = {};
 				}
 				data.options = opts;
 				
 				function options(){
-					return $container.data("cyedgehandles").options;
+					return $container.data('cyedgehandles').options;
 				}
 
 				function enabled(){
@@ -178,15 +191,15 @@
 				}
 
 				function resetToDefaultState(){
-//					console.log("resetToDefaultState");
+//					console.log('resetToDefaultState');
 
 					clearDraws();
 					
 					//setTimeout(function(){
 						cy.nodes()
-							.removeClass("edgehandles-hover")
-							.removeClass("edgehandles-source")
-							.removeClass("edgehandles-target")
+							.removeClass('edgehandles-hover')
+							.removeClass('edgehandles-source')
+							.removeClass('edgehandles-target')
 						;
 					//}, 1);
 					
@@ -203,11 +216,11 @@
 				}
 				
 				function removePreview( source, target ){
-					source.edgesWith(target).filter(".edgehandles-preview").remove();
+					source.edgesWith(target).filter('.edgehandles-preview').remove();
 					
 					target
-						.neighborhood("node.edgehandles-preview")
-						.closedNeighborhood(".edgehandles-preview")
+						.neighborhood('node.edgehandles-preview')
+						.closedNeighborhood('.edgehandles-preview')
 						.remove();
 
 					target.trigger('cyedgehandles.removepreview');
@@ -227,13 +240,56 @@
 				}
 
 				function drawLine(hx, hy, x, y){
-					ctx.fillStyle = options().handleColor;
-					ctx.strokeStyle = options().handleColor;
-					ctx.lineWidth = options().handleLineWidth;
+
+					if( options().handleLineType !== 'ghost' ){
+						ctx.fillStyle = options().handleColor;
+						ctx.strokeStyle = options().handleColor;
+						ctx.lineWidth = options().handleLineWidth;
+					}
 
 					// draw line based on type
 					switch( options().handleLineType ){
-					case "straight":
+					case 'ghost':
+
+						if( !ghostNode || ghostNode.removed() ){
+
+							drawHandle();
+
+							ghostNode = cy.add({
+								group: 'nodes',
+								classes: 'edgehandles-ghost edgehandles-ghost-node',
+								css: {
+									'background-color': 'blue',
+									'width': 0.0001,
+									'height': 0.0001,
+									'opacity': 0
+								},
+								position: {
+									x: 0,
+									y: 0
+								}
+							});
+
+							ghostEdge = cy.add({
+								group: 'edges',
+								classes: 'edgehandles-ghost edgehandles-ghost-edge',
+								data: {
+									source: sourceNode.id(),
+									target: ghostNode.id()
+								}
+							});
+
+						}
+
+						ghostNode.renderedPosition({
+							x: x,
+							y: y
+						});
+						
+
+						break;
+
+					case 'straight':
 
 						ctx.beginPath();
 						ctx.moveTo(hx, hy);
@@ -242,7 +298,7 @@
 						ctx.stroke();
 						
 						break;
-					case "draw":
+					case 'draw':
 					default:
 						
 						if( linePoints == null ){
@@ -265,18 +321,24 @@
 						break;
 					}
 
-					drawsClear = false;
+					if( options().handleLineType !== 'ghost' ){
+						drawsClear = false;
+					}
 				}
 
 				function makeEdges( preview, src, tgt ){
 					
-					// console.log("make edges");
+					// console.log('make edges', preview);
 					
-					var source = src ? src : cy.nodes(".edgehandles-source");
-					var targets = tgt ? tgt : cy.nodes(".edgehandles-target");
-					var classes = preview ? "edgehandles-preview" : "";
+					var source = src ? src : cy.nodes('.edgehandles-source');
+					var targets = tgt ? tgt : cy.nodes('.edgehandles-target');
+					var classes = preview ? 'edgehandles-preview' : '';
 					var added = cy.collection();
 					
+					if( !src && !tgt && !preview && options().preview ){
+						cy.$('.edgehandles-ghost').remove();
+					}
+
 					if( source.size() === 0 || targets.size() === 0 ){
 						return; // nothing to do :(
 					}
@@ -284,14 +346,14 @@
 					// just remove preview class if we already have the edges
 					if( !src && !tgt ){
 						if( !preview && options().preview ){
-							added = cy.elements(".edgehandles-preview").removeClass("edgehandles-preview");
+							added = cy.elements('.edgehandles-preview').removeClass('edgehandles-preview');
 							
 							options().complete( source, targets, added );
 							source.trigger('cyedgehandles.complete');	
 							return;
 						} else {
 							// remove old previews
-							cy.elements(".edgehandles-preview").remove();
+							cy.elements('.edgehandles-preview').remove();
 						}
 					}
 					
@@ -299,7 +361,7 @@
 						var target = targets[i];
 						
 						switch( options().edgeType( source, target ) ){
-						case "node":
+						case 'node':
 							
 							var p1 = source.position();
 							var p2 = target.position();
@@ -309,12 +371,12 @@
 							};
 												
 							var interNode = cy.add($.extend( true, {
-								group: "nodes",
+								group: 'nodes',
 								position: p
 							}, options().nodeParams(source, target) )).addClass(classes);
 
 							var source2inter = cy.add($.extend( true, {
-								group: "edges",
+								group: 'edges',
 								data: {
 									source: source.id(),
 									target: interNode.id()
@@ -322,7 +384,7 @@
 							}, options().edgeParams(source, target) )).addClass(classes);
 							
 							var inter2target = cy.add($.extend( true, {
-								group: "edges",
+								group: 'edges',
 								data: {
 									source: interNode.id(),
 									target: target.id()
@@ -333,9 +395,9 @@
 							
 							break;
 						
-						case "flat":
+						case 'flat':
 							var edge = cy.add($.extend( true, {
-								group: "edges",
+								group: 'edges',
 								data: {
 									source: source.id(),
 									target: target.id()
@@ -347,7 +409,7 @@
 							break;
 
 						default:
-							target.removeClass("edgehandles-target");
+							target.removeClass('edgehandles-target');
 							break; // don't add anything
 						}
 					}
@@ -370,21 +432,21 @@
 					var lastActiveId;
 
 					var transformHandler;
-					cy.bind("zoom pan", transformHandler = function(){
+					cy.bind('zoom pan', transformHandler = function(){
 						clearDraws();
 					});
 					
 					var lastMdownHandler;
 
 					var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler;
-					cy.on("mouseover", "node", startHandler = function(e){
+					cy.on('mouseover', 'node', startHandler = function(e){
 						
-						if( disabled() || mdownOnHandle || grabbingNode || this.hasClass("edgehandles-preview") || inForceStart ){
+						if( disabled() || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') ){
 							return; // don't override existing handle that's being dragged
 							// also don't trigger when grabbing a node etc
 						} 
 						
-						//console.log("mouseover startHandler %s %o", this.id(), this);
+						//console.log('mouseover startHandler %s %o', this.id(), this);
 						
 						if( lastMdownHandler ){
 							$container[0].removeEventListener('mousedown', lastMdownHandler, true);
@@ -428,18 +490,20 @@
 								return; // we don't want this going off if we have the forced start to consider
 							}
 
-							// console.log("mdownHandler %s %o", node.id(), node);
+							// console.log('mdownHandler %s %o', node.id(), node);
 							
 							mdownOnHandle = true;
 							
 							e.preventDefault();
 							e.stopPropagation();
 							
-							node.addClass("edgehandles-source");
+							sourceNode = node;
+
+							node.addClass('edgehandles-source');
 							node.trigger('cyedgehandles.start');
 							
 							function doneMoving(dmEvent){
-								// console.log("doneMoving %s %o", node.id(), node);
+								// console.log('doneMoving %s %o', node.id(), node);
 								
 								if( !mdownOnHandle || inForceStart ){
 									return;
@@ -447,7 +511,7 @@
 								
 								var $this = $(this);
 								mdownOnHandle = false;
-								$(window).unbind("mousemove", moveHandler);
+								$(window).unbind('mousemove', moveHandler);
 								
 								makeEdges();
 								resetToDefaultState();
@@ -456,7 +520,7 @@
 								node.trigger('cyedgehandles.stop');
 							}
 							
-							$(window).one("mouseup blur", doneMoving).bind("mousemove", moveHandler);
+							$(window).one('mouseup blur', doneMoving).bind('mousemove', moveHandler);
 							disableGestures();
 							
 							options().start( node );
@@ -465,13 +529,15 @@
 						}
 						
 						function moveHandler(e){
-							// console.log("mousemove moveHandler %s %o", node.id(), node);
+							// console.log('mousemove moveHandler %s %o', node.id(), node);
 							
 							var x = e.pageX - $container.offset().left;
 							var y = e.pageY - $container.offset().top;
 
-							clearDraws();
-							drawHandle(hx, hy, hr);
+							if( options().handleLineType !== 'ghost' ){
+								clearDraws();
+								drawHandle(hx, hy, hr);
+							}
 							drawLine(hx, hy, x, y);
 							
 							return false;
@@ -481,13 +547,13 @@
 						lastMdownHandler = mdownHandler;
 
 						
-					}).on("mouseover touchover", "node", hoverHandler = function(){
+					}).on('mouseover touchover', 'node', hoverHandler = function(){
 						var node = this;
 						var target = this;
 
 // console.log('mouseover hoverHandler')
 
-						if( disabled() || this.hasClass("edgehandles-preview") ){
+						if( disabled() || this.hasClass('edgehandles-preview') ){
 							return; // ignore preview nodes
 						}
 						
@@ -497,17 +563,20 @@
 
 							clearTimeout( hoverTimeout );
 							hoverTimeout = setTimeout(function(){
-								var source = cy.nodes(".edgehandles-source");
+								var source = cy.nodes('.edgehandles-source');
 								
-								var isLoop = node.hasClass("edgehandles-source");
+								var isLoop = node.hasClass('edgehandles-source');
 								var loopAllowed = options().loopAllowed( node );
+								var isGhost = node.hasClass('edgehandles-ghost-node');
 								
+								if( isGhost ){ return; }
+
 								if( !isLoop || (isLoop && loopAllowed) ){
-									node.addClass("edgehandles-hover");
-									node.toggleClass("edgehandles-target");
+									node.addClass('edgehandles-hover');
+									node.toggleClass('edgehandles-target');
 									
 									if( options().preview ){
-										if( node.hasClass("edgehandles-target") ){
+										if( node.hasClass('edgehandles-target') ){
 											makePreview( source, target );
 										} else {
 											removePreview( source, target );
@@ -519,19 +588,23 @@
 							return false;
 						}
 
-					}).on("mouseout", "node", leaveHandler = function(){
-						if( this.hasClass("edgehandles-hover") ){
-							this.removeClass("edgehandles-hover");
+					}).on('mouseout', 'node', leaveHandler = function(){
+						if( this.hasClass('edgehandles-hover') ){
+							this.removeClass('edgehandles-hover');
 						}
 
 						if( mdownOnHandle ){
 							clearTimeout(hoverTimeout);
 						}
 
-					}).on("drag position", "node", dragNodeHandler = function(){
-						setTimeout(clearDraws, 50);
+					}).on('drag position', 'node', dragNodeHandler = function(){
+						var node = this;
 
-					}).on("grab", "node", grabHandler = function(){
+						if( !node.hasClass('edgehandles-ghost') ){
+							setTimeout(clearDraws, 50);
+						}
+
+					}).on('grab', 'node', grabHandler = function(){
 						grabbingNode = true;
 
 						setTimeout(function(){
@@ -539,10 +612,10 @@
 						}, 5);
 						
 
-					}).on("free", "node", freeNodeHandler = function(){
+					}).on('free', 'node', freeNodeHandler = function(){
 						grabbingNode = false;
 
-					}).on("cyedgehandles.forcestart", "node", forceStartHandler = function(){
+					}).on('cyedgehandles.forcestart', 'node', forceStartHandler = function(){
 						inForceStart = true;
 						clearDraws(); // clear just in case
 
@@ -586,15 +659,17 @@
 									var x = (me.pageX !== undefined ? me.pageX : me.originalEvent.touches[0].pageX) - $container.offset().left;
 									var y = (me.pageY !== undefined ? me.pageY : me.originalEvent.touches[0].pageY) - $container.offset().top;
 
-									clearDraws();
-									drawHandle(hx, hy, hr);
+									if( options().handleLineType !== 'ghost' ){
+										clearDraws();
+										drawHandle(hx, hy, hr);
+									}
 									drawLine(hx, hy, x, y);
 								}
 
 								$container[0].addEventListener('mousemove', moveHandler, true);
 								$container[0].addEventListener('touchmove', moveHandler, true);
 
-								$(window).one("mouseup touchend blur", function(){
+								$(window).one('mouseup touchend blur', function(){
 									$container[0].removeEventListener('mousemove', moveHandler, true);
 									$container[0].removeEventListener('touchmove', moveHandler, true);
 
@@ -606,8 +681,8 @@
 									options().stop( node );
 									node.trigger('cyedgehandles.stop');
 
-									cy.off("tap", "node", tapHandler);
-									node.off("remove", removeBeforeHandler);
+									cy.off('tap', 'node', tapHandler);
+									node.off('remove', removeBeforeHandler);
 									resetToDefaultState();
 								});
 
@@ -621,15 +696,15 @@
 						$container[0].addEventListener('touchstart', downHandler, true);
 
 						var removeBeforeHandler;
-						node.one("remove", function(){
+						node.one('remove', function(){
 							$container[0].removeEventListener('mousedown', downHandler, true);
 							$container[0].removeEventListener('touchstart', downHandler, true);
-							cy.off("tap", "node", tapHandler);
+							cy.off('tap', 'node', tapHandler);
 						});
 
 						// case: tap a target node
 						var tapHandler;
-						cy.one("tap", "node", tapHandler = function(){
+						cy.one('tap', 'node', tapHandler = function(){
 							var target = this;
 
 							var isLoop = source.id() === target.id();
@@ -649,12 +724,12 @@
 
 							$container[0].removeEventListener('mousedown', downHandler, true);
 							$container[0].removeEventListener('touchstart', downHandler, true);
-							node.off("remove", removeBeforeHandler);
+							node.off('remove', removeBeforeHandler);
 							resetToDefaultState();
 						});
 					
 
-					}).on("remove", "node", removeHandler = function(){
+					}).on('remove', 'node', removeHandler = function(){
 						var id = this.id();
 
 						if( id === lastActiveId ){
@@ -667,21 +742,21 @@
 
 					data.unbind = function(){
 						cy
-							.off("mouseover", "node", startHandler)
-							.off("mouseover", "node", hoverHandler)
-							.off("mouseout", "node", leaveHandler)
-							.off("drag position", "node", dragNodeHandler)
-							.off("grab", "node", grabNodeHandler)
-							.off("free", "node", freeNodeHandler)
-							.off("cyedgehandles.forcestart", "node", forceStartHandler)
-							.off("remove", "node", removeHandler)
+							.off('mouseover', 'node', startHandler)
+							.off('mouseover', 'node', hoverHandler)
+							.off('mouseout', 'node', leaveHandler)
+							.off('drag position', 'node', dragNodeHandler)
+							.off('grab', 'node', grabNodeHandler)
+							.off('free', 'node', freeNodeHandler)
+							.off('cyedgehandles.forcestart', 'node', forceStartHandler)
+							.off('remove', 'node', removeHandler)
 						;
 						
-						cy.unbind("zoom pan", transformHandler);
+						cy.unbind('zoom pan', transformHandler);
 					};
 				});
 				
-				$container.data("cyedgehandles", data);
+				$container.data('cyedgehandles', data);
 			},
 
 			start: function( id ){
@@ -690,7 +765,7 @@
 				$container.cytoscape(function(e){
 					var cy = this;
 
-					cy.$("#" + id).trigger('cyedgehandles.forcestart');
+					cy.$('#' + id).trigger('cyedgehandles.forcestart');
 				});
 			}
 		};
@@ -700,7 +775,7 @@
 		} else if( typeof fn == 'object' || !fn ) {
 			return functions.init.apply( this, arguments );
 		} else {
-			$.error("No such function `"+ fn +"` for jquery.cytoscapeEdgeHandles");
+			$.error('No such function `'+ fn +'` for jquery.cytoscapeEdgeHandles');
 		}
 		
 		return $(this);

@@ -24,6 +24,10 @@
 		<script>
 			$(function(){
 				$('#cy').cytoscape({
+					ready: function(){
+						window.cy = this;
+					},
+
 					style: [
 						{
 							selector: 'node',
@@ -65,7 +69,7 @@
 						},
 
 						{
-							selector: '.edgehandles-preview',
+							selector: '.edgehandles-preview, .edgehandles-ghost-edge',
 							css: {
 								'line-color': 'red',
 								'target-arrow-color': 'red',

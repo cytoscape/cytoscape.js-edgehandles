@@ -30,15 +30,15 @@ $('#cy').cytoscape({
 $('#cy').cytoscapeEdgehandles({
 	preview: true, // whether to show added edges preview before releasing selection
 	handleSize: 10, // the size of the edge handle put on nodes
-	handleColor: "#ff0000", // the colour of the handle and the line drawn from it
-	handleLineType: "straight", // can be "straight" for a straight line or "draw" for a draw-as-you-go line
+	handleColor: '#ff0000', // the colour of the handle and the line drawn from it
+	handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
 	handleLineWidth: 1, // width of handle line in pixels
 	hoverDelay: 150, // time spend over a target node before it is considered a target selection
 	enabled: true, // whether to start the plugin in the enabled state
 	edgeType: function( sourceNode, targetNode ){
-		// can return "flat" for flat edges between nodes or "node" for intermediate node between them
+		// can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
 		// returning null/undefined means an edge can't be added between the two nodes
-		return "flat"; 
+		return 'flat'; 
 	},
 	loopAllowed: function( node ){
 		// for the specified node, return whether edges from itself to itself are allowed
@@ -66,6 +66,16 @@ $('#cy').cytoscapeEdgehandles({
 });
 
 ```
+
+## Classes
+
+These classes can be used for styling the graph as it interacts with the plugin:
+
+* `edgehandles-source` : The source node
+* `edgehandles-target` : A target node
+* `edgehandles-preview` : Preview elements (used with `options.preview: true`)
+* `edgehandles-hover` : Added to nodes as they are hovered over as targets
+* `edgehandles-ghost-edge` : The ghost handle line edge
 
 
 ## Events
