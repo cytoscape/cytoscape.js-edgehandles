@@ -13,7 +13,7 @@ This plugin creates handles on nodes that can be dragged to create edges between
 ## Dependencies
 
  * jQuery >=1.4
- * Cytoscape.js >=2.0
+ * Cytoscape.js >=2.2.3
 
 
 ## Initialisation

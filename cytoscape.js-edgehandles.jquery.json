@@ -12,7 +12,7 @@
 	],
 	"dependencies": {
 		"jquery": ">=1.4",
-		"cytoscape": ">=2.2"
+		"cytoscape": ">=2.2.3"
 	}, 
 	"licenses": [
 		{
