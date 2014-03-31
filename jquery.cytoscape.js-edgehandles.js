@@ -100,6 +100,14 @@
         $container.trigger('cyedgehandles.resize');
       },
 
+      drawon: function(){
+        $(this).trigger('cyedgehandles.drawon');
+      },
+
+      drawoff: function(){
+        $(this).trigger('cyedgehandles.drawoff');
+      },
+
       init: function(){
         var self = this;
         var opts = $.extend(true, {}, defaults, params); 
@@ -117,6 +125,7 @@
         var ghostNode;
         var ghostEdge;
         var sourceNode;
+        var drawMode = false;
 
         $container.append( $canvas );
 
@@ -138,6 +147,21 @@
 
         $container.bind('cyedgehandles.resize', function(){
           sizeCanvas();
+        });
+
+        var prevUngrabifyState;
+        $container.on('cyedgehandles.drawon', function(){
+          drawMode = true;
+
+          prevUngrabifyState = cy.autoungrabifyNodes();
+
+          cy.autoungrabifyNodes(true);
+        });
+
+        $container.on('cyedgehandles.drawoff', function(){
+          drawMode = false;
+
+          cy.autoungrabifyNodes(prevUngrabifyState);
         });
 
         var ctx = $canvas[0].getContext('2d'); 
@@ -194,7 +218,6 @@
         }
 
         function resetToDefaultState(){
-//          console.log('resetToDefaultState');
 
           clearDraws();
           
@@ -210,6 +233,8 @@
           
 
           linePoints = null;
+
+          sourceNode = null;
           
           resetGestures();
         }
@@ -244,7 +269,16 @@
           drawsClear = false;
         }
 
-        var drawLine = $$.util.throttle( function(hx, hy, x, y){
+        var lineDrawRate = 1000/30;
+        var lastDrawLine = 0;
+        var drawLine = function(hx, hy, x, y){
+          var now = +new Date();
+
+          if( now - lastDrawLine < lineDrawRate ){
+            return;
+          }
+
+          lastDrawLine = now;
 
           if( options().handleLineType !== 'ghost' ){
             ctx.fillStyle = options().handleColor;
@@ -329,7 +363,7 @@
           if( options().handleLineType !== 'ghost' ){
             drawsClear = false;
           }
-        }, 1000/30, { leading: true } );
+        };
 
         function makeEdges( preview, src, tgt ){
           
@@ -478,7 +512,7 @@
           var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler;
           cy.on('mouseover', 'node', startHandler = function(e){
             
-            if( disabled() || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') ){
+            if( disabled() || drawMode || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') ){
               return; // don't override existing handle that's being dragged
               // also don't trigger when grabbing a node etc
             } 
@@ -590,7 +624,7 @@
 
 // console.log('mouseover hoverHandler')
 
-            if( disabled() || this.hasClass('edgehandles-preview') ){
+            if( disabled() || drawMode || this.hasClass('edgehandles-preview') ){
               return; // ignore preview nodes
             }
             
@@ -604,6 +638,8 @@
             }
 
           }).on('mouseout', 'node', leaveHandler = function(){
+            if( drawMode ){ return; }
+
             if( this.hasClass('edgehandles-hover') ){
               this.removeClass('edgehandles-hover');
             }
@@ -613,6 +649,8 @@
             }
 
           }).on('drag position', 'node', dragNodeHandler = function(){
+            if( drawMode ){ return; }
+
             var node = this;
 
             if( !node.hasClass('edgehandles-ghost') ){
@@ -754,8 +792,11 @@
             }
           
 
-          }).on('cxttapstart', 'node', cxtstartHandler = function(){
-            if( options().cxt ){
+          }).on('cxttapstart tapstart', 'node', cxtstartHandler = function(e){
+            var cxtOk = options().cxt && e.type === 'cxttapstart';
+            var tapOk = drawMode && e.type === 'tapstart';
+
+            if( cxtOk || tapOk ){
               
               clearDraws(); // clear just in case
 
@@ -779,13 +820,16 @@
 
               node.trigger('cyedgehandles.showhandle');
 
-
-
+              options().start( node );
+              node.trigger('cyedgehandles.start');
             }
 
 
-          }).on('cxtdrag', cxtdragHandler = function(e){
-            if( options().cxt && sourceNode ){
+          }).on('cxtdrag tapdrag', cxtdragHandler = function(e){
+            var cxtOk = options().cxt && e.type === 'cxtdrag';
+            var tapOk = drawMode && e.type === 'tapdrag';
+
+            if( ( cxtOk || tapOk ) && sourceNode ){
               var rpos = e.cyRenderedPosition;
 
               drawLine(hx, hy, rpos.x, rpos.y);
@@ -793,28 +837,50 @@
             }
 
 
-          }).on('cxtdragover', 'node', cxtdragoverHandler = function(e){
-            if( options().cxt && sourceNode ){
+          }).on('cxtdragover tapdragover', 'node', cxtdragoverHandler = function(e){
+            var cxtOk = options().cxt && e.type === 'cxtdragover';
+            var tapOk = drawMode && e.type === 'tapdragover';
+
+            if( (cxtOk || tapOk) && sourceNode ){
               var node = this;
 
-              hoverOver( node );
+              clearTimeout(hoverTimeout);
+              hoverTimeout = setTimeout(function(){
+                hoverOver( node );
+              }, options().hoverDelay);
+              
             }
 
 
-          }).on('cxtdragout', 'node', cxtdragoutHandler = function(e){
-            if( options().cxt && sourceNode ){
+          }).on('cxtdragout tapdragout', 'node', cxtdragoutHandler = function(e){
+            var cxtOk = options().cxt && e.type === 'cxtdragout';
+            var tapOk = drawMode && e.type === 'tapdragout';
+
+            if( (cxtOk || tapOk) && sourceNode ){
               var node = this;
+
+              clearTimeout(hoverTimeout);
 
               hoverOut( node );
             }
 
 
-          }).on('cxttapend', cxtendHandler = function(){
-            if( options().cxt ){
+          }).on('cxttapend tapend', cxtendHandler = function(e){
+            var cxtOk = options().cxt && e.type === 'cxttapend';
+            var tapOk = drawMode && e.type === 'tapend';
+
+            if( cxtOk || tapOk ){
               
               makeEdges();
               resetToDefaultState();
               sourceNode = null;
+
+              if( sourceNode ){
+                options().stop( sourceNode );
+                node.trigger('cyedgehandles.stop');
+
+                options().complete( sourceNode );
+              }
             }
           });
         

@@ -113,3 +113,5 @@ cy.on('cyedgehandles.start', 'node', function(e){
  * `$('#cy').cytoscapeEdgehandles('option', 'preview')` : get option value (e.g. `'preview'`)
  * `$('#cy').cytoscapeEdgehandles('destroy')` : destroy the plugin instance
  * `$('#cy').cytoscapeEdgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
+ * `$('#cy').cytoscapeEdgehandles('drawon')` : enable draw mode
+ * `$('#cy').cytoscapeEdgehandles('drawoff')` : disable draw mode

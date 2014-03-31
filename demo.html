@@ -5,6 +5,8 @@
 	<head>
 		<title>[jquery.cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles</title>
 
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
 		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<!--<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>-->
 		<script src="../cytoscape.js/build/cytoscape.js"></script>
@@ -103,6 +105,14 @@
 				$('#cy').cytoscapeEdgehandles({
 					// options go here
 				});
+
+				$('#draw-on').on('click', function(){
+					$('#cy').cytoscapeEdgehandles('drawon');
+				});
+
+				$('#draw-off').on('click', function(){
+					$('#cy').cytoscapeEdgehandles('drawoff');
+				});
 			});
 		</script>
 	</head>
@@ -111,6 +121,9 @@
 		<h1>[jquery.cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles Demo</h1>
 
 		<div id="cy"></div>
+
+		<button id="draw-on">Draw mode on</button>
+		<button id="draw-off">Draw mode off</button>
 	</body>
 
 </html>
