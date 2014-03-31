@@ -622,6 +622,10 @@
             var node = this;
             var target = this;
 
+							if (options().canAccept && !options().canAccept( node)) {
+								return; // ignore nodes that don't accept edge to.
+							}
+							
 // console.log('mouseover hoverHandler')
 
             if( disabled() || drawMode || this.hasClass('edgehandles-preview') ){
