@@ -1,5 +1,7 @@
 ;(function($){
   
+  var $$ = cytoscape;
+
   var defaults = {
     preview: true, // whether to show added edges preview before releasing selection
     handleSize: 10, // the size of the edge handle put on nodes
@@ -242,7 +244,7 @@
           drawsClear = false;
         }
 
-        function drawLine(hx, hy, x, y){
+        var drawLine = $$.util.throttle( function(hx, hy, x, y){
 
           if( options().handleLineType !== 'ghost' ){
             ctx.fillStyle = options().handleColor;
@@ -327,7 +329,7 @@
           if( options().handleLineType !== 'ghost' ){
             drawsClear = false;
           }
-        }
+        }, 1000/30, { leading: true } );
 
         function makeEdges( preview, src, tgt ){
           
