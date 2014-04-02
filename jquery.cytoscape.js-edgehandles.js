@@ -489,6 +489,8 @@
 
         function hoverOut( node ){
           node.removeClass('edgehandles-hover');
+
+          clearTimeout(hoverTimeout);
         }
 
         $container.cytoscape(function(e){
@@ -844,11 +846,7 @@
             if( (cxtOk || tapOk) && sourceNode ){
               var node = this;
 
-              clearTimeout(hoverTimeout);
-              hoverTimeout = setTimeout(function(){
-                hoverOver( node );
-              }, options().hoverDelay);
-              
+              hoverOver( node );
             }
 
 
@@ -858,8 +856,6 @@
 
             if( (cxtOk || tapOk) && sourceNode ){
               var node = this;
-
-              clearTimeout(hoverTimeout);
 
               hoverOut( node );
             }
