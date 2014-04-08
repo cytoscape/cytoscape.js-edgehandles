@@ -26,9 +26,10 @@
       // return element object to be passed to cy.add() for intermediary node
       return {};
     },
-    edgeParams: function( sourceNode, targetNode ){
+    edgeParams: function( sourceNode, targetNode, i ){
       // for edges between the specified source and target
       // return element object to be passed to cy.add() for edge
+      // NB: i indicates edge index in case of edgeType: 'node'
       return {};
     },
     start: function( sourceNode ){
@@ -421,7 +422,7 @@
                   source: source.id(),
                   target: interNode.id()
                 }
-              }, options().edgeParams(source, target) )).addClass(classes);
+              }, options().edgeParams(source, target, 0) )).addClass(classes);
               
               var inter2target = cy.add($.extend( true, {
                 group: 'edges',
@@ -429,7 +430,7 @@
                   source: interNode.id(),
                   target: target.id()
                 }
-              }, options().edgeParams(source, target) )).addClass(classes);
+              }, options().edgeParams(source, target, 1) )).addClass(classes);
               
               added = added.add( interNode ).add( source2inter ).add( inter2target );
               
@@ -442,7 +443,7 @@
                   source: source.id(),
                   target: target.id()
                 }
-              }, options().edgeParams(source, target) )).addClass(classes);
+              }, options().edgeParams(source, target, 0) )).addClass(classes);
             
               added = added.add( edge );
             

@@ -29,6 +29,7 @@ $('#cy').cytoscape({
 // the default values of each option are outlined below:
 $('#cy').cytoscapeEdgehandles({
 preview: true, // whether to show added edges preview before releasing selection
+    preview: true, // whether to show added edges preview before releasing selection
     handleSize: 10, // the size of the edge handle put on nodes
     handleColor: '#ff0000', // the colour of the handle and the line drawn from it
     handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
@@ -51,9 +52,10 @@ preview: true, // whether to show added edges preview before releasing selection
       // return element object to be passed to cy.add() for intermediary node
       return {};
     },
-    edgeParams: function( sourceNode, targetNode ){
+    edgeParams: function( sourceNode, targetNode, i ){
       // for edges between the specified source and target
       // return element object to be passed to cy.add() for edge
+      // NB: i indicates edge index in case of edgeType: 'node'
       return {};
     },
     start: function( sourceNode ){
