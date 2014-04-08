@@ -8,6 +8,7 @@
     handleColor: '#ff0000', // the colour of the handle and the line drawn from it
     handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
     handleLineWidth: 1, // width of handle line in pixels
+    handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
     hoverDelay: 150, // time spend over a target node before it is considered a target selection
     cxt: true, // whether cxt events trigger edgehandles (useful on touch)
     enabled: true, // whether to start the plugin in the enabled state
@@ -513,8 +514,9 @@
 
           var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler;
           cy.on('mouseover', 'node', startHandler = function(e){
+            var node = this;
             
-            if( disabled() || drawMode || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') ){
+            if( disabled() || drawMode || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') || node.filter(options().handleNodes).length === 0 ){
               return; // don't override existing handle that's being dragged
               // also don't trigger when grabbing a node etc
             } 
@@ -525,7 +527,6 @@
               $container[0].removeEventListener('mousedown', lastMdownHandler, true);
             }
 
-            var node = this;
             var source = this;
             var p = node.renderedPosition();
             var h = node.renderedOuterHeight();
@@ -671,10 +672,15 @@
             grabbingNode = false;
 
           }).on('cyedgehandles.forcestart', 'node', forceStartHandler = function(){
+            var node = this;
+
+            if( node.filter(options().handleNodes).length === 0 ){
+              return; // skip if node not allowed
+            }
+
             inForceStart = true;
             clearDraws(); // clear just in case
 
-            var node = this;
             var source = node;
 
             lastActiveId = node.id();
@@ -795,6 +801,12 @@
           
 
           }).on('cxttapstart tapstart', 'node', cxtstartHandler = function(e){
+            var node = this;
+
+            if( node.filter(options().handleNodes).length === 0 ){
+              return; // skip if node not allowed
+            }
+
             var cxtOk = options().cxt && e.type === 'cxttapstart';
             var tapOk = drawMode && e.type === 'tapstart';
 

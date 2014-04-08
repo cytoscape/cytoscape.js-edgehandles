@@ -28,41 +28,43 @@ $('#cy').cytoscape({
 
 // the default values of each option are outlined below:
 $('#cy').cytoscapeEdgehandles({
-	preview: true, // whether to show added edges preview before releasing selection
-	handleSize: 10, // the size of the edge handle put on nodes
-	handleColor: '#ff0000', // the colour of the handle and the line drawn from it
-	handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
-	handleLineWidth: 1, // width of handle line in pixels
-	hoverDelay: 150, // time spend over a target node before it is considered a target selection
-	enabled: true, // whether to start the plugin in the enabled state
-	edgeType: function( sourceNode, targetNode ){
-		// can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
-		// returning null/undefined means an edge can't be added between the two nodes
-		return 'flat'; 
-	},
-	loopAllowed: function( node ){
-		// for the specified node, return whether edges from itself to itself are allowed
-		return false;
-	},
-	nodeParams: function( sourceNode, targetNode ){
-		// for edges between the specified source and target
-		// return element object to be passed to cy.add() for intermediary node
-		return {};
-	},
-	edgeParams: function( sourceNode, targetNode ){
-		// for edges between the specified source and target
-		// return element object to be passed to cy.add() for edge
-		return {};
-	},
-	start: function( sourceNode ){
-		// fired when edgehandles interaction starts (drag on handle)
-	},
-	complete: function( sourceNode, targetNodes, addedEntities ){
-		// fired when edgehandles is done and entities are added
-	},
-	stop: function( sourceNode ){
-		// fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
-	}
+preview: true, // whether to show added edges preview before releasing selection
+    handleSize: 10, // the size of the edge handle put on nodes
+    handleColor: '#ff0000', // the colour of the handle and the line drawn from it
+    handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
+    handleLineWidth: 1, // width of handle line in pixels
+    handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
+    hoverDelay: 150, // time spend over a target node before it is considered a target selection
+    cxt: true, // whether cxt events trigger edgehandles (useful on touch)
+    enabled: true, // whether to start the plugin in the enabled state
+    edgeType: function( sourceNode, targetNode ){
+      // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
+      // returning null/undefined means an edge can't be added between the two nodes
+      return 'flat'; 
+    },
+    loopAllowed: function( node ){
+      // for the specified node, return whether edges from itself to itself are allowed
+      return false;
+    },
+    nodeParams: function( sourceNode, targetNode ){
+      // for edges between the specified source and target
+      // return element object to be passed to cy.add() for intermediary node
+      return {};
+    },
+    edgeParams: function( sourceNode, targetNode ){
+      // for edges between the specified source and target
+      // return element object to be passed to cy.add() for edge
+      return {};
+    },
+    start: function( sourceNode ){
+      // fired when edgehandles interaction starts (drag on handle)
+    },
+    complete: function( sourceNode, targetNodes, addedEntities ){
+      // fired when edgehandles is done and entities are added
+    },
+    stop: function( sourceNode ){
+      // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
+    }
 });
 
 ```
