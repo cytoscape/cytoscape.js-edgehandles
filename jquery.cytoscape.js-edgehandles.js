@@ -21,6 +21,7 @@
       // for the specified node, return whether edges from itself to itself are allowed
       return false;
     },
+    nodeLoopOffset: -50, // offset for edgeType: 'node' loops
     nodeParams: function( sourceNode, targetNode ){
       // for edges between the specified source and target
       // return element object to be passed to cy.add() for intermediary node
@@ -406,10 +407,19 @@
               
               var p1 = source.position();
               var p2 = target.position();
-              var p = {
-                x: (p1.x + p2.x)/2,
-                y: (p1.y + p2.y)/2
-              };
+              var p;
+
+              if( source.id() === target.id() ){
+                p = {
+                  x: p1.x + options().nodeLoopOffset,
+                  y: p1.y + options().nodeLoopOffset
+                };
+              } else {
+                p = {
+                  x: (p1.x + p2.x)/2,
+                  y: (p1.y + p2.y)/2
+                };
+              }
                         
               var interNode = cy.add($.extend( true, {
                 group: 'nodes',
