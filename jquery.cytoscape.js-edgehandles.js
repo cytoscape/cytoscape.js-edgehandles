@@ -560,7 +560,7 @@
             
             hr = options().handleSize/2 * cy.zoom();
             hx = p.x;
-            hy = p.y - h/2 - hr/2;
+            hy = p.y - h/2;
             
             // add new handle
             drawHandle(hx, hy, hr);
@@ -714,7 +714,7 @@
                         
             var hr = options().handleSize/2 * cy.zoom();
             var hx = p.x;
-            var hy = p.y - h/2 - hr/2;
+            var hy = p.y - h/2;
 
             drawHandle(hx, hy, hr);
 
