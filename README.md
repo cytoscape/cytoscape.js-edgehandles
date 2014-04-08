@@ -38,6 +38,7 @@ preview: true, // whether to show added edges preview before releasing selection
     hoverDelay: 150, // time spend over a target node before it is considered a target selection
     cxt: true, // whether cxt events trigger edgehandles (useful on touch)
     enabled: true, // whether to start the plugin in the enabled state
+    toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
     edgeType: function( sourceNode, targetNode ){
       // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
       // returning null/undefined means an edge can't be added between the two nodes

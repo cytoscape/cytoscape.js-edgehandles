@@ -12,6 +12,7 @@
     hoverDelay: 150, // time spend over a target node before it is considered a target selection
     cxt: true, // whether cxt events trigger edgehandles (useful on touch)
     enabled: true, // whether to start the plugin in the enabled state
+    toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
     edgeType: function( sourceNode, targetNode ){
       // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
       // returning null/undefined means an edge can't be added between the two nodes
@@ -176,8 +177,9 @@
         }
         data.options = opts;
         
+        var optCache;
         function options(){
-          return $container.data('cyedgehandles').options;
+          return optCache || (optCache = $container.data('cyedgehandles').options);
         }
 
         function enabled(){
@@ -500,9 +502,18 @@
         }
 
         function hoverOut( node ){
+          var target = node;
+
           node.removeClass('edgehandles-hover');
 
           clearTimeout(hoverTimeout);
+
+          if( options().toggleOffOnLeave ){
+            var source = sourceNode;
+
+            node.removeClass('edgehandles-target');
+            removePreview( source, target );
+          }
         }
 
         $container.cytoscape(function(e){
@@ -652,14 +663,12 @@
             }
 
           }).on('mouseout', 'node', leaveHandler = function(){
+            var node = this;
+
             if( drawMode ){ return; }
 
-            if( this.hasClass('edgehandles-hover') ){
-              this.removeClass('edgehandles-hover');
-            }
-
             if( mdownOnHandle ){
-              clearTimeout(hoverTimeout);
+              hoverOut(node);
             }
 
           }).on('drag position', 'node', dragNodeHandler = function(){
