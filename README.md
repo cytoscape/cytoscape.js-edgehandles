@@ -6,7 +6,7 @@ cytoscape.js-edgehandles
 
 ## Description
 
-This plugin creates handles on nodes that can be dragged to create edges between nodes.  Because the handle itself is small and shown on `mouseover`, it's not intended to work on touch devices.  To support touch devices, you can use some alternative UI (e.g. [jquery.cytoscape.js-cxtmenu](https://github.com/cytoscape/cytoscape.js-cxtmenu)) to manually start the handle drag state, and then past that point the plugin works the same.
+This plugin creates handles on nodes that can be dragged to create edges between nodes.
 
 
 
