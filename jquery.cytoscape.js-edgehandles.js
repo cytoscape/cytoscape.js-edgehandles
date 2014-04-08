@@ -848,7 +848,7 @@
                           
               hr = options().handleSize/2 * cy.zoom();
               hx = p.x;
-              hy = p.y - h/2 - hr/2;
+              hy = p.y - h/2 + hr/2;
 
               drawHandle(hx, hy, hr);
 
