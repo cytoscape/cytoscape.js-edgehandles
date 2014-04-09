@@ -16,7 +16,7 @@
     edgeType: function( sourceNode, targetNode ){
       // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
       // returning null/undefined means an edge can't be added between the two nodes
-      return 'flat'; 
+      return null; 
     },
     loopAllowed: function( node ){
       // for the specified node, return whether edges from itself to itself are allowed
@@ -483,8 +483,9 @@
             var isLoop = node.hasClass('edgehandles-source');
             var loopAllowed = options().loopAllowed( node );
             var isGhost = node.hasClass('edgehandles-ghost-node');
+            var noEdge = options().edgeType( node ) == null;
             
-            if( isGhost ){ return; }
+            if( isGhost || noEdge ){ return; }
 
             if( !isLoop || (isLoop && loopAllowed) ){
               node.addClass('edgehandles-hover');
