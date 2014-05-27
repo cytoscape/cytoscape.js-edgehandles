@@ -5,18 +5,19 @@
   var defaults = {
     preview: true, // whether to show added edges preview before releasing selection
     handleSize: 10, // the size of the edge handle put on nodes
+    handleTouchTargetMult: 3, // effective size of handle on touch (not shown but used to make grabbing the small handle easier)
     handleColor: '#ff0000', // the colour of the handle and the line drawn from it
     handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
     handleLineWidth: 1, // width of handle line in pixels
     handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
     hoverDelay: 150, // time spend over a target node before it is considered a target selection
-    cxt: true, // whether cxt events trigger edgehandles (useful on touch)
+    cxt: false, // whether cxt events trigger edgehandles (useful on touch)
     enabled: true, // whether to start the plugin in the enabled state
     toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
     edgeType: function( sourceNode, targetNode ){
       // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
       // returning null/undefined means an edge can't be added between the two nodes
-      return null; 
+      return 'flat'; 
     },
     loopAllowed: function( node ){
       // for the specified node, return whether edges from itself to itself are allowed
@@ -265,6 +266,11 @@
         function drawHandle(hx, hy, hr){
           ctx.fillStyle = options().handleColor;
           ctx.strokeStyle = options().handleColor;
+
+          // if( $$.is.touch() ){
+          //   hr *= 1.5;
+          //   hy -= hr/3;
+          // }
 
           ctx.beginPath();
           ctx.arc(hx, hy, hr, 0 , 2*Math.PI);
@@ -535,19 +541,20 @@
           
           var lastMdownHandler;
 
-          var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler;
-          cy.on('mouseover', 'node', startHandler = function(e){
+          var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler, cxtstartHandler, tapToStartHandler, cxtdragHandler, cxtdragoverHandler, cxtdragoutHandler, cxtendHandler, dragHandler;
+          cy.on('mouseover tap', 'node', startHandler = function(e){
             var node = this;
             
             if( disabled() || drawMode || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') || node.filter(options().handleNodes).length === 0 ){
               return; // don't override existing handle that's being dragged
               // also don't trigger when grabbing a node etc
             } 
-            
+
             //console.log('mouseover startHandler %s %o', this.id(), this);
             
             if( lastMdownHandler ){
               $container[0].removeEventListener('mousedown', lastMdownHandler, true);
+              $container[0].removeEventListener('touchstart', lastMdownHandler, true);
             }
 
             var source = this;
@@ -571,15 +578,19 @@
 
             function mdownHandler(e){
               $container[0].removeEventListener('mousedown', mdownHandler, true);
+              $container[0].removeEventListener('touchstart', mdownHandler, true);
 
-              var x = e.pageX - $container.offset().left;
-              var y = e.pageY - $container.offset().top;
+              var pageX = !e.touches ? e.pageX : e.touches[0].pageX;
+              var pageY = !e.touches ? e.pageY : e.touches[0].pageY; 
+              var x = pageX - $container.offset().left;
+              var y = pageY - $container.offset().top;
+              var hrTarget = $$.is.touch() ? hr * options().handleTouchTargetMult : hr;
 
-              if( e.button !== 0 ){
+              if( e.button !== 0 && !e.touches ){
                 return; // sorry, no right clicks allowed 
               }
               
-              if( Math.abs(x - hx) > hr || Math.abs(y - hy) > hr ){
+              if( Math.abs(x - hx) > hrTarget || Math.abs(y - hy) > hrTarget ){
                 return; // only consider this a proper mousedown if on the handle
               }
 
@@ -599,7 +610,7 @@
               node.addClass('edgehandles-source');
               node.trigger('cyedgehandles.start');
               
-              function doneMoving(dmEvent){
+              function doneMoving(dmEvent){ 
                 // console.log('doneMoving %s %o', node.id(), node);
                 
                 if( !mdownOnHandle || inForceStart ){
@@ -608,7 +619,7 @@
                 
                 var $this = $(this);
                 mdownOnHandle = false;
-                $(window).unbind('mousemove', moveHandler);
+                $(window).unbind('mousemove touchmove', moveHandler);
                 
                 makeEdges();
                 resetToDefaultState();
@@ -617,7 +628,7 @@
                 node.trigger('cyedgehandles.stop');
               }
               
-              $(window).one('mouseup blur', doneMoving).bind('mousemove', moveHandler);
+              $(window).one('mouseup touchend touchcancel blur', doneMoving).bind('mousemove touchmove', moveHandler);
               disableGestures();
               
               options().start( node );
@@ -628,8 +639,10 @@
             function moveHandler(e){
               // console.log('mousemove moveHandler %s %o', node.id(), node);
               
-              var x = e.pageX - $container.offset().left;
-              var y = e.pageY - $container.offset().top;
+              var pageX = !e.originalEvent.touches ? e.pageX : e.originalEvent.touches[0].pageX;
+              var pageY = !e.originalEvent.touches ? e.pageY : e.originalEvent.touches[0].pageY;
+              var x = pageX - $container.offset().left;
+              var y = pageY - $container.offset().top;
 
               if( options().handleLineType !== 'ghost' ){
                 clearDraws();
@@ -641,10 +654,11 @@
             }
 
             $container[0].addEventListener('mousedown', mdownHandler, true);
+            $container[0].addEventListener('touchstart', mdownHandler, true);
             lastMdownHandler = mdownHandler;
 
             
-          }).on('mouseover touchover', 'node', hoverHandler = function(){
+          }).on('mouseover tapdragover', 'node', hoverHandler = function(){
             var node = this;
             var target = this;
 
@@ -663,7 +677,7 @@
               return false;
             }
 
-          }).on('mouseout', 'node', leaveHandler = function(){
+          }).on('mouseout tapdragout', 'node', leaveHandler = function(){
             var node = this;
 
             if( drawMode ){ return; }
@@ -682,11 +696,15 @@
             }
 
           }).on('grab', 'node', grabHandler = function(){
-            grabbingNode = true;
+            //grabbingNode = true;
 
-            setTimeout(function(){
+            //setTimeout(function(){
               clearDraws();
-            }, 5);
+            //}, 5);
+            
+
+          }).on('drag', 'node', dragHandler = function(){
+            grabbingNode = true;
             
 
           }).on('free', 'node', freeNodeHandler = function(){
@@ -702,7 +720,7 @@
             inForceStart = true;
             clearDraws(); // clear just in case
 
-            var source = node;
+            var source = sourceNode = node;
 
             lastActiveId = node.id();
 
@@ -821,7 +839,7 @@
             }
           
 
-          }).on('cxttapstart tapstart', 'node', cxtstartHandler = function(e){
+          }).on('cxttapstart tapstart', 'node', cxtstartHandler = function(e){ 
             var node = this;
 
             if( node.filter(options().handleNodes).length === 0 ){
@@ -876,7 +894,7 @@
             var cxtOk = options().cxt && e.type === 'cxtdragover';
             var tapOk = drawMode && e.type === 'tapdragover';
 
-            if( (cxtOk || tapOk) && sourceNode ){
+            if( (cxtOk || tapOk) && sourceNode ){ 
               var node = this;
 
               hoverOver( node );
@@ -887,7 +905,7 @@
             var cxtOk = options().cxt && e.type === 'cxtdragout';
             var tapOk = drawMode && e.type === 'tapdragout';
 
-            if( (cxtOk || tapOk) && sourceNode ){
+            if( (cxtOk || tapOk) && sourceNode ){ 
               var node = this;
 
               hoverOut( node );
@@ -898,7 +916,7 @@
             var cxtOk = options().cxt && e.type === 'cxttapend';
             var tapOk = drawMode && e.type === 'tapend';
 
-            if( cxtOk || tapOk ){
+            if( cxtOk || tapOk ){ 
               
               makeEdges();
               resetToDefaultState();
@@ -911,6 +929,32 @@
                 options().complete( sourceNode );
               }
             }
+
+          }).on('tap', 'node', tapToStartHandler = function(){ return;
+            var node = this;
+
+            if( !sourceNode ){ // must not be active
+              setTimeout(function(){
+                if( node.filter(options().handleNodes).length === 0 ){
+                  return; // skip if node not allowed
+                }
+
+                clearDraws(); // clear just in case
+
+                var p = node.renderedPosition();
+                var h = node.renderedOuterHeight();
+                var w = node.renderedOuterWidth();
+                            
+                var hr = options().handleSize/2 * cy.zoom();
+                var hx = p.x;
+                var hy = p.y - h/2;
+
+                drawHandle(hx, hy, hr);
+
+                node.trigger('cyedgehandles.showhandle');
+              }, 16);
+            }
+            
           });
         
 
@@ -929,6 +973,7 @@
               .off('cxtdrag', cxtdragHandler)
               .off('cxtdragover', 'node', cxtdragoverHandler)
               .off('cxtdragout', 'node', cxtdragoutHandler)
+              .off('tap', 'node', tapToStartHandler)
             ;
             
             cy.unbind('zoom pan', transformHandler);
