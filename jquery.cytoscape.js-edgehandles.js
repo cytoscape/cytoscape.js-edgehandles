@@ -489,7 +489,7 @@
             var isLoop = node.hasClass('edgehandles-source');
             var loopAllowed = options().loopAllowed( node );
             var isGhost = node.hasClass('edgehandles-ghost-node');
-            var noEdge = options().edgeType( node ) == null;
+            var noEdge = options().edgeType( source, node ) == null;
             
             if( isGhost || noEdge ){ return; }
 
