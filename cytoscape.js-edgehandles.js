@@ -1,6 +1,4 @@
-;(function($){
-  
-  var $$ = cytoscape;
+;(function($, $$){
 
   var defaults = {
     preview: true, // whether to show added edges preview before releasing selection
@@ -1006,5 +1004,11 @@
   };
 
   $.fn.cyEdgehandles = $.fn.cytoscapeEdgehandles;
+
+  $$('core', 'edgehandles', function( options ){
+    var cy = this;
+
+    $( cy.container() ).cytoscapeEdgehandles( options );
+  });
   
-})( jQuery );
+})( jQuery, cytoscape );
