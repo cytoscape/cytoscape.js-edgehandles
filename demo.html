@@ -3,14 +3,14 @@
 <html>
 
 	<head>
-		<title>[jquery.cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles</title>
+		<title>[cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles</title>
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
 		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
-		<script src="jquery.cytoscape.js-edgehandles.js"></script>
+		<script src="cytoscape.js-edgehandles.js"></script>
 
 		<style>
 			body {
@@ -33,9 +33,11 @@
 
 		<script>
 			$(function(){
-				$('#cy').cytoscape({
+				var cy = cytoscape({
+					container: $('#cy')[0],
+
 					ready: function(){
-						window.cy = this;
+						//window.cy = this;
 					},
 
 					style: [
@@ -109,23 +111,23 @@
 					},
 				});
 
-				$('#cy').cytoscapeEdgehandles({
+				cy.edgehandles({
 					// options go here
 				});
 
 				$('#draw-on').on('click', function(){
-					$('#cy').cytoscapeEdgehandles('drawon');
+					cy.edgehandles('drawon');
 				});
 
 				$('#draw-off').on('click', function(){
-					$('#cy').cytoscapeEdgehandles('drawoff');
+					cy.edgehandles('drawoff');
 				});
 			});
 		</script>
 	</head>
 
 	<body>
-		<h1>[jquery.cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles Demo</h1>
+		<h1>[cytoscape.js-edgehandles.js] Cytoscape.js Edge Handles Demo</h1>
 
 		<div id="cy"></div>
 
