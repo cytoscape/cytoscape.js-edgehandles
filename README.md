@@ -1,5 +1,6 @@
-cytoscape.js-edgehandles
-========================
+cytoscape-edgehandles
+================================================================================
+
 
 ![Preview](https://raw2.github.com/cytoscape/cytoscape.js-edgehandles/master/img/preview.png)
 
@@ -9,11 +10,38 @@ cytoscape.js-edgehandles
 This plugin creates handles on nodes that can be dragged to create edges between nodes.
 
 
-
 ## Dependencies
 
  * jQuery >=1.4
  * Cytoscape.js >=2.2.8
+
+
+## Usage instructions
+
+Download the library:
+ * via npm: `npm install cytoscape-edgehandles`,
+ * via bower: `bower install cytoscape-edgehandles`, or
+ * via direct download in the repository (probably from a tag).
+
+`require()` the library as appropriate for your project:
+
+CommonJS:
+```js
+var cytoscape = require('cytoscape');
+var edgehandles = require('cytoscape-edgehandles');
+var jquery = require('jquery');
+
+edgehandles( cytoscape, jquery ); // register extension
+```
+
+AMD:
+```js
+require(['cytoscape', 'cytoscape-edgehandles', 'jquery'], function( cytoscape, edgehandles, jquery ){
+  edgehandles( cytoscape, jquery ); // register extension
+});
+```
+
+Plain HTML/JS has the extension registered for you automatically, because no `require()` is needed.
 
 
 ## Initialisation
@@ -73,9 +101,6 @@ var defaults = {
 
 cy.edgehandles( defaults );
 
-// or init via jquery
-$('#cy').cytoscapeEdgehandles( defaults );
-
 ```
 
 ## Classes
@@ -115,9 +140,9 @@ cy.on('cyedgehandles.start', 'node', function(e){
 });
 ```
 
-## Plugin functions
+## Extension functions
 
-All function can be called via `cy.edgehandles('function-name')` or `$('#cy').cytoscapeEdgehandles('function-name')`:
+All function can be called via `cy.edgehandles('function-name')`:
 
  * `cy.edgehandles('enable')` : enable the plugin
  * `cy.edgehandles('enable')` : disable the plugin
@@ -128,3 +153,12 @@ All function can be called via `cy.edgehandles('function-name')` or `$('#cy').cy
  * `cy.edgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
  * `cy.edgehandles('drawon')` : enable draw mode
  * `cy.edgehandles('drawoff')` : disable draw mode
+
+
+## Publishing instructions
+
+This project is set up to automatically be published to npm and bower.  To publish:
+
+1. Set the version number environment variable: `export VERSION=1.2.3`
+1. Publish: `gulp publish`
+1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edgehandles https://github.com/cytoscape/cytoscape.js-edgehandles.git`
