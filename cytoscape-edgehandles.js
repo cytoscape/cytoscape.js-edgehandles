@@ -986,7 +986,7 @@
         },
 
         start: function( id ){
-          $container = $(this);
+          var $container = $(this);
 
           $container.cytoscape(function(e){
             var cy = this;
