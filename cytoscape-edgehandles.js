@@ -37,6 +37,11 @@
         // NB: i indicates edge index in case of edgeType: 'node'
         return {};
       },
+      beforeMakeEdge: function( sourceNode, targetNode ){
+        // for edges between the specified source and target
+        // return true to add and edge or false otherwise
+        return true;
+      },
       start: function( sourceNode ){
         // fired when edgehandles interaction starts (drag on handle)
       },
@@ -496,13 +501,22 @@
               if( isGhost || noEdge ){ return; }
 
               if( !isLoop || (isLoop && loopAllowed) ){
-                node.addClass('edgehandles-hover');
-                node.toggleClass('edgehandles-target');
-                
-                if( options().preview ){
+                var result = options().beforeMakeEdge(source, target);
+
+                if ( result ){
+                  node.addClass('edgehandles-hover');
+                  node.toggleClass('edgehandles-target');
+                  
+                  if( options().preview ){
+                    if( node.hasClass('edgehandles-target') ){
+                      makePreview( source, target );
+                    } else {
+                      removePreview( source, target );
+                    }
+                  }
+                } else {
                   if( node.hasClass('edgehandles-target') ){
-                    makePreview( source, target );
-                  } else {
+                    node.removeClass('edgehandles-target');
                     removePreview( source, target );
                   }
                 }
