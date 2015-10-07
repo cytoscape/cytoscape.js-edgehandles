@@ -7,7 +7,6 @@
     var defaults = {
       preview: true, // whether to show added edges preview before releasing selection
       handleSize: 10, // the size of the edge handle put on nodes
-      handleTouchTargetMult: 3, // effective size of handle on touch (not shown but used to make grabbing the small handle easier)
       handleColor: '#ff0000', // the colour of the handle and the line drawn from it
       handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
       handleLineWidth: 1, // width of handle line in pixels
@@ -19,7 +18,7 @@
       edgeType: function( sourceNode, targetNode ){
         // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
         // returning null/undefined means an edge can't be added between the two nodes
-        return 'flat'; 
+        return 'flat';
       },
       loopAllowed: function( node ){
         // for the specified node, return whether edges from itself to itself are allowed
@@ -47,35 +46,35 @@
         // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
       }
     };
-    
+
     $.fn.cytoscapeEdgehandles = function( params ){
       var fn = params;
-      
+
       var functions = {
         destroy: function(){
           var $container = $(this);
           var data = $container.data('cyedgehandles');
-          
+
           if( data == null ){
             return;
           }
-          
+
           data.unbind();
           $container.data('cyedgehandles', {});
-          
+
           return $container;
         },
-        
+
         option: function(name, value){
           var $container = $(this);
           var data = $container.data('cyedgehandles');
-          
+
           if( data == null ){
             return;
           }
-          
+
           var options = data.options;
-          
+
           if( value === undefined ){
             if( typeof name == typeof {} ){
               var newOpts = name;
@@ -87,7 +86,7 @@
           } else {
             options[ name ] = value;
           }
-          
+
           $container.data('cyedgehandles', data);
 
           return $container;
@@ -100,7 +99,7 @@
         enable: function(){
           return functions.option.apply(this, ['enabled', true]);
         },
-          
+
         resize: function(){
           var $container = $(this);
 
@@ -117,7 +116,7 @@
 
         init: function(){
           var self = this;
-          var opts = $.extend(true, {}, defaults, params); 
+          var opts = $.extend(true, {}, defaults, params);
           var $container = $(this);
           var cy;
           var $canvas = $('<canvas></canvas>');
@@ -148,16 +147,19 @@
           }
           sizeCanvas();
 
-          $(window).bind('resize', function(){
+          var winResizeHandler;
+          $(window).bind('resize', winResizeHandler = function(){
             sizeCanvas();
           });
 
-          $container.bind('cyedgehandles.resize', function(){
+          var ctrResizeHandler;
+          $container.bind('cyedgehandles.resize', ctrResizeHandler = function(){
             sizeCanvas();
           });
 
           var prevUngrabifyState;
-          $container.on('cyedgehandles.drawon', function(){
+          var ctrDrawonHandler;
+          $container.on('cyedgehandles.drawon', ctrDrawonHandler = function(){
             drawMode = true;
 
             prevUngrabifyState = cy.autoungrabify();
@@ -165,21 +167,22 @@
             cy.autoungrabify(true);
           });
 
-          $container.on('cyedgehandles.drawoff', function(){
+          var ctrDrawoffHandler;
+          $container.on('cyedgehandles.drawoff', ctrDrawoffHandler = function(){
             drawMode = false;
 
             cy.autoungrabify(prevUngrabifyState);
           });
 
-          var ctx = $canvas[0].getContext('2d'); 
-          
+          var ctx = $canvas[0].getContext('2d');
+
           // write options to data
           var data = $container.data('cyedgehandles');
           if( data == null ){
             data = {};
           }
           data.options = opts;
-          
+
           var optCache;
           function options(){
             return optCache || (optCache = $container.data('cyedgehandles').options);
@@ -192,8 +195,8 @@
           function disabled(){
             return !enabled();
           }
-          
-          function clearDraws(){ 
+
+          function clearDraws(){
 
             if( drawsClear ){ return; } // break early to be efficient
 
@@ -228,7 +231,7 @@
           function resetToDefaultState(){
 
             clearDraws();
-            
+
             //setTimeout(function(){
               cy.nodes()
                 .removeClass('edgehandles-hover')
@@ -238,41 +241,36 @@
 
               cy.$('.edgehandles-ghost').remove();
             //}, 1);
-            
+
 
             linePoints = null;
 
             sourceNode = null;
-            
+
             resetGestures();
           }
-          
+
           function makePreview( source, target ){
             makeEdges( true );
 
             target.trigger('cyedgehandles.addpreview');
           }
-          
+
           function removePreview( source, target ){
             source.edgesWith(target).filter('.edgehandles-preview').remove();
-            
+
             target
               .neighborhood('node.edgehandles-preview')
               .closedNeighborhood('.edgehandles-preview')
               .remove();
 
             target.trigger('cyedgehandles.removepreview');
-            
+
           }
-          
+
           function drawHandle(hx, hy, hr){
             ctx.fillStyle = options().handleColor;
             ctx.strokeStyle = options().handleColor;
-
-            // if( $$.is.touch() ){
-            //   hr *= 1.5;
-            //   hy -= hr/3;
-            // }
 
             ctx.beginPath();
             ctx.arc(hx, hy, hr, 0 , 2*Math.PI);
@@ -337,7 +335,7 @@
                 x: x,
                 y: y
               });
-              
+
 
               break;
 
@@ -348,11 +346,11 @@
               ctx.lineTo(x, y);
               ctx.closePath();
               ctx.stroke();
-              
+
               break;
             case 'draw':
             default:
-              
+
               if( linePoints == null ){
                 linePoints = [ [x, y] ];
               } else {
@@ -379,14 +377,14 @@
           };
 
           function makeEdges( preview, src, tgt ){
-            
+
             // console.log('make edges', preview);
-            
+
             var source = src ? src : cy.nodes('.edgehandles-source');
             var targets = tgt ? tgt : cy.nodes('.edgehandles-target');
             var classes = preview ? 'edgehandles-preview' : '';
             var added = cy.collection();
-            
+
             if( !src && !tgt && !preview && options().preview ){
               cy.$('.edgehandles-ghost').remove();
             }
@@ -394,27 +392,27 @@
             if( source.size() === 0 || targets.size() === 0 ){
               return; // nothing to do :(
             }
-            
+
             // just remove preview class if we already have the edges
             if( !src && !tgt ){
               if( !preview && options().preview ){
                 added = cy.elements('.edgehandles-preview').removeClass('edgehandles-preview');
-                
+
                 options().complete( source, targets, added );
-                source.trigger('cyedgehandles.complete'); 
+                source.trigger('cyedgehandles.complete');
                 return;
               } else {
                 // remove old previews
                 cy.elements('.edgehandles-preview').remove();
               }
             }
-            
+
             for( var i = 0; i < targets.length; i++ ){
               var target = targets[i];
-              
+
               switch( options().edgeType( source, target ) ){
               case 'node':
-                
+
                 var p1 = source.position();
                 var p2 = target.position();
                 var p;
@@ -430,7 +428,7 @@
                     y: (p1.y + p2.y)/2
                   };
                 }
-                          
+
                 var interNode = cy.add($.extend( true, {
                   group: 'nodes',
                   position: p
@@ -443,7 +441,7 @@
                     target: interNode.id()
                   }
                 }, options().edgeParams(source, target, 0) )).addClass(classes);
-                
+
                 var inter2target = cy.add($.extend( true, {
                   group: 'edges',
                   data: {
@@ -451,11 +449,11 @@
                     target: target.id()
                   }
                 }, options().edgeParams(source, target, 1) )).addClass(classes);
-                
+
                 added = added.add( interNode ).add( source2inter ).add( inter2target );
-                
+
                 break;
-              
+
               case 'flat':
                 var edge = cy.add($.extend( true, {
                   group: 'edges',
@@ -464,9 +462,9 @@
                     target: target.id()
                   }
                 }, options().edgeParams(source, target, 0) )).addClass(classes);
-              
+
                 added = added.add( edge );
-              
+
                 break;
 
               default:
@@ -474,10 +472,10 @@
                 break; // don't add anything
               }
             }
-            
+
             if( !preview ){
               options().complete( source, targets, added );
-              source.trigger('cyedgehandles.complete'); 
+              source.trigger('cyedgehandles.complete');
             }
           }
 
@@ -487,18 +485,18 @@
             clearTimeout( hoverTimeout );
             hoverTimeout = setTimeout(function(){
               var source = cy.nodes('.edgehandles-source');
-              
+
               var isLoop = node.hasClass('edgehandles-source');
               var loopAllowed = options().loopAllowed( node );
               var isGhost = node.hasClass('edgehandles-ghost-node');
               var noEdge = options().edgeType( source, node ) == null;
-              
+
               if( isGhost || noEdge ){ return; }
 
               if( !isLoop || (isLoop && loopAllowed) ){
                 node.addClass('edgehandles-hover');
                 node.toggleClass('edgehandles-target');
-                
+
                 if( options().preview ){
                   if( node.hasClass('edgehandles-target') ){
                     makePreview( source, target );
@@ -527,7 +525,7 @@
 
           $container.cytoscape(function(e){
             cy = this;
-            
+
             lastPanningEnabled = cy.panningEnabled();
             lastZoomingEnabled = cy.zoomingEnabled();
             lastBoxSelectionEnabled = cy.boxSelectionEnabled();
@@ -540,20 +538,20 @@
             cy.bind('zoom pan', transformHandler = function(){
               clearDraws();
             });
-            
+
             var lastMdownHandler;
 
             var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler, cxtstartHandler, tapToStartHandler, cxtdragHandler, cxtdragoverHandler, cxtdragoutHandler, cxtendHandler, dragHandler, grabHandler;
             cy.on('mouseover tap', 'node', startHandler = function(e){
               var node = this;
-              
+
               if( disabled() || drawMode || mdownOnHandle || grabbingNode || this.hasClass('edgehandles-preview') || inForceStart || this.hasClass('edgehandles-ghost-node') || node.filter(options().handleNodes).length === 0 ){
                 return; // don't override existing handle that's being dragged
                 // also don't trigger when grabbing a node etc
-              } 
+              }
 
               //console.log('mouseover startHandler %s %o', this.id(), this);
-              
+
               if( lastMdownHandler ){
                 $container[0].removeEventListener('mousedown', lastMdownHandler, true);
                 $container[0].removeEventListener('touchstart', lastMdownHandler, true);
@@ -562,36 +560,36 @@
               var source = this;
               var p = node.renderedPosition();
               var h = node.renderedOuterHeight();
-              
+
               lastActiveId = node.id();
 
               // remove old handle
               clearDraws();
-              
+
               hr = options().handleSize/2 * cy.zoom();
               hx = p.x;
               hy = p.y - h/2;
-              
+
               // add new handle
               drawHandle(hx, hy, hr);
 
               node.trigger('cyedgehandles.showhandle');
-              
+
 
               function mdownHandler(e){
                 $container[0].removeEventListener('mousedown', mdownHandler, true);
                 $container[0].removeEventListener('touchstart', mdownHandler, true);
 
                 var pageX = !e.touches ? e.pageX : e.touches[0].pageX;
-                var pageY = !e.touches ? e.pageY : e.touches[0].pageY; 
+                var pageY = !e.touches ? e.pageY : e.touches[0].pageY;
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
-                var hrTarget = $$.is.touch() ? hr * options().handleTouchTargetMult : hr;
+                var hrTarget = hr;
 
                 if( e.button !== 0 && !e.touches ){
-                  return; // sorry, no right clicks allowed 
+                  return; // sorry, no right clicks allowed
                 }
-                
+
                 if( Math.abs(x - hx) > hrTarget || Math.abs(y - hy) > hrTarget ){
                   return; // only consider this a proper mousedown if on the handle
                 }
@@ -601,46 +599,46 @@
                 }
 
                 // console.log('mdownHandler %s %o', node.id(), node);
-                
+
                 mdownOnHandle = true;
-                
+
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 sourceNode = node;
 
                 node.addClass('edgehandles-source');
                 node.trigger('cyedgehandles.start');
-                
-                function doneMoving(dmEvent){ 
+
+                function doneMoving(dmEvent){
                   // console.log('doneMoving %s %o', node.id(), node);
-                  
+
                   if( !mdownOnHandle || inForceStart ){
                     return;
                   }
-                  
+
                   var $this = $(this);
                   mdownOnHandle = false;
                   $(window).unbind('mousemove touchmove', moveHandler);
-                  
+
                   makeEdges();
                   resetToDefaultState();
-                  
+
                   options().stop( node );
                   node.trigger('cyedgehandles.stop');
                 }
-                
+
                 $(window).one('mouseup touchend touchcancel blur', doneMoving).bind('mousemove touchmove', moveHandler);
                 disableGestures();
-                
+
                 options().start( node );
 
                 return false;
               }
-              
+
               function moveHandler(e){
                 // console.log('mousemove moveHandler %s %o', node.id(), node);
-                
+
                 var pageX = !e.originalEvent.touches ? e.pageX : e.originalEvent.touches[0].pageX;
                 var pageY = !e.originalEvent.touches ? e.pageY : e.originalEvent.touches[0].pageY;
                 var x = pageX - $container.offset().left;
@@ -651,7 +649,7 @@
                   drawHandle(hx, hy, hr);
                 }
                 drawLine(hx, hy, x, y);
-                
+
                 return false;
               }
 
@@ -659,7 +657,7 @@
               $container[0].addEventListener('touchstart', mdownHandler, true);
               lastMdownHandler = mdownHandler;
 
-              
+
             }).on('mouseover tapdragover', 'node', hoverHandler = function(){
               var node = this;
               var target = this;
@@ -669,7 +667,7 @@
               if( disabled() || drawMode || this.hasClass('edgehandles-preview') ){
                 return; // ignore preview nodes
               }
-              
+
               if( mdownOnHandle ){ // only handle mdown case
 
                 // console.log( 'mouseover hoverHandler %s $o', node.id(), node );
@@ -703,11 +701,11 @@
               //setTimeout(function(){
                 clearDraws();
               //}, 5);
-              
+
 
             }).on('drag', 'node', dragHandler = function(){
               grabbingNode = true;
-              
+
 
             }).on('free', 'node', freeNodeHandler = function(){
               grabbingNode = false;
@@ -732,7 +730,7 @@
               var p = node.renderedPosition();
               var h = node.renderedOuterHeight();
               var w = node.renderedOuterWidth();
-                          
+
               var hr = options().handleSize/2 * cy.zoom();
               var hx = p.x;
               var hy = p.y - h/2;
@@ -743,7 +741,7 @@
 
               // case: down and drag as normal
               var downHandler = function(e){
-                
+
                 $container[0].removeEventListener('mousedown', downHandler, true);
                 $container[0].removeEventListener('touchstart', downHandler, true);
 
@@ -756,7 +754,7 @@
                 if( onNode ){
                   disableGestures();
                   mdownOnHandle = true; // enable the regular logic for handling going over target nodes
-                  
+
                   var moveHandler = function(me){
                     var x = (me.pageX !== undefined ? me.pageX : me.originalEvent.touches[0].pageX) - $container.offset().left;
                     var y = (me.pageY !== undefined ? me.pageY : me.originalEvent.touches[0].pageY) - $container.offset().top;
@@ -811,12 +809,12 @@
 
                 var isLoop = source.id() === target.id();
                 var loopAllowed = options().loopAllowed( target );
-                
-                if( !isLoop || (isLoop && loopAllowed) ){             
+
+                if( !isLoop || (isLoop && loopAllowed) ){
                   makeEdges(false, source, target);
 
                   //options().complete( node );
-                  //node.trigger('cyedgehandles.complete'); 
+                  //node.trigger('cyedgehandles.complete');
                 }
 
                 inForceStart = false; // now we're done so reset the flag
@@ -829,7 +827,7 @@
                 node.off('remove', removeBeforeHandler);
                 resetToDefaultState();
               });
-            
+
 
             }).on('remove', 'node', removeHandler = function(){
               var id = this.id();
@@ -839,9 +837,9 @@
                   resetToDefaultState();
                 }, 5);
               }
-            
 
-            }).on('cxttapstart tapstart', 'node', cxtstartHandler = function(e){ 
+
+            }).on('cxttapstart tapstart', 'node', cxtstartHandler = function(e){
               var node = this;
 
               if( node.filter(options().handleNodes).length === 0 ){
@@ -852,7 +850,7 @@
               var tapOk = drawMode && e.type === 'tapstart';
 
               if( cxtOk || tapOk ){
-                
+
                 clearDraws(); // clear just in case
 
                 var node = sourceNode = this;
@@ -866,7 +864,7 @@
                 var p = node.renderedPosition();
                 var h = node.renderedOuterHeight();
                 var w = node.renderedOuterWidth();
-                            
+
                 hr = options().handleSize/2 * cy.zoom();
                 hx = p.x;
                 hy = p.y - h/2 - hr/2;
@@ -896,7 +894,7 @@
               var cxtOk = options().cxt && e.type === 'cxtdragover';
               var tapOk = drawMode && e.type === 'tapdragover';
 
-              if( (cxtOk || tapOk) && sourceNode ){ 
+              if( (cxtOk || tapOk) && sourceNode ){
                 var node = this;
 
                 hoverOver( node );
@@ -907,7 +905,7 @@
               var cxtOk = options().cxt && e.type === 'cxtdragout';
               var tapOk = drawMode && e.type === 'tapdragout';
 
-              if( (cxtOk || tapOk) && sourceNode ){ 
+              if( (cxtOk || tapOk) && sourceNode ){
                 var node = this;
 
                 hoverOut( node );
@@ -918,8 +916,8 @@
               var cxtOk = options().cxt && e.type === 'cxttapend';
               var tapOk = drawMode && e.type === 'tapend';
 
-              if( cxtOk || tapOk ){ 
-                
+              if( cxtOk || tapOk ){
+
                 makeEdges();
                 resetToDefaultState();
                 sourceNode = null;
@@ -946,7 +944,7 @@
                   var p = node.renderedPosition();
                   var h = node.renderedOuterHeight();
                   var w = node.renderedOuterWidth();
-                              
+
                   var hr = options().handleSize/2 * cy.zoom();
                   var hx = p.x;
                   var hy = p.y - h/2;
@@ -956,9 +954,9 @@
                   node.trigger('cyedgehandles.showhandle');
                 }, 16);
               }
-              
+
             });
-          
+
 
             data.unbind = function(){
               cy
@@ -977,11 +975,19 @@
                 .off('cxtdragout', 'node', cxtdragoutHandler)
                 .off('tap', 'node', tapToStartHandler)
               ;
-              
+
               cy.unbind('zoom pan', transformHandler);
+
+              $(window).off( 'resize', winResizeHandler );
+
+              $container
+                .off( 'cyedgehandles.resize', ctrResizeHandler )
+                .off( 'cyedgehandles.drawon', ctrDrawonHandler )
+                .off( 'cyedgehandles.drawoff', ctrDrawoffHandler )
+              ;
             };
           });
-          
+
           $container.data('cyedgehandles', data);
         },
 
@@ -995,7 +1001,7 @@
           });
         }
       };
-      
+
       if( functions[fn] ){
         return functions[fn].apply(this, Array.prototype.slice.call( arguments, 1 ));
       } else if( typeof fn == 'object' || !fn ) {
@@ -1003,7 +1009,7 @@
       } else {
         $.error('No such function `'+ fn +'` for jquery.cytoscapeEdgeHandles');
       }
-      
+
       return $(this);
     };
 
