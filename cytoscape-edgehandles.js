@@ -1,8 +1,8 @@
 ;(function( $$, $ ){ 'use strict';
 
 	// registers the extension on a cytoscape lib ref
-	var register = function( $$, $ ){
-		if( !cytoscape ){ return; } // can't register if cytoscape unspecified
+var register = function( $$, $ ){
+	if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
 		var defaults = {
 			preview: true, // whether to show added edges preview before releasing selection
