@@ -145,8 +145,10 @@
               .attr( 'height', $container.height() )
               .attr( 'width', $container.width() )
               .css( {
-                'position': 'absolute',
+                'position': 'relative',
                 'z-index': opts.stackOrder,
+                'top': -( $canvas.offset().top - $container.offset().top ),
+                'left': -( $canvas.offset().left - $container.offset().left )
               } );
           }
           sizeCanvas();
