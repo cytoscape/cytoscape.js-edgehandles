@@ -14,7 +14,7 @@
     "cytoscape",
     "cyext"
   ],
-  "license": "LGPL3+",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/cytoscape/cytoscape.js-edgehandles/issues"
   },
