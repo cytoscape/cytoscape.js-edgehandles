@@ -7,7 +7,7 @@ cytoscape-edgehandles
 
 ## Description
 
-This plugin creates handles on nodes that can be dragged to create edges between nodes.
+This extension creates handles on nodes that can be dragged to create edges between nodes.
 
 
 ## Dependencies
@@ -46,7 +46,7 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## Initialisation
 
-You initialise the plugin on the same HTML DOM element container used for Cytoscape.js:
+You initialise the extension on the Cytoscape instance:
 
 ```js
 
@@ -66,7 +66,7 @@ var defaults = {
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
   hoverDelay: 150, // time spend over a target node before it is considered a target selection
   cxt: false, // whether cxt events trigger edgehandles (useful on touch)
-  enabled: true, // whether to start the plugin in the enabled state
+  enabled: true, // whether to start the extension in the enabled state
   toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
   edgeType: function( sourceNode, targetNode ) {
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
@@ -106,7 +106,7 @@ cy.edgehandles( defaults );
 
 ## Classes
 
-These classes can be used for styling the graph as it interacts with the plugin:
+These classes can be used for styling the graph as it interacts with the extension:
 
 * `edgehandles-source` : The source node
 * `edgehandles-target` : A target node
@@ -117,7 +117,7 @@ These classes can be used for styling the graph as it interacts with the plugin:
 
 ## Events
 
-During the course of a user's interaction with the plugin, several events are generated and triggered on the corresponding elements:
+During the course of a user's interaction with the extension, several events are generated and triggered on the corresponding elements:
 
 On the source node:
 
@@ -145,12 +145,12 @@ cy.on('cyedgehandles.start', 'node', function(e){
 
 All function can be called via `cy.edgehandles('function-name')`:
 
- * `cy.edgehandles('enable')` : enable the plugin
- * `cy.edgehandles('enable')` : disable the plugin
+ * `cy.edgehandles('enable')` : enable the extension
+ * `cy.edgehandles('enable')` : disable the extension
  * `cy.edgehandles('option', 'preview', false)` : set individual option (e.g. `'preview'`)
  * `cy.edgehandles('option', { /* options */ })` : set all options
  * `cy.edgehandles('option', 'preview')` : get option value (e.g. `'preview'`)
- * `cy.edgehandles('destroy')` : destroy the plugin instance
+ * `cy.edgehandles('destroy')` : destroy the extension instance
  * `cy.edgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
  * `cy.edgehandles('drawon')` : enable draw mode
  * `cy.edgehandles('drawoff')` : disable draw mode
