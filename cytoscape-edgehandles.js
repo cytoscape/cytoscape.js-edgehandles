@@ -262,7 +262,7 @@ SOFTWARE.
 
   // registers the extension on a cytoscape lib ref
   var register = function( $$, $ ) {
-    if( !cytoscape ) {
+    if( !$$ ) {
       return;
     } // can't register if cytoscape unspecified
 
@@ -310,8 +310,9 @@ SOFTWARE.
       }
     };
 
-    $.fn.cytoscapeEdgehandles = function( params ) {
+    var edgehandles = function( params, cy ) {
       var fn = params;
+      var container = cy.container();
 
       var functions = {
         destroy: function() {
@@ -381,7 +382,6 @@ SOFTWARE.
           var self = this;
           var opts = $.extend( true, {}, defaults, params );
           var $container = $( this );
-          var cy;
           var $canvas = $( '<canvas></canvas>' );
           var handle;
           var line, linePoints;
@@ -809,9 +809,7 @@ SOFTWARE.
             }
           }
 
-          $container.cytoscape( function( e ) {
-            cy = this;
-
+          cy.ready( function( e ) {
             lastPanningEnabled = cy.panningEnabled();
             lastZoomingEnabled = cy.zoomingEnabled();
             lastBoxSelectionEnabled = cy.boxSelectionEnabled();
@@ -1282,31 +1280,25 @@ SOFTWARE.
         start: function( id ) {
           var $container = $( this );
 
-          $container.cytoscape( function( e ) {
-            var cy = this;
-
+          cy.ready( function( e ) {
             cy.$( '#' + id ).trigger( 'cyedgehandles.forcestart' );
           } );
         }
       };
 
       if( functions[ fn ] ) {
-        return functions[ fn ].apply( this, Array.prototype.slice.call( arguments, 1 ) );
+        return functions[ fn ].apply( container, Array.prototype.slice.call( arguments, 1 ) );
       } else if( typeof fn == 'object' || !fn ) {
-        return functions.init.apply( this, arguments );
+        return functions.init.apply( container, arguments );
       } else {
-        $.error( 'No such function `' + fn + '` for jquery.cytoscapeEdgeHandles' );
+        console.error( 'No such function `' + fn + '` for edgehandles' );
       }
-
-      return $( this );
     };
-
-    $.fn.cyEdgehandles = $.fn.cytoscapeEdgehandles;
 
     $$( 'core', 'edgehandles', function( options ) {
       var cy = this;
 
-      return $( cy.container() ).cytoscapeEdgehandles( options );
+      return edgehandles( options, cy );
     } );
 
   };
