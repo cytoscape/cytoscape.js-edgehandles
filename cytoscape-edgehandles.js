@@ -1317,4 +1317,4 @@ SOFTWARE.
     register( $$, $ );
   }
 
-} )( cytoscape, jQuery );
+} )( typeof cytoscape !== 'undefined' ? cytoscape : null, typeof jQuery !== 'undefined' ? jQuery : null );
