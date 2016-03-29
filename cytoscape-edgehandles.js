@@ -259,6 +259,24 @@ SOFTWARE.
 
   })();
 
+  // ported lodash throttle function
+  var throttle = function( func, wait, options ){
+    var leading = true,
+        trailing = true;
+
+    if( options === false ){
+      leading = false;
+    } else if( typeof options === typeof {} ){
+      leading = 'leading' in options ? options.leading : leading;
+      trailing = 'trailing' in options ? options.trailing : trailing;
+    }
+    options = options || {};
+    options.leading = leading;
+    options.maxWait = wait;
+    options.trailing = trailing;
+
+    return debounce( func, wait, options );
+  };
 
   // registers the extension on a cytoscape lib ref
   var register = function( $$, $ ) {
@@ -565,16 +583,9 @@ SOFTWARE.
             drawsClear = false;
           }
 
-          var lineDrawRate = 1000 / 30;
-          var lastDrawLine = 0;
-          var drawLine = function( hx, hy, x, y ) {
-            var now = +new Date();
+          var lineDrawRate = 1000 / 60;
 
-            if( now - lastDrawLine < lineDrawRate ) {
-              return;
-            }
-
-            lastDrawLine = now;
+          var drawLine = throttle( function( hx, hy, x, y ) {
 
             if( options().handleLineType !== 'ghost' ) {
               ctx.fillStyle = options().handleColor;
@@ -659,7 +670,7 @@ SOFTWARE.
             if( options().handleLineType !== 'ghost' ) {
               drawsClear = false;
             }
-          };
+          }, lineDrawRate, { leading: true } );
 
           function makeEdges( preview, src, tgt ) {
 
