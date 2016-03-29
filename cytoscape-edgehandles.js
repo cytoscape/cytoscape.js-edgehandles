@@ -310,7 +310,8 @@ SOFTWARE.
       }
     };
 
-    var edgehandles = function( params, cy ) {
+    var edgehandles = function( params ) {
+      var cy = this;
       var fn = params;
       var container = cy.container();
 
@@ -1295,11 +1296,7 @@ SOFTWARE.
       }
     };
 
-    $$( 'core', 'edgehandles', function( options ) {
-      var cy = this;
-
-      return edgehandles( options, cy );
-    } );
+    $$( 'core', 'edgehandles', edgehandles );
 
   };
 
