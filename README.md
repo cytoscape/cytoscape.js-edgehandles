@@ -12,8 +12,8 @@ This extension creates handles on nodes that can be dragged to create edges betw
 
 ## Dependencies
 
- * jQuery >=1.4
- * Cytoscape.js >=2.2.8
+ * jQuery ^1.4 || ^2.0
+ * Cytoscape.js ^2.2.8
 
 
 ## Usage instructions

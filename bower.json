@@ -17,5 +17,9 @@
     "cytoscape",
     "cyext"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "jquery": "^1.4 || ^2.0",
+    "cytoscape": "^2.2.8"
+  }
 }
