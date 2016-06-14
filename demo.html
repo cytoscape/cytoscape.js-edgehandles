@@ -52,6 +52,12 @@
 					ready: function(){
 					},
 
+					layout: {
+						name: 'grid',
+						rows: 2,
+						cols: 2
+					},
+
 					style: [
 						{
 							selector: 'node',
@@ -63,6 +69,7 @@
 						{
 							selector: 'edge',
 							css: {
+								'curve-style': 'bezier',
 								'target-arrow-shape': 'triangle'
 							}
 						},
