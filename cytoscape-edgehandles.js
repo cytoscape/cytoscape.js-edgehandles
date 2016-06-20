@@ -608,7 +608,8 @@ SOFTWARE.
                       'background-color': 'blue',
                       'width': 0.0001,
                       'height': 0.0001,
-                      'opacity': 0
+                      'opacity': 0,
+                      'events': 'no'
                     },
                     position: {
                       x: 0,
@@ -622,6 +623,9 @@ SOFTWARE.
                     data: {
                       source: sourceNode.id(),
                       target: ghostNode.id()
+                    },
+                    css: {
+                      'events': 'no'
                     }
                   } );
 
