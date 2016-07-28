@@ -414,6 +414,9 @@ SOFTWARE.
           var ghostEdge;
           var sourceNode;
           var drawMode = false;
+          cy.on( 'resize', function() {
+            $container.trigger( 'cyedgehandles.resize' );
+          });
 
           $container.append( $canvas );
 
