@@ -63,6 +63,7 @@ var defaults = {
   handleColor: '#ff0000', // the colour of the handle and the line drawn from it
   handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
   handleLineWidth: 1, // width of handle line in pixels
+  handleIcon: false, // Pass an Image-object to use as icon on handle. Icons are resized according to zoom and centered in handle.
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
   hoverDelay: 150, // time spend over a target node before it is considered a target selection
   cxt: false, // whether cxt events trigger edgehandles (useful on touch)
