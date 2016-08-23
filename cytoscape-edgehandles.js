@@ -585,8 +585,9 @@ SOFTWARE.
             ctx.fill();
 
             if(options().handleIcon){
-               var icon = options().handleIcon; 
-               ctx.drawImage(icon, hx-hr, hy-hr, hr, hr); 
+               var icon = options().handleIcon;
+               var width = icon.width*cy.zoom(), height = icon.height*cy.zoom(); 
+               ctx.drawImage(icon, hx-(width/2), hy-(height/2), width, height); 
             }
 
             drawsClear = false;
