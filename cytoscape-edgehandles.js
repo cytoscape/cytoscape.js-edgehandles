@@ -288,6 +288,7 @@ SOFTWARE.
       preview: true, // whether to show added edges preview before releasing selection
       stackOrder: 4, // Controls stack order of edgehandles canvas element by setting it's z-index
       handleSize: 10, // the size of the edge handle put on nodes
+      handleIcon: false,
       handleColor: '#ff0000', // the colour of the handle and the line drawn from it
       handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
       handleLineWidth: 1, // width of handle line in pixels
@@ -582,6 +583,12 @@ SOFTWARE.
             ctx.arc( hx, hy, hr, 0, 2 * Math.PI );
             ctx.closePath();
             ctx.fill();
+
+            if(options().handleIcon){
+               var icon = options().handleIcon;
+               var width = icon.width*cy.zoom(), height = icon.height*cy.zoom(); 
+               ctx.drawImage(icon, hx-(width/2), hy-(height/2), width, height); 
+            }
 
             drawsClear = false;
           }
