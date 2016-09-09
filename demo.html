@@ -6,8 +6,6 @@
 		<title>cytoscape-edgehandles.js demo</title>
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
-
-		<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
@@ -44,7 +42,7 @@
 		</style>
 
 		<script>
-			$(function(){
+			window.addEventListener("load", function(){
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -134,11 +132,11 @@
 					// options go here
 				});
 
-				$('#draw-on').on('click', function(){
+				document.querySelector('#draw-on').addEventListener('click', function(){
 					cy.edgehandles('drawon');
 				});
 
-				$('#draw-off').on('click', function(){
+				document.querySelector('#draw-off').addEventListener('click', function(){
 					cy.edgehandles('drawoff');
 				});
 
