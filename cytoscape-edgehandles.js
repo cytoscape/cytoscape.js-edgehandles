@@ -28,59 +28,73 @@ SOFTWARE.
       0: d,
       data: function(){
         if (arguments.length === 1) {
-          return (d['cyto-edge-handle-data'] || {})[arguments[0]];
+          return (this[0]['cyto-edge-handle-data'] || {})[arguments[0]];
         } else if (arguments.length === 2) {
-          d['cyto-edge-handle-data'] = d['cyto-edge-handle-data'] || {};
-          d['cyto-edge-handle-data'][arguments[0]] = arguments[1];
+          this[0]['cyto-edge-handle-data'] = this[0]['cyto-edge-handle-data'] || {};
+          this[0]['cyto-edge-handle-data'][arguments[0]] = arguments[1];
           return $d;
         }
       },
       trigger: function(eventName){
         var event = new Event(eventName);
-        d.dispatchEvent(event);
+        this[0].dispatchEvent(event);
       },
       append: function(ele) {
-        d.appendChild(ele[0]);
+        this[0].appendChild(ele[0]);
       },
       attr: function() {
         if (arguments.length === 1) {
-          return d.getAttribute(arguments[0]);
+          return this[0].getAttribute(arguments[0]);
         } else if (arguments.length === 2) {
-          d.setAttribute(arguments[0], arguments[1]);
+          this[0].setAttribute(arguments[0], arguments[1]);
           return $d;
         }
       },
       offset: function() {
         return {
-          left: d.offsetLeft,
-          top: d.offsetTop
+          left: this[0].offsetLeft,
+          top: this[0].offsetTop
         };
       },
       bind: function(name, listener) {
-        d.addEventListener(name, listener);
+        var names = name.split(' ');
+        names.forEach(function(n){
+          this[0].addEventListener(n, listener);
+        });
         return $d;
       },
       one: function(name, listener) {
-        function handler() {
-          listener();
-          d.removeEventListener(name, listener);
-        }
-        d.addEventListener(name, handler);
+        var names = name.split(' ');
+        names.forEach(function(n){
+          var handler = function () {
+            listener();
+            this[0].removeEventListener(n, handler);
+          }
+          this[0].addEventListener(n, handler);
+          listener.__handler = handler;
+        });
         return $d;
       },
       height: function(){
-        return d.clientHeight;
+        return this[0].clientHeight;
       },
       width: function(){
-        return d.clientWidth;
+        return this[0].clientWidth;
       },
       on: function(name, listener){
-        d.addEventListener(name, listener);
+        var names = name.split(' ');
+        names.forEach(function(n){
+          this[0].addEventListener(n, listener);
+        });
       },
       off: function(name, listener){
         var names = name.split(' ');
-        names.forEach(function(n ) {
-          d.removeEventListener(n, listener);
+        names.forEach(function(n) {
+          var handler = listener;
+          if (listener.__handler) {
+            handler = listener.__handler;
+          }
+          this[0].removeEventListener(n, handler);
         });
       }
     };
@@ -996,12 +1010,8 @@ SOFTWARE.
                   node.trigger( 'cyedgehandles.stop' );
                 }
 
-                $( window ).one('mouseup', doneMoving)
-                  .one('touchend', doneMoving)
-                  .one('touchcancel', doneMoving)
-                  .one('blur', doneMoving )
-                  .bind('mousemove', moveHandler )
-                  .bind('touchmove', moveHandler );
+                $( window ).one('mouseup touchend touchcancel blur', doneMoving )
+                  .bind('mousemove touchmove', moveHandler );
                 disableGestures();
 
                 options().start( node );
