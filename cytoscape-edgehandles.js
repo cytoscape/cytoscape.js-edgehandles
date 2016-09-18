@@ -57,20 +57,20 @@ SOFTWARE.
         };
       },
       bind: function(name, listener) {
-        var names = name.split(' ');
+        var names = name.split(' '), that = this;
         names.forEach(function(n){
-          this[0].addEventListener(n, listener);
+          that[0].addEventListener(n, listener);
         });
         return $d;
       },
       one: function(name, listener) {
-        var names = name.split(' ');
+        var names = name.split(' '), that = this;
         names.forEach(function(n){
           var handler = function () {
             listener();
-            this[0].removeEventListener(n, handler);
+            that[0].removeEventListener(n, handler);
           }
-          this[0].addEventListener(n, handler);
+          that[0].addEventListener(n, handler);
           listener.__handler = handler;
         });
         return $d;
@@ -82,19 +82,19 @@ SOFTWARE.
         return this[0].clientWidth;
       },
       on: function(name, listener){
-        var names = name.split(' ');
+        var names = name.split(' '), that = this;
         names.forEach(function(n){
-          this[0].addEventListener(n, listener);
+          that[0].addEventListener(n, listener);
         });
       },
       off: function(name, listener){
-        var names = name.split(' ');
+        var names = name.split(' '), that = this;
         names.forEach(function(n) {
           var handler = listener;
           if (listener.__handler) {
             handler = listener.__handler;
           }
-          this[0].removeEventListener(n, handler);
+          that[0].removeEventListener(n, handler);
         });
       }
     };
