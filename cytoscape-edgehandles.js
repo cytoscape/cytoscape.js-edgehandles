@@ -65,13 +65,14 @@ SOFTWARE.
       },
       one: function(name, listener) {
         var names = name.split(' '), that = this;
+        listener.__handler = {};
         names.forEach(function(n){
           var handler = function () {
             listener();
             that[0].removeEventListener(n, handler);
-          }
+          };
           that[0].addEventListener(n, handler);
-          listener.__handler = handler;
+          listener.__handler[n] = handler;
         });
         return $d;
       },
@@ -91,8 +92,8 @@ SOFTWARE.
         var names = name.split(' '), that = this;
         names.forEach(function(n) {
           var handler = listener;
-          if (listener.__handler) {
-            handler = listener.__handler;
+          if (listener.__handler && listener.__handler[n]) {
+            handler = listener.__handler[n];
           }
           that[0].removeEventListener(n, handler);
         });
