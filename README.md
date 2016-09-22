@@ -12,7 +12,6 @@ This extension creates handles on nodes that can be dragged to create edges betw
 
 ## Dependencies
 
- * jQuery ^1.4 || ^2.0
  * Cytoscape.js ^2.2.8
 
 
@@ -29,15 +28,14 @@ CommonJS:
 ```js
 var cytoscape = require('cytoscape');
 var edgehandles = require('cytoscape-edgehandles');
-var jquery = require('jquery');
 
-edgehandles( cytoscape, jquery ); // register extension
+edgehandles( cytoscape ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-edgehandles', 'jquery'], function( cytoscape, edgehandles, jquery ){
-  edgehandles( cytoscape, jquery ); // register extension
+require(['cytoscape', 'cytoscape-edgehandles'], function( cytoscape, edgehandles ){
+  edgehandles( cytoscape ); // register extension
 });
 ```
 
