@@ -20,8 +20,87 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-;( function( $$, $ ) {
+;( function($$) {
   'use strict';
+
+  var $ = function(d){
+    var $d = {
+      0: d,
+      data: function(){
+        if (arguments.length === 1) {
+          return (this[0]['cyto-edge-handle-data'] || {})[arguments[0]];
+        } else if (arguments.length === 2) {
+          this[0]['cyto-edge-handle-data'] = this[0]['cyto-edge-handle-data'] || {};
+          this[0]['cyto-edge-handle-data'][arguments[0]] = arguments[1];
+          return $d;
+        }
+      },
+      trigger: function(eventName){
+        var event = new Event(eventName);
+        this[0].dispatchEvent(event);
+      },
+      append: function(ele) {
+        this[0].appendChild(ele[0]);
+      },
+      attr: function() {
+        if (arguments.length === 1) {
+          return this[0].getAttribute(arguments[0]);
+        } else if (arguments.length === 2) {
+          this[0].setAttribute(arguments[0], arguments[1]);
+          return $d;
+        }
+      },
+      offset: function() {
+        return {
+          left: this[0].offsetLeft,
+          top: this[0].offsetTop
+        };
+      },
+      bind: function(name, listener) {
+        var names = name.split(' '), that = this;
+        names.forEach(function(n){
+          that[0].addEventListener(n, listener);
+        });
+        return $d;
+      },
+      one: function(name, listener) {
+        var names = name.split(' '), that = this;
+        listener.__handler = {};
+        names.forEach(function(n){
+          var handler = function () {
+            listener();
+            that[0].removeEventListener(n, handler);
+          };
+          that[0].addEventListener(n, handler);
+          listener.__handler[n] = handler;
+        });
+        return $d;
+      },
+      height: function(){
+        return this[0].clientHeight;
+      },
+      width: function(){
+        return this[0].clientWidth;
+      },
+      on: function(name, listener){
+        var names = name.split(' '), that = this;
+        names.forEach(function(n){
+          that[0].addEventListener(n, listener);
+        });
+      },
+      off: function(name, listener){
+        var names = name.split(' '), that = this;
+        names.forEach(function(n) {
+          var handler = listener;
+          if (listener.__handler && listener.__handler[n]) {
+            handler = listener.__handler[n];
+          }
+          that[0].removeEventListener(n, handler);
+        });
+      }
+    };
+    return $d;
+  };
 
   var debounce = (function(){
     /**
@@ -279,7 +358,7 @@ SOFTWARE.
   };
 
   // registers the extension on a cytoscape lib ref
-  var register = function( $$, $ ) {
+  var register = function( $$ ) {
     if( !$$ ) {
       return;
     } // can't register if cytoscape unspecified
@@ -362,7 +441,7 @@ SOFTWARE.
           if( value === undefined ) {
             if( typeof name == typeof {} ) {
               var newOpts = name;
-              options = $.extend( true, {}, defaults, newOpts );
+              options =Object.assign( {}, defaults, newOpts );
               data.options = options;
             } else {
               return options[ name ];
@@ -400,9 +479,10 @@ SOFTWARE.
 
         init: function() {
           var self = this;
-          var opts = $.extend( true, {}, defaults, params );
+          var opts = Object.assign({}, defaults, params );
           var $container = $( this );
-          var $canvas = $( '<canvas></canvas>' );
+          var canvas = document.createElement('canvas');
+          var $canvas = $(canvas);
           var handle;
           var line, linePoints;
           var mdownOnHandle = false;
@@ -424,25 +504,18 @@ SOFTWARE.
           var _sizeCanvas = debounce( function(){
             $canvas
               .attr( 'height', $container.height() )
-              .attr( 'width', $container.width() )
-              .css( {
-                'position': 'absolute',
-                'top': 0,
-                'left': 0,
-                'z-index': opts.stackOrder
-              } )
-            ;
+              .attr( 'width', $container.width() );
+            canvas.setAttribute('style', 'position:absolute;top:0;left:0;z-index:'+opts.stackOrder);
 
             setTimeout(function(){
               var canvasBb = $canvas.offset();
               var containerBb = $container.offset();
 
-              $canvas
-                .css( {
-                  'top': -( canvasBb.top - containerBb.top ),
-                  'left': -( canvasBb.left - containerBb.left )
-                } )
-              ;
+              canvas
+                .setAttribute('style', 'position:absolute;top:'+
+                  (-( canvasBb.top - containerBb.top ))+
+                  ';left:'+(-( canvasBb.left - containerBb.left ))+
+                  ';z-index:'+opts.stackOrder);
             }, 0);
           }, 250 );
 
@@ -586,8 +659,8 @@ SOFTWARE.
 
             if(options().handleIcon){
                var icon = options().handleIcon;
-               var width = icon.width*cy.zoom(), height = icon.height*cy.zoom(); 
-               ctx.drawImage(icon, hx-(width/2), hy-(height/2), width, height); 
+               var width = icon.width*cy.zoom(), height = icon.height*cy.zoom();
+               ctx.drawImage(icon, hx-(width/2), hy-(height/2), width, height);
             }
 
             drawsClear = false;
@@ -739,12 +812,12 @@ SOFTWARE.
                     };
                   }
 
-                  var interNode = cy.add( $.extend( true, {
+                  var interNode = cy.add( Object.assign( {
                     group: 'nodes',
                     position: p
                   }, options().nodeParams( source, target ) ) ).addClass( classes );
 
-                  var source2inter = cy.add( $.extend( true, {
+                  var source2inter = cy.add( Object.assign( {
                     group: 'edges',
                     data: {
                       source: source.id(),
@@ -752,7 +825,7 @@ SOFTWARE.
                     }
                   }, options().edgeParams( source, target, 0 ) ) ).addClass( classes );
 
-                  var inter2target = cy.add( $.extend( true, {
+                  var inter2target = cy.add( Object.assign( {
                     group: 'edges',
                     data: {
                       source: interNode.id(),
@@ -765,7 +838,7 @@ SOFTWARE.
                   break;
 
                 case 'flat':
-                  var edge = cy.add( $.extend( true, {
+                  var edge = cy.add( Object.assign( {
                     group: 'edges',
                     data: {
                       source: source.id(),
@@ -929,7 +1002,7 @@ SOFTWARE.
 
                   var $this = $( this );
                   mdownOnHandle = false;
-                  $( window ).unbind( 'mousemove touchmove', moveHandler );
+                  $( window ).off( 'mousemove touchmove', moveHandler );
 
                   makeEdges();
                   resetToDefaultState();
@@ -938,7 +1011,8 @@ SOFTWARE.
                   node.trigger( 'cyedgehandles.stop' );
                 }
 
-                $( window ).one( 'mouseup touchend touchcancel blur', doneMoving ).bind( 'mousemove touchmove', moveHandler );
+                $( window ).one('mouseup touchend touchcancel blur', doneMoving )
+                  .bind('mousemove touchmove', moveHandler );
                 disableGestures();
 
                 options().start( node );
@@ -949,8 +1023,8 @@ SOFTWARE.
               function moveHandler( e ) {
                 // console.log('mousemove moveHandler %s %o', node.id(), node);
 
-                var pageX = !e.originalEvent.touches ? e.pageX : e.originalEvent.touches[ 0 ].pageX;
-                var pageY = !e.originalEvent.touches ? e.pageY : e.originalEvent.touches[ 0 ].pageY;
+                var pageX = !e.touches ? e.pageX : e.touches[ 0 ].pageX;
+                var pageY = !e.touches ? e.pageY : e.touches[ 0 ].pageY;
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
 
@@ -1059,8 +1133,8 @@ SOFTWARE.
                 $container[ 0 ].removeEventListener( 'mousedown', downHandler, true );
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
 
-                var x = ( e.pageX !== undefined ? e.pageX : e.originalEvent.touches[ 0 ].pageX ) - $container.offset().left;
-                var y = ( e.pageY !== undefined ? e.pageY : e.originalEvent.touches[ 0 ].pageY ) - $container.offset().top;
+                var x = ( e.pageX !== undefined ? e.pageX : e.touches[ 0 ].pageX ) - $container.offset().left;
+                var y = ( e.pageY !== undefined ? e.pageY : e.touches[ 0 ].pageY ) - $container.offset().top;
                 var d = hr / 2;
                 var onNode = p.x - w / 2 - d <= x && x <= p.x + w / 2 + d && p.y - h / 2 - d <= y && y <= p.y + h / 2 + d;
 
@@ -1069,8 +1143,8 @@ SOFTWARE.
                   mdownOnHandle = true; // enable the regular logic for handling going over target nodes
 
                   var moveHandler = function( me ) {
-                    var x = ( me.pageX !== undefined ? me.pageX : me.originalEvent.touches[ 0 ].pageX ) - $container.offset().left;
-                    var y = ( me.pageY !== undefined ? me.pageY : me.originalEvent.touches[ 0 ].pageY ) - $container.offset().top;
+                    var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - $container.offset().left;
+                    var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - $container.offset().top;
 
                     if( options().handleLineType !== 'ghost' ) {
                       clearDraws();
@@ -1335,8 +1409,8 @@ SOFTWARE.
     } );
   }
 
-  if( $ && $$ ) { // expose to global cytoscape (i.e. window.cytoscape)
-    register( $$, $ );
+  if( $$ ) { // expose to global cytoscape (i.e. window.cytoscape)
+    register( $$ );
   }
 
-} )( typeof cytoscape !== 'undefined' ? cytoscape : null, typeof jQuery !== 'undefined' ? jQuery : null );
+} )( typeof cytoscape !== 'undefined' ? cytoscape : null );
