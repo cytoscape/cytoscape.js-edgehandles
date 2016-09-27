@@ -52,8 +52,8 @@ SOFTWARE.
       },
       offset: function() {
         return {
-          left: this[0].offsetLeft,
-          top: this[0].offsetTop
+          left: this[0].getBoundingClientRect().left,
+          top: this[0].getBoundingClientRect().top
         };
       },
       bind: function(name, listener) {
