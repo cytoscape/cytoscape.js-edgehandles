@@ -23,83 +23,117 @@ SOFTWARE.
 ;( function($$) {
   'use strict';
 
+  var whitespace = /\s+/;
+
   var $ = function(d){
-    var $d = {
+    var dataKey = '_cytoscapeEdgehandlesData';
+    var listenerKey = '_cytoscapeEdgehandlesListeners';
+
+    return {
       0: d,
-      data: function(){
-        if (arguments.length === 1) {
-          return (this[0]['cyto-edge-handle-data'] || {})[arguments[0]];
-        } else if (arguments.length === 2) {
-          this[0]['cyto-edge-handle-data'] = this[0]['cyto-edge-handle-data'] || {};
-          this[0]['cyto-edge-handle-data'][arguments[0]] = arguments[1];
-          return $d;
+      addClass: function( cls ){
+        this.toggleClass( cls, true );
+      },
+      removeClass: function( cls ){
+        this.toggleClass( cls, true );
+      },
+      toggleClass: function( cls, bool ){
+        this[0].classList.toggle( cls, bool );
+      },
+      data: function( name, val ){
+        var k = dataKey;
+        var data = this[0][k] = this[0][k] || {};
+
+        if ( val === undefined ) {
+          return data[ name ];
+        } else {
+          data[ name ] = val;
         }
+
+        return this;
       },
       trigger: function(eventName){
-        var event = new Event(eventName);
-        this[0].dispatchEvent(event);
+        var evt = new Event(eventName);
+
+        this[0].dispatchEvent(evt);
+
+        return this;
       },
       append: function(ele) {
-        this[0].appendChild(ele[0]);
+        this[0].appendChild( ele[0] || ele );
+
+        return this;
       },
-      attr: function() {
-        if (arguments.length === 1) {
-          return this[0].getAttribute(arguments[0]);
-        } else if (arguments.length === 2) {
-          this[0].setAttribute(arguments[0], arguments[1]);
-          return $d;
+      attr: function( name, val ) {
+        if (val === undefined) {
+          return this[0].getAttribute( name );
+        } else {
+          this[0].setAttribute( name, val );
         }
+
+        return this;
       },
       offset: function() {
-        return {
-          left: this[0].getBoundingClientRect().left,
-          top: this[0].getBoundingClientRect().top
-        };
+        return this[0].getBoundingClientRect();
       },
-      bind: function(name, listener) {
-        var names = name.split(' '), that = this;
-        names.forEach(function(n){
-          that[0].addEventListener(n, listener);
-        });
-        return $d;
+      listeners: function( name ){
+        var k = listenerKey;
+        var l = this[0][k] = this[0][k] || {};
+
+        l[ name ] = l[ name ] || [];
+
+        return l[ name ];
+      },
+      on: function(name, listener, one) {
+        name.split( whitespace ).forEach(function(n){
+          var wrappedListener = (function( e ){
+            e.originalEvent = e;
+
+            if( one ){
+              this.off( n, wrappedListener );
+            }
+
+            listener.apply( this[0], [ e ] );
+          }).bind( this );
+
+          this.listeners(n).push({
+            wrapped: wrappedListener,
+            passed: listener
+          });
+
+          this[0].addEventListener( n, wrappedListener );
+        }, this);
+
+        return this;
+      },
+      bind: function(name, listener){
+        return this.on( name, listener );
+      },
+      off: function(name, listener){
+        name.split( whitespace ).forEach(function(n) {
+          var liss = this.listeners(n);
+
+          for( var i = liss.length - 1; i >= 0; i-- ){
+            var lis = liss[i];
+
+            if( lis.wrapped === listener || lis.passed === listener ){
+              this[0].removeEventListener( n, lis.wrapped );
+
+              liss.splice( i, 1 );
+            }
+          }
+        }, this);
       },
       one: function(name, listener) {
-        var names = name.split(' '), that = this;
-        listener.__handler = {};
-        names.forEach(function(n){
-          var handler = function () {
-            listener();
-            that[0].removeEventListener(n, handler);
-          };
-          that[0].addEventListener(n, handler);
-          listener.__handler[n] = handler;
-        });
-        return $d;
+        return this.on( name, listener, true );
       },
       height: function(){
         return this[0].clientHeight;
       },
       width: function(){
         return this[0].clientWidth;
-      },
-      on: function(name, listener){
-        var names = name.split(' '), that = this;
-        names.forEach(function(n){
-          that[0].addEventListener(n, listener);
-        });
-      },
-      off: function(name, listener){
-        var names = name.split(' '), that = this;
-        names.forEach(function(n) {
-          var handler = listener;
-          if (listener.__handler && listener.__handler[n]) {
-            handler = listener.__handler[n];
-          }
-          that[0].removeEventListener(n, handler);
-        });
       }
     };
-    return $d;
   };
 
   var debounce = (function(){
