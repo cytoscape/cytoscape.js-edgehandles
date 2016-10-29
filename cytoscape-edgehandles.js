@@ -548,8 +548,8 @@ SOFTWARE.
               canvas
                 .setAttribute('style', 'position:absolute;top:'+
                   (-( canvasBb.top - containerBb.top ))+
-                  ';left:'+(-( canvasBb.left - containerBb.left ))+
-                  ';z-index:'+opts.stackOrder);
+                  'px;left:'+(-( canvasBb.left - containerBb.left ))+
+                  'px;z-index:'+opts.stackOrder);
             }, 0);
           }, 250 );
 
