@@ -129,8 +129,13 @@
 				});
 
 				cy.edgehandles({
-					// options go here
-				});
+			   toggleOffOnLeave: true,
+			   handleNodes: "node",
+			   handleSize: 10,
+			   handleColor: '#DF0085',
+			   handleIcon: false,
+			   edgeType: function(){ return 'flat'; }
+			 });
 
 				document.querySelector('#draw-on').addEventListener('click', function(){
 					cy.edgehandles('drawon');
