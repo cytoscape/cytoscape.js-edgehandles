@@ -145,7 +145,7 @@ cy.on('cyedgehandles.start', 'node', function(e){
 All function can be called via `cy.edgehandles('function-name')`:
 
  * `cy.edgehandles('enable')` : enable the extension
- * `cy.edgehandles('enable')` : disable the extension
+ * `cy.edgehandles('disable')` : disable the extension
  * `cy.edgehandles('option', 'preview', false)` : set individual option (e.g. `'preview'`)
  * `cy.edgehandles('option', { /* options */ })` : set all options
  * `cy.edgehandles('option', 'preview')` : get option value (e.g. `'preview'`)
