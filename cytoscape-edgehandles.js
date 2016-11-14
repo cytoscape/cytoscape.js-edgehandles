@@ -704,6 +704,9 @@ SOFTWARE.
 
           var drawLine = throttle( function( hx, hy, x, y ) {
 
+            // can't draw a line without having the starting node
+            if( !sourceNode ){ return; }
+
             if( options().handleLineType !== 'ghost' ) {
               ctx.fillStyle = options().handleColor;
               ctx.strokeStyle = options().handleColor;
