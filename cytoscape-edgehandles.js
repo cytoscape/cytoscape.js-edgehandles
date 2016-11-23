@@ -123,6 +123,8 @@ SOFTWARE.
             }
           }
         }, this);
+        
+        return this;
       },
       one: function(name, listener) {
         return this.on( name, listener, true );
