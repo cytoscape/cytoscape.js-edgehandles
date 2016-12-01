@@ -407,6 +407,8 @@ SOFTWARE.
       handleColor: '#ff0000', // the colour of the handle and the line drawn from it
       handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
       handleLineWidth: 1, // width of handle line in pixels
+      handleOutlineColor: '#000000', // the colour of the handle outline
+      handleOutlineWidth: 0, // the width of the handle outline in pixels
       handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
       hoverDelay: 150, // time spend over a target node before it is considered a target selection
       cxt: false, // whether cxt events trigger edgehandles (useful on touch)
@@ -686,12 +688,17 @@ SOFTWARE.
 
           function drawHandle( hx, hy, hr ) {
             ctx.fillStyle = options().handleColor;
-            ctx.strokeStyle = options().handleColor;
+            ctx.strokeStyle = options().handleOutlineColor;
 
             ctx.beginPath();
             ctx.arc( hx, hy, hr, 0, 2 * Math.PI );
             ctx.closePath();
             ctx.fill();
+
+            if(options().handleOutlineWidth) {
+              ctx.lineWidth = options().handleLineWidth;
+              ctx.stroke();
+            }
 
             if(options().handleIcon){
                var icon = options().handleIcon;
