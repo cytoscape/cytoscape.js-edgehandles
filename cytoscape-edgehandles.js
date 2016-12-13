@@ -74,7 +74,12 @@ SOFTWARE.
         return this;
       },
       offset: function() {
-        return this[0].getBoundingClientRect();
+        var rect = this[0].getBoundingClientRect();
+
+        return {
+          top: rect.top + window.pageYOffset,
+          left: rect.left + window.pageXOffset
+        };
       },
       listeners: function( name ){
         var k = listenerKey;
@@ -123,7 +128,7 @@ SOFTWARE.
             }
           }
         }, this);
-        
+
         return this;
       },
       one: function(name, listener) {
