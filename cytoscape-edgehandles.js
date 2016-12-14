@@ -990,6 +990,7 @@ SOFTWARE.
               var source = this;
               var p = node.renderedPosition();
               var h = node.renderedOuterHeight();
+              var w = node.renderedOuterWidth();
 
               lastActiveId = node.id();
 
