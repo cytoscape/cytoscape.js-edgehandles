@@ -1375,15 +1375,15 @@ SOFTWARE.
               if( cxtOk || tapOk ) {
 
                 makeEdges();
-                resetToDefaultState();
-                sourceNode = null;
 
                 if( sourceNode ) {
                   options().stop( sourceNode );
-                  node.trigger( 'cyedgehandles.stop' );
+                  sourceNode.trigger( 'cyedgehandles.stop' );
 
                   options().complete( sourceNode );
                 }
+
+                resetToDefaultState();
               }
 
             } ).on( 'tap', 'node', tapToStartHandler = function() {
