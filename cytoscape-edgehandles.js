@@ -415,6 +415,7 @@ SOFTWARE.
       handleOutlineColor: '#000000', // the colour of the handle outline
       handleOutlineWidth: 0, // the width of the handle outline in pixels
       handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
+      handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
       hoverDelay: 150, // time spend over a target node before it is considered a target selection
       cxt: false, // whether cxt events trigger edgehandles (useful on touch)
       enabled: true, // whether to start the plugin in the enabled state
@@ -994,6 +995,7 @@ SOFTWARE.
               var source = this;
               var p = node.renderedPosition();
               var h = node.renderedOuterHeight();
+              var w = node.renderedOuterWidth();
 
               lastActiveId = node.id();
 
@@ -1001,8 +1003,24 @@ SOFTWARE.
               clearDraws();
 
               hr = options().handleSize / 2 * cy.zoom();
-              hx = p.x;
-              hy = p.y - h / 2;
+
+              // store how much we should move the handle from origin(p.x, p.y)
+              var moveX = 0;
+              var moveY = 0;
+
+              // grab axis's
+              var axisX = options().handlePosition.split(' ')[0].toLowerCase();
+              var axisY = options().handlePosition.split(' ')[1].toLowerCase();
+
+              // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
+              if(axisX == 'left') moveX = -(w / 2);
+              else if(axisX == 'right') moveX = w / 2;
+              if(axisY == 'top') moveY = -(h / 2);
+              else if(axisY == 'bottom') moveY = h / 2;
+
+              // set handle x and y based on adjusted positions
+              hx = p.x + moveX;
+              hy = p.y + moveY;
 
               // add new handle
               drawHandle( hx, hy, hr );
