@@ -97,8 +97,11 @@ var defaults = {
   complete: function( sourceNode, targetNodes, addedEntities ) {
     // fired when edgehandles is done and entities are added
   },
-  stop: function( sourceNode ) {
+  stop: function( sourceNode) {
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
+  }, 
+  cancel: function(position){
+    // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - position is where the edgehandle was released
   }
 };
 

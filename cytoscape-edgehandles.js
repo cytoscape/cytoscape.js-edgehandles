@@ -449,6 +449,9 @@ SOFTWARE.
       },
       stop: function( sourceNode ) {
         // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
+      }, 
+      cancel: function(position) {
+        // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - position is where the edgehandle was released
       }
     };
 
@@ -533,6 +536,7 @@ SOFTWARE.
           var grabbingNode = false;
           var inForceStart = false;
           var hx, hy, hr;
+          var mx, my;
           var hoverTimeout;
           var drawsClear = true;
           var ghostNode;
@@ -825,6 +829,7 @@ SOFTWARE.
             }
 
             if( source.size() === 0 || targets.size() === 0 ) {
+              options().cancel({x: mx, y: my});
               return; // nothing to do :(
             }
 
@@ -1097,11 +1102,15 @@ SOFTWARE.
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
 
+                mx = x; 
+                my = y; 
+
                 if( options().handleLineType !== 'ghost' ) {
                   clearDraws();
                   drawHandle( hx, hy, hr );
                 }
                 drawLine( hx, hy, x, y );
+
 
                 return false;
               }
@@ -1214,6 +1223,9 @@ SOFTWARE.
                   var moveHandler = function( me ) {
                     var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - $container.offset().left;
                     var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - $container.offset().top;
+
+                    mx = x; 
+                    my = y; 
 
                     if( options().handleLineType !== 'ghost' ) {
                       clearDraws();
