@@ -829,7 +829,7 @@ SOFTWARE.
             }
 
             if( source.size() === 0 || targets.size() === 0 ) {
-              options().cancel(source, ({x: mx, y: my});
+              options().cancel(source, {x: mx, y: my});
               return; // nothing to do :(
             }
 
