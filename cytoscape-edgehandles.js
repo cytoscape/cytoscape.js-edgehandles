@@ -450,8 +450,8 @@ SOFTWARE.
       stop: function( sourceNode ) {
         // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
       }, 
-      cancel: function( sourceNode, position ) {
-        // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - position is where the edgehandle was released
+      cancel: function( sourceNode, renderedPosition ) {
+        // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released
       }
     };
 
@@ -830,6 +830,7 @@ SOFTWARE.
 
             if( source.size() === 0 || targets.size() === 0 ) {
               options().cancel(source, {x: mx, y: my});
+              source.trigger( 'cyedgehandles.cancel', {x: mx, y: my});
               return; // nothing to do :(
             }
 

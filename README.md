@@ -130,6 +130,7 @@ On the source node:
  * `cyedgehandles.start` : when starting to drag on the handle
  * `cyedgehandles.stop` : when the handle is released
  * `cyedgehandles.complete` : when the handle has been released and edges are created
+ * `cyedgehandles.cancel` : when the handle has been released but not on a valid target
 
 On the target node:
 
