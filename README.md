@@ -99,6 +99,9 @@ var defaults = {
   },
   stop: function( sourceNode ) {
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
+  }, 
+  cancel: function( sourceNode, renderedPosition ){
+    // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released
   }
 };
 
@@ -127,6 +130,7 @@ On the source node:
  * `cyedgehandles.start` : when starting to drag on the handle
  * `cyedgehandles.stop` : when the handle is released
  * `cyedgehandles.complete` : when the handle has been released and edges are created
+ * `cyedgehandles.cancel` : when the handle has been released but not on a valid target. The renderedPosition where the handle as releases is available as an extra paramater to the listener.
 
 On the target node:
 
