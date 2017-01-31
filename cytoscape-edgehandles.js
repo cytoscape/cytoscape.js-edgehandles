@@ -665,6 +665,7 @@ SOFTWARE.
             cy.nodes()
               .removeClass( 'edgehandles-hover' )
               .removeClass( 'edgehandles-source' )
+              .removeClass( 'edgehandles-presumptiveTarget')
               .removeClass( 'edgehandles-target' );
 
             cy.$( '.edgehandles-ghost' ).remove();
@@ -839,7 +840,7 @@ SOFTWARE.
             if( !src && !tgt ) {
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
-
+console.log("laer")
                 options().complete( source, targets, added );
                 source.trigger( 'cyedgehandles.complete' );
                 return;
@@ -916,6 +917,7 @@ SOFTWARE.
             }
 
             if( !preview ) {
+              console.log("run!")
               options().complete( source, targets, added );
               source.trigger( 'cyedgehandles.complete' );
             }
