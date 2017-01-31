@@ -829,8 +829,9 @@ SOFTWARE.
             }
 
             if( source.size() === 0 || targets.size() === 0 ) {
-              options().cancel(source, {x: mx, y: my});
-              source.trigger( 'cyedgehandles.cancel', {x: mx, y: my});
+              let presumptiveTarget = cy.nodes( '.edgehandles-presumptiveTarget' );
+              options().cancel(source, {x: mx, y: my}, presumptiveTarget);
+              source.trigger( 'cyedgehandles.cancel', [{x: mx, y: my}, presumptiveTarget]);
               return; // nothing to do :(
             }
 
@@ -932,6 +933,9 @@ SOFTWARE.
               var isGhost = node.hasClass( 'edgehandles-ghost-node' );
               var noEdge = options().edgeType( source, node ) == null;
 
+              node.addClass('edgehandles-presumptiveTarget');
+
+
               if( isGhost || noEdge ) {
                 return;
               }
@@ -962,6 +966,8 @@ SOFTWARE.
               var source = sourceNode;
 
               node.removeClass( 'edgehandles-target' );
+              node.removeClass('edgehandles-presumptiveTarget');
+
               removePreview( source, target );
             }
           }
