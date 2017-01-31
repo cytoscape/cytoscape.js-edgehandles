@@ -100,8 +100,9 @@ var defaults = {
   stop: function( sourceNode ) {
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
   }, 
-  cancel: function( sourceNode, renderedPosition ){
-    // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released
+  cancel: function( sourceNode, renderedPosition, invalidTarget ){
+    // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
+        // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
   }
 };
 
