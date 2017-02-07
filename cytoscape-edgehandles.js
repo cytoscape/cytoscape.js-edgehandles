@@ -666,7 +666,7 @@ SOFTWARE.
             cy.nodes()
               .removeClass( 'edgehandles-hover' )
               .removeClass( 'edgehandles-source' )
-              .removeClass( 'edgehandles-presumptiveTarget')
+              .removeClass( 'edgehandles-presumptive-target')
               .removeClass( 'edgehandles-target' );
 
             cy.$( '.edgehandles-ghost' ).remove();
@@ -831,7 +831,7 @@ SOFTWARE.
             }
 
             if( source.size() === 0 || targets.size() === 0 ) {
-              let presumptiveTarget = cy.nodes( '.edgehandles-presumptiveTarget' );
+              var presumptiveTarget = cy.nodes( '.edgehandles-presumptive-target' );
               options().cancel(source, {x: mx, y: my}, presumptiveTarget);
               source.trigger( 'cyedgehandles.cancel', [{x: mx, y: my}, presumptiveTarget]);
               return; // nothing to do :(
@@ -841,7 +841,6 @@ SOFTWARE.
             if( !src && !tgt ) {
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
-console.log("laer")
                 options().complete( source, targets, added );
                 source.trigger( 'cyedgehandles.complete' );
                 return;
@@ -918,7 +917,6 @@ console.log("laer")
             }
 
             if( !preview ) {
-              console.log("run!")
               options().complete( source, targets, added );
               source.trigger( 'cyedgehandles.complete' );
             }
@@ -936,7 +934,7 @@ console.log("laer")
               var isGhost = node.hasClass( 'edgehandles-ghost-node' );
               var noEdge = options().edgeType( source, node ) == null;
 
-              node.addClass('edgehandles-presumptiveTarget');
+              node.addClass('edgehandles-presumptive-target');
 
 
               if( isGhost || noEdge ) {
@@ -969,7 +967,7 @@ console.log("laer")
               var source = sourceNode;
 
               node.removeClass( 'edgehandles-target' );
-              node.removeClass('edgehandles-presumptiveTarget');
+              node.removeClass( 'edgehandles-presumptive-target' );
 
               removePreview( source, target );
             }
