@@ -29,6 +29,6 @@
     "run-sequence": "^1.0.0"
   },
   "peerDependencies": {
-    "cytoscape": "^2.2.8"
+    "cytoscape": "^2.2.8 || ^3.0.0"
   }
 }
