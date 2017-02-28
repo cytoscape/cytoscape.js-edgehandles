@@ -29,6 +29,8 @@
     "run-sequence": "^1.0.0"
   },
   "peerDependencies": {
-    "cytoscape": "^2.2.8 || ^3.0.0"
+    "cytoscape": "^2.2.8 || ^3.0.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1"
   }
 }
