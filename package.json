@@ -28,9 +28,11 @@
     "jshint-stylish": "^1.0.0",
     "run-sequence": "^1.0.0"
   },
-  "peerDependencies": {
-    "cytoscape": "^2.2.8 || ^3.0.0",
+  "dependencies": {
     "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1"
+  },
+  "peerDependencies": {
+    "cytoscape": "^2.2.8 || ^3.0.0"
   }
 }
