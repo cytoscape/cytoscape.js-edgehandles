@@ -1230,9 +1230,7 @@ SOFTWARE.
     module.exports = function( $$ ){
       register( $$, require('lodash.debounce'), require('lodash.throttle') );
     }
-  }
-
-  if( typeof define !== 'undefined' && define.amd ) { // expose as an amd/requirejs module
+  } else if( typeof define !== 'undefined' && define.amd ) { // expose as an amd/requirejs module
     define( 'cytoscape-edgehandles', function() {
       return register;
     } );
