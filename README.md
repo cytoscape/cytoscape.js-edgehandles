@@ -12,7 +12,7 @@ This extension creates handles on nodes that can be dragged to create edges betw
 
 ## Dependencies
 
- * Cytoscape.js ^2.2.8
+ * Cytoscape.js ^2.2.8 || ^3.0.0
 
 
 ## Usage instructions
