@@ -1237,7 +1237,7 @@ SOFTWARE.
   }
 
   if( $$ && typeof _ !== 'undefined' ) { // expose to global cytoscape (i.e. window.cytoscape)
-    register( $$, _.debounce, _.throttle );
+    register( $$, _.debounce.bind( _ ), _.throttle.bind( _ ) );
   }
 
 } )( typeof cytoscape !== 'undefined' ? cytoscape : null );
