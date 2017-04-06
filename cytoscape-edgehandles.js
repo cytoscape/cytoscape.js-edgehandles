@@ -451,7 +451,7 @@ SOFTWARE.
             ctx.fill();
 
             if(options().handleOutlineWidth) {
-              ctx.lineWidth = options().handleLineWidth;
+              ctx.lineWidth = options().handleLineWidth * cy.zoom();
               ctx.stroke();
             }
 
