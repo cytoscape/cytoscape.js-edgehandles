@@ -194,7 +194,7 @@ SOFTWARE.
       },
       stop: function( sourceNode ) {
         // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
-      }, 
+      },
       cancel: function( sourceNode, renderedPosition ) {
         // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released
       }
@@ -848,8 +848,8 @@ SOFTWARE.
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
 
-                mx = x; 
-                my = y; 
+                mx = x;
+                my = y;
 
                 if( options().handleLineType !== 'ghost' ) {
                   clearDraws();
@@ -970,8 +970,8 @@ SOFTWARE.
                     var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - $container.offset().left;
                     var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - $container.offset().top;
 
-                    mx = x; 
-                    my = y; 
+                    mx = x;
+                    my = y;
 
                     if( options().handleLineType !== 'ghost' ) {
                       clearDraws();
@@ -1097,7 +1097,7 @@ SOFTWARE.
               var tapOk = drawMode && e.type === 'tapdrag';
 
               if( ( cxtOk || tapOk ) && sourceNode ) {
-                var rpos = e.cyRenderedPosition;
+                var rpos = e.renderedPosition || e.cyRenderedPosition;
 
                 drawLine( hx, hy, rpos.x, rpos.y );
 
