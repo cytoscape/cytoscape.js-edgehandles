@@ -441,7 +441,7 @@ SOFTWARE.
 
           }
 
-          function drawHandle( hx, hy, hr ) {
+          function drawHandle() {
             ctx.fillStyle = options().handleColor;
             ctx.strokeStyle = options().handleOutlineColor;
 
@@ -466,7 +466,7 @@ SOFTWARE.
 
           var lineDrawRate = 1000 / 60;
 
-          var drawLine = throttle( function( hx, hy, x, y ) {
+          var drawLine = throttle( function( x, y ) {
 
             // can't draw a line without having the starting node
             if( !sourceNode ){ return; }
@@ -711,6 +711,32 @@ SOFTWARE.
             }
           }
 
+          function setHandleDimensions( node ){
+            var p = node.renderedPosition();
+            var h = node.renderedHeight();
+            var w = node.renderedWidth();
+
+            hr = options().handleSize / 2 * cy.zoom();
+
+            // store how much we should move the handle from origin(p.x, p.y)
+            var moveX = 0;
+            var moveY = 0;
+
+            // grab axis's
+            var axisX = options().handlePosition.split(' ')[0].toLowerCase();
+            var axisY = options().handlePosition.split(' ')[1].toLowerCase();
+
+            // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
+            if(axisX == 'left') moveX = -(w / 2);
+            else if(axisX == 'right') moveX = w / 2;
+            if(axisY == 'top') moveY = -(h / 2);
+            else if(axisY == 'bottom') moveY = h / 2;
+
+            // set handle x and y based on adjusted positions
+            hx = p.x + moveX;
+            hy = p.y + moveY;
+          }
+
           cy.ready( function( e ) {
             lastPanningEnabled = cy.panningEnabled();
             lastZoomingEnabled = cy.zoomingEnabled();
@@ -753,28 +779,10 @@ SOFTWARE.
               // remove old handle
               clearDraws();
 
-              hr = options().handleSize / 2 * cy.zoom();
-
-              // store how much we should move the handle from origin(p.x, p.y)
-              var moveX = 0;
-              var moveY = 0;
-
-              // grab axis's
-              var axisX = options().handlePosition.split(' ')[0].toLowerCase();
-              var axisY = options().handlePosition.split(' ')[1].toLowerCase();
-
-              // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
-              if(axisX == 'left') moveX = -(w / 2);
-              else if(axisX == 'right') moveX = w / 2;
-              if(axisY == 'top') moveY = -(h / 2);
-              else if(axisY == 'bottom') moveY = h / 2;
-
-              // set handle x and y based on adjusted positions
-              hx = p.x + moveX;
-              hy = p.y + moveY;
+              setHandleDimensions( node );
 
               // add new handle
-              drawHandle( hx, hy, hr );
+              drawHandle();
 
               node.trigger( 'cyedgehandles.showhandle' );
 
@@ -853,9 +861,9 @@ SOFTWARE.
 
                 if( options().handleLineType !== 'ghost' ) {
                   clearDraws();
-                  drawHandle( hx, hy, hr );
+                  drawHandle();
                 }
-                drawLine( hx, hy, x, y );
+                drawLine( x, y );
 
 
                 return false;
@@ -943,11 +951,9 @@ SOFTWARE.
               var h = node.renderedOuterHeight();
               var w = node.renderedOuterWidth();
 
-              var hr = options().handleSize / 2 * cy.zoom();
-              var hx = p.x;
-              var hy = p.y - h / 2;
+              setHandleDimensions( node );
 
-              drawHandle( hx, hy, hr );
+              drawHandle();
 
               node.trigger( 'cyedgehandles.showhandle' );
 
@@ -975,9 +981,9 @@ SOFTWARE.
 
                     if( options().handleLineType !== 'ghost' ) {
                       clearDraws();
-                      drawHandle( hx, hy, hr );
+                      drawHandle();
                     }
-                    drawLine( hx, hy, x, y );
+                    drawLine( x, y );
                   }
 
                   $container[ 0 ].addEventListener( 'mousemove', moveHandler, true );
@@ -1075,15 +1081,9 @@ SOFTWARE.
                 node.trigger( 'cyedgehandles.start' );
                 node.addClass( 'edgehandles-source' );
 
-                var p = node.renderedPosition();
-                var h = node.renderedOuterHeight();
-                var w = node.renderedOuterWidth();
+                setHandleDimensions( node );
 
-                hr = options().handleSize / 2 * cy.zoom();
-                hx = p.x;
-                hy = p.y - h / 2 - hr / 2;
-
-                drawHandle( hx, hy, hr );
+                drawHandle();
 
                 node.trigger( 'cyedgehandles.showhandle' );
 
@@ -1099,7 +1099,7 @@ SOFTWARE.
               if( ( cxtOk || tapOk ) && sourceNode ) {
                 var rpos = e.renderedPosition || e.cyRenderedPosition;
 
-                drawLine( hx, hy, rpos.x, rpos.y );
+                drawLine( rpos.x, rpos.y );
 
               }
 
@@ -1156,15 +1156,9 @@ SOFTWARE.
 
                   clearDraws(); // clear just in case
 
-                  var p = node.renderedPosition();
-                  var h = node.renderedOuterHeight();
-                  var w = node.renderedOuterWidth();
+                  setHandleDimensions( node );
 
-                  var hr = options().handleSize / 2 * cy.zoom();
-                  var hx = p.x;
-                  var hy = p.y - h / 2;
-
-                  drawHandle( hx, hy, hr );
+                  drawHandle();
 
                   node.trigger( 'cyedgehandles.showhandle' );
                 }, 16 );
