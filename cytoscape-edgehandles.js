@@ -288,6 +288,12 @@ SOFTWARE.
           var ghostEdge;
           var sourceNode;
           var drawMode = false;
+          var pxRatio;
+
+          function getDevicePixelRatio(){
+            return window.devicePixelRatio || 1;
+          }
+
           cy.on( 'resize', function() {
             $container.trigger( 'cyedgehandles.resize' );
           });
@@ -295,21 +301,26 @@ SOFTWARE.
           $container.append( $canvas );
 
           var _sizeCanvas = debounce( function(){
+            pxRatio = getDevicePixelRatio();
+
+            var width = $container.width();
+            var height = $container.height();
+
+            var attrWidth = width * pxRatio;
+            var attrHeight = height * pxRatio;
+
             $canvas
-              .attr( 'height', $container.height() )
-              .attr( 'width', $container.width() );
-            canvas.setAttribute('style', 'position:absolute;top:0;left:0;z-index:'+opts.stackOrder);
+              .attr( 'width', attrWidth )
+              .attr( 'height', attrHeight )
+            ;
 
-            setTimeout(function(){
-              var canvasBb = $canvas.offset();
-              var containerBb = $container.offset();
+            canvas.setAttribute('style', 'position:absolute; top:0; left:0; z-index:'+options().stackOrder+'; width:'+width+'px; height:'+height+'px;');
 
-              canvas
-                .setAttribute('style', 'position:absolute;top:'+
-                  (-( canvasBb.top - containerBb.top ))+
-                  'px;left:'+(-( canvasBb.left - containerBb.left ))+
-                  'px;z-index:'+opts.stackOrder);
-            }, 0);
+            var c2d = canvas.getContext('2d');
+
+            c2d.setTransform( 1, 0, 0, 1, 0, 0 );
+
+            c2d.scale( pxRatio, pxRatio );
           }, 250 );
 
           var sizeCanvas = function(){
