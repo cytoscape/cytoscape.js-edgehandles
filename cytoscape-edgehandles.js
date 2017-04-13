@@ -153,7 +153,8 @@ SOFTWARE.
       preview: true, // whether to show added edges preview before releasing selection
       stackOrder: 4, // Controls stack order of edgehandles canvas element by setting it's z-index
       handleSize: 10, // the size of the edge handle put on nodes
-      handleIcon: false,
+      handleHitThreshold: 6, // a threshold for hit detection that makes it easier to grab the handle
+      handleIcon: false, // an image to put on the handle
       handleColor: '#ff0000', // the colour of the handle and the line drawn from it
       handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
       handleLineWidth: 1, // width of handle line in pixels
@@ -806,7 +807,7 @@ SOFTWARE.
                 var pageY = !e.touches ? e.pageY : e.touches[ 0 ].pageY;
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
-                var hrTarget = hr;
+                var hrTarget = hr + options().handleHitThreshold;
 
                 if( e.button !== 0 && !e.touches ) {
                   return; // sorry, no right clicks allowed
