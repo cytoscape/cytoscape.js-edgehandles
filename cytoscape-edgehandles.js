@@ -1157,7 +1157,6 @@ SOFTWARE.
               }
 
             } ).on( 'tap', 'node', tapToStartHandler = function() {
-              return;
               var node = this;
 
               if( !sourceNode ) { // must not be active
