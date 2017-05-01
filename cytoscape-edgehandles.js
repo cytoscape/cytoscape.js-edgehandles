@@ -1085,6 +1085,8 @@ SOFTWARE.
 
                 clearDraws(); // clear just in case
 
+                disableGestures(); // cases like draw mode need this
+
                 var node = sourceNode = this;
                 var source = node;
 
