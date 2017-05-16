@@ -119,6 +119,7 @@ These classes can be used for styling the graph as it interacts with the extensi
 * `edgehandles-preview` : Preview elements (used with `options.preview: true`)
 * `edgehandles-hover` : Added to nodes as they are hovered over as targets
 * `edgehandles-ghost-edge` : The ghost handle line edge
+* `edgehandles-presumptive-target` : A node that, during an edge drag, may become a target when released
 
 
 ## Events
@@ -131,7 +132,7 @@ On the source node:
  * `cyedgehandles.start` : when starting to drag on the handle
  * `cyedgehandles.stop` : when the handle is released
  * `cyedgehandles.complete` : when the handle has been released and edges are created
- * `cyedgehandles.cancel` : when the handle has been released but not on a valid target. The renderedPosition where the handle as releases is available as an extra paramater to the listener.
+ * `cyedgehandles.cancel` : when the handle has been released but not on a valid target. The handler receives two arguments - the renderedPosition at which the handle was released and a collection of presumptive targets. Presumptive targets are nodes that would have become targets but were, for some reason, deemed invalid. Possible reasons include `edgeType` or `loopAllowed` returning null.
 
 On the target node:
 
