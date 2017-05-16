@@ -19,6 +19,6 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "cytoscape": "^2.2.8"
+    "cytoscape": "^2.2.8 || ^3.0.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-edgehandles",
-  "version": "2.8.0",
+  "version": "2.11.1",
   "description": "Edge creation extension for Cytoscape.js",
   "main": "cytoscape-edgehandles.js",
   "scripts": {
@@ -28,7 +28,11 @@
     "jshint-stylish": "^1.0.0",
     "run-sequence": "^1.0.0"
   },
+  "dependencies": {
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1"
+  },
   "peerDependencies": {
-    "cytoscape": "^2.2.8"
+    "cytoscape": "^2.2.8 || ^3.0.0"
   }
 }

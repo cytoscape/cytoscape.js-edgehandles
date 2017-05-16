@@ -12,7 +12,7 @@ This extension creates handles on nodes that can be dragged to create edges betw
 
 ## Dependencies
 
- * Cytoscape.js ^2.2.8
+ * Cytoscape.js ^2.2.8 || ^3.0.0
 
 
 ## Usage instructions
@@ -58,17 +58,18 @@ var defaults = {
   preview: true, // whether to show added edges preview before releasing selection
   stackOrder: 4, // Controls stack order of edgehandles canvas element by setting it's z-index
   handleSize: 10, // the size of the edge handle put on nodes
+  handleHitThreshold: 6, // a threshold for hit detection that makes it easier to grab the handle
+  handleIcon: false, // an image to put on the handle
   handleColor: '#ff0000', // the colour of the handle and the line drawn from it
   handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
   handleLineWidth: 1, // width of handle line in pixels
-  handleIcon: false, // Pass an Image-object to use as icon on handle. Icons are resized according to zoom and centered in handle.
   handleOutlineColor: '#000000', // the colour of the handle outline
   handleOutlineWidth: 0, // the width of the handle outline in pixels
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
   handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
   hoverDelay: 150, // time spend over a target node before it is considered a target selection
   cxt: false, // whether cxt events trigger edgehandles (useful on touch)
-  enabled: true, // whether to start the extension in the enabled state
+  enabled: true, // whether to start the plugin in the enabled state
   toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
   edgeType: function( sourceNode, targetNode ) {
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them

@@ -143,272 +143,18 @@ SOFTWARE.
     };
   };
 
-  var debounce = (function(){
-    /**
-     * lodash 3.1.1 (Custom Build) <https://lodash.com/>
-     * Build: `lodash modern modularize exports="npm" -o ./`
-     * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
-     * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
-     * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-     * Available under MIT license <https://lodash.com/license>
-     */
-    /** Used as the `TypeError` message for "Functions" methods. */
-    var FUNC_ERROR_TEXT = 'Expected a function';
-
-    /* Native method references for those with the same name as other `lodash` methods. */
-    var nativeMax = Math.max,
-        nativeNow = Date.now;
-
-    /**
-     * Gets the number of milliseconds that have elapsed since the Unix epoch
-     * (1 January 1970 00:00:00 UTC).
-     *
-     * @static
-     * @memberOf _
-     * @category Date
-     * @example
-     *
-     * _.defer(function(stamp) {
-     *   console.log(_.now() - stamp);
-     * }, _.now());
-     * // => logs the number of milliseconds it took for the deferred function to be invoked
-     */
-    var now = nativeNow || function() {
-      return new Date().getTime();
-    };
-
-    /**
-     * Creates a debounced function that delays invoking `func` until after `wait`
-     * milliseconds have elapsed since the last time the debounced function was
-     * invoked. The debounced function comes with a `cancel` method to cancel
-     * delayed invocations. Provide an options object to indicate that `func`
-     * should be invoked on the leading and/or trailing edge of the `wait` timeout.
-     * Subsequent calls to the debounced function return the result of the last
-     * `func` invocation.
-     *
-     * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
-     * on the trailing edge of the timeout only if the the debounced function is
-     * invoked more than once during the `wait` timeout.
-     *
-     * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
-     * for details over the differences between `_.debounce` and `_.throttle`.
-     *
-     * @static
-     * @memberOf _
-     * @category Function
-     * @param {Function} func The function to debounce.
-     * @param {number} [wait=0] The number of milliseconds to delay.
-     * @param {Object} [options] The options object.
-     * @param {boolean} [options.leading=false] Specify invoking on the leading
-     *  edge of the timeout.
-     * @param {number} [options.maxWait] The maximum time `func` is allowed to be
-     *  delayed before it's invoked.
-     * @param {boolean} [options.trailing=true] Specify invoking on the trailing
-     *  edge of the timeout.
-     * @returns {Function} Returns the new debounced function.
-     * @example
-     *
-     * // avoid costly calculations while the window size is in flux
-     * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
-     *
-     * // invoke `sendMail` when the click event is fired, debouncing subsequent calls
-     * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
-     *   'leading': true,
-     *   'trailing': false
-     * }));
-     *
-     * // ensure `batchLog` is invoked once after 1 second of debounced calls
-     * var source = new EventSource('/stream');
-     * jQuery(source).on('message', _.debounce(batchLog, 250, {
-     *   'maxWait': 1000
-     * }));
-     *
-     * // cancel a debounced call
-     * var todoChanges = _.debounce(batchLog, 1000);
-     * Object.observe(models.todo, todoChanges);
-     *
-     * Object.observe(models, function(changes) {
-     *   if (_.find(changes, { 'user': 'todo', 'type': 'delete'})) {
-     *     todoChanges.cancel();
-     *   }
-     * }, ['delete']);
-     *
-     * // ...at some point `models.todo` is changed
-     * models.todo.completed = true;
-     *
-     * // ...before 1 second has passed `models.todo` is deleted
-     * // which cancels the debounced `todoChanges` call
-     * delete models.todo;
-     */
-    function debounce(func, wait, options) {
-      var args,
-          maxTimeoutId,
-          result,
-          stamp,
-          thisArg,
-          timeoutId,
-          trailingCall,
-          lastCalled = 0,
-          maxWait = false,
-          trailing = true;
-
-      if (typeof func != 'function') {
-        throw new TypeError(FUNC_ERROR_TEXT);
-      }
-      wait = wait < 0 ? 0 : (+wait || 0);
-      if (options === true) {
-        var leading = true;
-        trailing = false;
-      } else if (isObject(options)) {
-        leading = !!options.leading;
-        maxWait = 'maxWait' in options && nativeMax(+options.maxWait || 0, wait);
-        trailing = 'trailing' in options ? !!options.trailing : trailing;
-      }
-
-      function cancel() {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        if (maxTimeoutId) {
-          clearTimeout(maxTimeoutId);
-        }
-        lastCalled = 0;
-        maxTimeoutId = timeoutId = trailingCall = undefined;
-      }
-
-      function complete(isCalled, id) {
-        if (id) {
-          clearTimeout(id);
-        }
-        maxTimeoutId = timeoutId = trailingCall = undefined;
-        if (isCalled) {
-          lastCalled = now();
-          result = func.apply(thisArg, args);
-          if (!timeoutId && !maxTimeoutId) {
-            args = thisArg = undefined;
-          }
-        }
-      }
-
-      function delayed() {
-        var remaining = wait - (now() - stamp);
-        if (remaining <= 0 || remaining > wait) {
-          complete(trailingCall, maxTimeoutId);
-        } else {
-          timeoutId = setTimeout(delayed, remaining);
-        }
-      }
-
-      function maxDelayed() {
-        complete(trailing, timeoutId);
-      }
-
-      function debounced() {
-        args = arguments;
-        stamp = now();
-        thisArg = this;
-        trailingCall = trailing && (timeoutId || !leading);
-
-        if (maxWait === false) {
-          var leadingCall = leading && !timeoutId;
-        } else {
-          if (!maxTimeoutId && !leading) {
-            lastCalled = stamp;
-          }
-          var remaining = maxWait - (stamp - lastCalled),
-              isCalled = remaining <= 0 || remaining > maxWait;
-
-          if (isCalled) {
-            if (maxTimeoutId) {
-              maxTimeoutId = clearTimeout(maxTimeoutId);
-            }
-            lastCalled = stamp;
-            result = func.apply(thisArg, args);
-          }
-          else if (!maxTimeoutId) {
-            maxTimeoutId = setTimeout(maxDelayed, remaining);
-          }
-        }
-        if (isCalled && timeoutId) {
-          timeoutId = clearTimeout(timeoutId);
-        }
-        else if (!timeoutId && wait !== maxWait) {
-          timeoutId = setTimeout(delayed, wait);
-        }
-        if (leadingCall) {
-          isCalled = true;
-          result = func.apply(thisArg, args);
-        }
-        if (isCalled && !timeoutId && !maxTimeoutId) {
-          args = thisArg = undefined;
-        }
-        return result;
-      }
-      debounced.cancel = cancel;
-      return debounced;
-    }
-
-    /**
-     * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
-     * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
-     *
-     * @static
-     * @memberOf _
-     * @category Lang
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if `value` is an object, else `false`.
-     * @example
-     *
-     * _.isObject({});
-     * // => true
-     *
-     * _.isObject([1, 2, 3]);
-     * // => true
-     *
-     * _.isObject(1);
-     * // => false
-     */
-    function isObject(value) {
-      // Avoid a V8 JIT bug in Chrome 19-20.
-      // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
-      var type = typeof value;
-      return !!value && (type == 'object' || type == 'function');
-    }
-
-    return debounce;
-
-  })();
-
-  // ported lodash throttle function
-  var throttle = function( func, wait, options ){
-    var leading = true,
-        trailing = true;
-
-    if( options === false ){
-      leading = false;
-    } else if( typeof options === typeof {} ){
-      leading = 'leading' in options ? options.leading : leading;
-      trailing = 'trailing' in options ? options.trailing : trailing;
-    }
-    options = options || {};
-    options.leading = leading;
-    options.maxWait = wait;
-    options.trailing = trailing;
-
-    return debounce( func, wait, options );
-  };
-
   // registers the extension on a cytoscape lib ref
-  var register = function( $$ ) {
-    if( !$$ ) {
+  var register = function( $$, debounce, throttle ) {
+    if( !$$ || !debounce || !throttle ) {
       return;
-    } // can't register if cytoscape unspecified
+    } // can't register if cytoscape or dependencies unspecified
 
     var defaults = {
       preview: true, // whether to show added edges preview before releasing selection
       stackOrder: 4, // Controls stack order of edgehandles canvas element by setting it's z-index
       handleSize: 10, // the size of the edge handle put on nodes
-      handleIcon: false,
+      handleHitThreshold: 6, // a threshold for hit detection that makes it easier to grab the handle
+      handleIcon: false, // an image to put on the handle
       handleColor: '#ff0000', // the colour of the handle and the line drawn from it
       handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
       handleLineWidth: 1, // width of handle line in pixels
@@ -544,6 +290,12 @@ SOFTWARE.
           var ghostEdge;
           var sourceNode;
           var drawMode = false;
+          var pxRatio;
+
+          function getDevicePixelRatio(){
+            return window.devicePixelRatio || 1;
+          }
+
           cy.on( 'resize', function() {
             $container.trigger( 'cyedgehandles.resize' );
           });
@@ -551,21 +303,26 @@ SOFTWARE.
           $container.append( $canvas );
 
           var _sizeCanvas = debounce( function(){
+            pxRatio = getDevicePixelRatio();
+
+            var width = $container.width();
+            var height = $container.height();
+
+            var attrWidth = width * pxRatio;
+            var attrHeight = height * pxRatio;
+
             $canvas
-              .attr( 'height', $container.height() )
-              .attr( 'width', $container.width() );
-            canvas.setAttribute('style', 'position:absolute;top:0;left:0;z-index:'+opts.stackOrder);
+              .attr( 'width', attrWidth )
+              .attr( 'height', attrHeight )
+            ;
 
-            setTimeout(function(){
-              var canvasBb = $canvas.offset();
-              var containerBb = $container.offset();
+            canvas.setAttribute('style', 'position:absolute; top:0; left:0; z-index:'+options().stackOrder+'; width:'+width+'px; height:'+height+'px;');
 
-              canvas
-                .setAttribute('style', 'position:absolute;top:'+
-                  (-( canvasBb.top - containerBb.top ))+
-                  'px;left:'+(-( canvasBb.left - containerBb.left ))+
-                  'px;z-index:'+opts.stackOrder);
-            }, 0);
+            var c2d = canvas.getContext('2d');
+
+            c2d.setTransform( 1, 0, 0, 1, 0, 0 );
+
+            c2d.scale( pxRatio, pxRatio );
           }, 250 );
 
           var sizeCanvas = function(){
@@ -698,7 +455,7 @@ SOFTWARE.
 
           }
 
-          function drawHandle( hx, hy, hr ) {
+          function drawHandle() {
             ctx.fillStyle = options().handleColor;
             ctx.strokeStyle = options().handleOutlineColor;
 
@@ -708,7 +465,7 @@ SOFTWARE.
             ctx.fill();
 
             if(options().handleOutlineWidth) {
-              ctx.lineWidth = options().handleLineWidth;
+              ctx.lineWidth = options().handleLineWidth * cy.zoom();
               ctx.stroke();
             }
 
@@ -723,7 +480,7 @@ SOFTWARE.
 
           var lineDrawRate = 1000 / 60;
 
-          var drawLine = throttle( function( hx, hy, x, y ) {
+          var drawLine = throttle( function( x, y ) {
 
             // can't draw a line without having the starting node
             if( !sourceNode ){ return; }
@@ -973,6 +730,32 @@ SOFTWARE.
             }
           }
 
+          function setHandleDimensions( node ){
+            var p = node.renderedPosition();
+            var h = node.renderedHeight();
+            var w = node.renderedWidth();
+
+            hr = options().handleSize / 2 * cy.zoom();
+
+            // store how much we should move the handle from origin(p.x, p.y)
+            var moveX = 0;
+            var moveY = 0;
+
+            // grab axis's
+            var axisX = options().handlePosition.split(' ')[0].toLowerCase();
+            var axisY = options().handlePosition.split(' ')[1].toLowerCase();
+
+            // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
+            if(axisX == 'left') moveX = -(w / 2);
+            else if(axisX == 'right') moveX = w / 2;
+            if(axisY == 'top') moveY = -(h / 2);
+            else if(axisY == 'bottom') moveY = h / 2;
+
+            // set handle x and y based on adjusted positions
+            hx = p.x + moveX;
+            hy = p.y + moveY;
+          }
+
           cy.ready( function( e ) {
             lastPanningEnabled = cy.panningEnabled();
             lastZoomingEnabled = cy.zoomingEnabled();
@@ -1015,28 +798,10 @@ SOFTWARE.
               // remove old handle
               clearDraws();
 
-              hr = options().handleSize / 2 * cy.zoom();
-
-              // store how much we should move the handle from origin(p.x, p.y)
-              var moveX = 0;
-              var moveY = 0;
-
-              // grab axis's
-              var axisX = options().handlePosition.split(' ')[0].toLowerCase();
-              var axisY = options().handlePosition.split(' ')[1].toLowerCase();
-
-              // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
-              if(axisX == 'left') moveX = -(w / 2);
-              else if(axisX == 'right') moveX = w / 2;
-              if(axisY == 'top') moveY = -(h / 2);
-              else if(axisY == 'bottom') moveY = h / 2;
-
-              // set handle x and y based on adjusted positions
-              hx = p.x + moveX;
-              hy = p.y + moveY;
+              setHandleDimensions( node );
 
               // add new handle
-              drawHandle( hx, hy, hr );
+              drawHandle();
 
               node.trigger( 'cyedgehandles.showhandle' );
 
@@ -1049,7 +814,7 @@ SOFTWARE.
                 var pageY = !e.touches ? e.pageY : e.touches[ 0 ].pageY;
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
-                var hrTarget = hr;
+                var hrTarget = hr + options().handleHitThreshold;
 
                 if( e.button !== 0 && !e.touches ) {
                   return; // sorry, no right clicks allowed
@@ -1110,14 +875,14 @@ SOFTWARE.
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
 
-                mx = x; 
-                my = y; 
+                mx = x;
+                my = y;
 
                 if( options().handleLineType !== 'ghost' ) {
                   clearDraws();
-                  drawHandle( hx, hy, hr );
+                  drawHandle();
                 }
-                drawLine( hx, hy, x, y );
+                drawLine( x, y );
 
 
                 return false;
@@ -1205,11 +970,9 @@ SOFTWARE.
               var h = node.renderedOuterHeight();
               var w = node.renderedOuterWidth();
 
-              var hr = options().handleSize / 2 * cy.zoom();
-              var hx = p.x;
-              var hy = p.y - h / 2;
+              setHandleDimensions( node );
 
-              drawHandle( hx, hy, hr );
+              drawHandle();
 
               node.trigger( 'cyedgehandles.showhandle' );
 
@@ -1232,14 +995,14 @@ SOFTWARE.
                     var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - $container.offset().left;
                     var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - $container.offset().top;
 
-                    mx = x; 
-                    my = y; 
+                    mx = x;
+                    my = y;
 
                     if( options().handleLineType !== 'ghost' ) {
                       clearDraws();
-                      drawHandle( hx, hy, hr );
+                      drawHandle();
                     }
-                    drawLine( hx, hy, x, y );
+                    drawLine( x, y );
                   }
 
                   $container[ 0 ].addEventListener( 'mousemove', moveHandler, true );
@@ -1329,6 +1092,8 @@ SOFTWARE.
 
                 clearDraws(); // clear just in case
 
+                disableGestures(); // cases like draw mode need this
+
                 var node = sourceNode = this;
                 var source = node;
 
@@ -1337,15 +1102,9 @@ SOFTWARE.
                 node.trigger( 'cyedgehandles.start' );
                 node.addClass( 'edgehandles-source' );
 
-                var p = node.renderedPosition();
-                var h = node.renderedOuterHeight();
-                var w = node.renderedOuterWidth();
+                setHandleDimensions( node );
 
-                hr = options().handleSize / 2 * cy.zoom();
-                hx = p.x;
-                hy = p.y - h / 2 - hr / 2;
-
-                drawHandle( hx, hy, hr );
+                drawHandle();
 
                 node.trigger( 'cyedgehandles.showhandle' );
 
@@ -1359,9 +1118,9 @@ SOFTWARE.
               var tapOk = drawMode && e.type === 'tapdrag';
 
               if( ( cxtOk || tapOk ) && sourceNode ) {
-                var rpos = e.cyRenderedPosition;
+                var rpos = e.renderedPosition || e.cyRenderedPosition;
 
-                drawLine( hx, hy, rpos.x, rpos.y );
+                drawLine( rpos.x, rpos.y );
 
               }
 
@@ -1418,15 +1177,9 @@ SOFTWARE.
 
                   clearDraws(); // clear just in case
 
-                  var p = node.renderedPosition();
-                  var h = node.renderedOuterHeight();
-                  var w = node.renderedOuterWidth();
+                  setHandleDimensions( node );
 
-                  var hr = options().handleSize / 2 * cy.zoom();
-                  var hx = p.x;
-                  var hy = p.y - h / 2;
-
-                  drawHandle( hx, hy, hr );
+                  drawHandle();
 
                   node.trigger( 'cyedgehandles.showhandle' );
                 }, 16 );
@@ -1489,17 +1242,17 @@ SOFTWARE.
   };
 
   if( typeof module !== 'undefined' && module.exports ) { // expose as a commonjs module
-    module.exports = register;
-  }
-
-  if( typeof define !== 'undefined' && define.amd ) { // expose as an amd/requirejs module
+    module.exports = function( $$ ){
+      register( $$, require('lodash.debounce'), require('lodash.throttle') );
+    }
+  } else if( typeof define !== 'undefined' && define.amd ) { // expose as an amd/requirejs module
     define( 'cytoscape-edgehandles', function() {
       return register;
     } );
   }
 
-  if( $$ ) { // expose to global cytoscape (i.e. window.cytoscape)
-    register( $$ );
+  if( $$ && typeof _ !== 'undefined' ) { // expose to global cytoscape (i.e. window.cytoscape)
+    register( $$, _.debounce.bind( _ ), _.throttle.bind( _ ) );
   }
 
 } )( typeof cytoscape !== 'undefined' ? cytoscape : null );

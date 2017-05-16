@@ -1,4 +1,4 @@
-<!DOCTYPE>
+<!DOCTYPE html>
 
 <html>
 
@@ -6,6 +6,7 @@
 		<title>cytoscape-edgehandles.js demo</title>
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+		<script src="https://cdn.jsdelivr.net/lodash/4.17.4/lodash.min.js"></script>
 		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
@@ -125,7 +126,7 @@
 							{ data: { source: 'k', target: 'g' } },
 							{ data: { source: 'g', target: 'j' } }
 						]
-					},
+					}
 				});
 
 				cy.edgehandles({
