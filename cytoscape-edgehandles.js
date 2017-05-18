@@ -195,9 +195,10 @@ SOFTWARE.
       },
       stop: function( sourceNode ) {
         // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
-      },
-      cancel: function( sourceNode, renderedPosition ) {
-        // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released
+      }, 
+      cancel: function( sourceNode, renderedPosition, invalidTarget ) {
+        // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
+        // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
       }
     };
 
@@ -422,6 +423,7 @@ SOFTWARE.
             cy.nodes()
               .removeClass( 'edgehandles-hover' )
               .removeClass( 'edgehandles-source' )
+              .removeClass( 'edgehandles-presumptive-target')
               .removeClass( 'edgehandles-target' );
 
             cy.$( '.edgehandles-ghost' ).remove();
@@ -586,8 +588,9 @@ SOFTWARE.
             }
 
             if( source.size() === 0 || targets.size() === 0 ) {
-              options().cancel(source, {x: mx, y: my});
-              source.trigger( 'cyedgehandles.cancel', {x: mx, y: my});
+              var presumptiveTarget = cy.nodes( '.edgehandles-presumptive-target' );
+              options().cancel(source, {x: mx, y: my}, presumptiveTarget);
+              source.trigger( 'cyedgehandles.cancel', [{x: mx, y: my}, presumptiveTarget]);
               return; // nothing to do :(
             }
 
@@ -595,7 +598,6 @@ SOFTWARE.
             if( !src && !tgt ) {
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
-
                 options().complete( source, targets, added );
                 source.trigger( 'cyedgehandles.complete' );
                 return;
@@ -689,6 +691,9 @@ SOFTWARE.
               var isGhost = node.hasClass( 'edgehandles-ghost-node' );
               var noEdge = options().edgeType( source, node ) == null;
 
+              node.addClass('edgehandles-presumptive-target');
+
+
               if( isGhost || noEdge ) {
                 return;
               }
@@ -719,6 +724,8 @@ SOFTWARE.
               var source = sourceNode;
 
               node.removeClass( 'edgehandles-target' );
+              node.removeClass( 'edgehandles-presumptive-target' );
+
               removePreview( source, target );
             }
           }
