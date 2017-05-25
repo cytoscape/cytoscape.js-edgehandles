@@ -397,6 +397,16 @@ SOFTWARE.
             return !enabled();
           }
 
+          function addClassesToEleJson( json, classes ){
+            if( json.classes ){
+              json.classes += classes;
+            } else {
+              json.classes = classes;
+            }
+
+            return json;
+          }
+
           function clearDraws() {
 
             if( drawsClear ) {
@@ -644,39 +654,59 @@ SOFTWARE.
                     };
                   }
 
-                  var interNode = cy.add( assign( {
-                    group: 'nodes',
-                    position: p
-                  }, options().nodeParams( source, target ) ) ).addClass( classes );
+                  var interNode = cy.add(
+                    addClassesToEleJson( assign(
+                      {
+                        group: 'nodes',
+                        position: p
+                      },
+                      options().nodeParams( source, target )
+                    ), classes )
+                  );
 
-                  var source2inter = cy.add( assign( {
-                    group: 'edges',
-                    data: {
-                      source: source.id(),
-                      target: interNode.id()
-                    }
-                  }, options().edgeParams( source, target, 0 ) ) ).addClass( classes );
+                  var source2inter = cy.add(
+                    addClassesToEleJson( assign(
+                      {
+                        group: 'edges',
+                        data: {
+                          source: source.id(),
+                          target: interNode.id()
+                        }
+                      },
+                      options().edgeParams( source, target, 0 )
+                    ), classes )
+                  );
 
-                  var inter2target = cy.add( assign( {
-                    group: 'edges',
-                    data: {
-                      source: interNode.id(),
-                      target: target.id()
-                    }
-                  }, options().edgeParams( source, target, 1 ) ) ).addClass( classes );
+                  var inter2target = cy.add(
+                    addClassesToEleJson( assign(
+                      {
+                        group: 'edges',
+                        data: {
+                          source: interNode.id(),
+                          target: target.id()
+                        }
+                      },
+                      options().edgeParams( source, target, 1 )
+                    ), classes )
+                  );
 
                   added = added.add( interNode ).add( source2inter ).add( inter2target );
 
                   break;
 
                 case 'flat':
-                  var edge = cy.add( assign( {
-                    group: 'edges',
-                    data: {
-                      source: source.id(),
-                      target: target.id()
-                    }
-                  }, options().edgeParams( source, target, 0 ) ) ).addClass( classes );
+                  var edge = cy.add(
+                    addClassesToEleJson( assign(
+                      {
+                        group: 'edges',
+                        data: {
+                          source: source.id(),
+                          target: target.id()
+                        }
+                      },
+                      options().edgeParams( source, target, 0 )
+                    ), classes )
+                  );
 
                   added = added.add( edge );
 
