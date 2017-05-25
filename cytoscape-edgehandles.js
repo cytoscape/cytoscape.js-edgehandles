@@ -143,6 +143,21 @@ SOFTWARE.
     };
   };
 
+  var assign = false && Object.assign ? Object.assign.bind( Object ) : function( tgt ){
+    for( var i = 1; i < arguments.length; i++ ){
+      var obj = arguments[i];
+      var keys = Object.keys( obj );
+
+      for( var j = 0; j < keys.length; j++ ){
+        var key = keys[j];
+
+        tgt[key] = obj[key];
+      }
+    }
+
+    return tgt;
+  };
+
   // registers the extension on a cytoscape lib ref
   var register = function( $$, debounce, throttle ) {
     if( !$$ || !debounce || !throttle ) {
@@ -195,7 +210,7 @@ SOFTWARE.
       },
       stop: function( sourceNode ) {
         // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
-      }, 
+      },
       cancel: function( sourceNode, renderedPosition, invalidTarget ) {
         // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
         // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
@@ -235,7 +250,7 @@ SOFTWARE.
           if( value === undefined ) {
             if( typeof name == typeof {} ) {
               var newOpts = name;
-              options =Object.assign( {}, defaults, newOpts );
+              options = assign( {}, defaults, newOpts );
               data.options = options;
             } else {
               return options[ name ];
@@ -273,7 +288,7 @@ SOFTWARE.
 
         init: function() {
           var self = this;
-          var opts = Object.assign({}, defaults, params );
+          var opts = assign({}, defaults, params );
           var $container = $( this );
           var canvas = document.createElement('canvas');
           var $canvas = $(canvas);
@@ -629,12 +644,12 @@ SOFTWARE.
                     };
                   }
 
-                  var interNode = cy.add( Object.assign( {
+                  var interNode = cy.add( assign( {
                     group: 'nodes',
                     position: p
                   }, options().nodeParams( source, target ) ) ).addClass( classes );
 
-                  var source2inter = cy.add( Object.assign( {
+                  var source2inter = cy.add( assign( {
                     group: 'edges',
                     data: {
                       source: source.id(),
@@ -642,7 +657,7 @@ SOFTWARE.
                     }
                   }, options().edgeParams( source, target, 0 ) ) ).addClass( classes );
 
-                  var inter2target = cy.add( Object.assign( {
+                  var inter2target = cy.add( assign( {
                     group: 'edges',
                     data: {
                       source: interNode.id(),
@@ -655,7 +670,7 @@ SOFTWARE.
                   break;
 
                 case 'flat':
-                  var edge = cy.add( Object.assign( {
+                  var edge = cy.add( assign( {
                     group: 'edges',
                     data: {
                       source: source.id(),
