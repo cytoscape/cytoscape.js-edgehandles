@@ -65,8 +65,8 @@ var defaults = {
   handleOutlineColor: '#000000', // the colour of the handle outline
   handleOutlineWidth: 0, // the width of the handle outline in pixels
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
-  handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
-  handlePositionAngles: '0,180', // sets the position of the handle in the format of csv of angles (angle: 0,1,...,359,360 where 0 is at right, 180 is at left of node or -1 for middle of the node). You cannot use handlePosition and handlePositionAngles at the same time.
+  handlePosition: 'middle top', // sets the position of the handle in the csv format of "X-AXIS Y-AXIS" such as "left top,middle top" OR 
+                  angle format "0,180" (angle: 0,1,...,359,360 where 0 is at right, 180 is at left of node or -1 for middle of the node).
   handleHighlightColor: '#ff0000', // the colour to highlight handle on hover
   handleHighlightPercentOffset: '1.0', // percent offset respective to handle size
   hoverDelay: 150, // time spend over a target node before it is considered a target selection

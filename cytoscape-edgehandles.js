@@ -177,7 +177,6 @@ SOFTWARE.
       handleOutlineWidth: 0, // the width of the handle outline in pixels
       handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
       handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
-      handlePositionAngles: '0,180', // sets the position of the handle in the format of csv of angles (angle: 0,1,...,359,360 where 0 is at right, 180 is at left of node or -1 for middle of the node)
       handleHighlightColor: '#ff0000', // the colour to highlight handle on hover
       handleHighlightPercentOffset: '1.0', // percent offset respective to handle size
       hoverDelay: 150, // time spend over a target node before it is considered a target selection
@@ -248,12 +247,7 @@ SOFTWARE.
             return;
           }
 
-          var options = data.options;
-          if (name === 'handlePosition') {
-            options.handlePositionAngles = '';
-          } else if (name === 'handlePositionAngles') {
-            options.handlePosition = '';
-          }
+          options.handlePosition = parseHandlePosition(options.handlePosition);
 
           if( value === undefined ) {
             if( typeof name == typeof {} ) {
@@ -305,7 +299,7 @@ SOFTWARE.
           var mdownOnHandle = false;
           var grabbingNode = false;
           var inForceStart = false;
-          var hx, hy, hr;
+          var hr;
           var mx, my;
           var hoverTimeout;
           var drawsClear = true;
@@ -314,18 +308,24 @@ SOFTWARE.
           var sourceNode;
           var drawMode = false;
           var pxRatio;
-          var handleAngles = [];
+          var registeredHandleAngles = [];
           var sourceHandleAngle;
           var hoveredTarget;
           var hoveredTargetHandle = {};
 
-          if (params.handlePosition) {
-            opts.handlePositionAngles = '';
-          } else if (params.handlePositionAngles) {
-            opts.handlePosition = '';
-          } else {
-            opts.handlePositionAngles = '';
-          }
+          const positionXYToAngle = {
+            "right middle": 0,
+            "right top": 45,
+            "middle top": 90,
+            "left top": 135,
+            "left middle": 180,
+            "left bottom": 225,
+            "middle bottom": 270,
+            "right bottom": 315,
+            "middle middle": -1
+          };
+
+          opts.handlePosition = parseHandlePosition(params.handlePosition)
 
           function getDevicePixelRatio(){
             return window.devicePixelRatio || 1;
@@ -395,12 +395,12 @@ SOFTWARE.
           } );
 
           var registerHandler;
-          cy.on('cyedgehandles.registerHandle', registerHandler = function ( event, typeName, angles ) {
-            handleAngles.push({
+          cy.on( 'cyedgehandles.registerHandle', registerHandler = function ( event, typeName, angles ) {
+            registeredHandleAngles.push({
               name: typeName,
-              angles: angles
+              angles: parseHandlePosition( angles )
             });
-          });
+          } );
 
           var ctx = $canvas[ 0 ].getContext( '2d' );
 
@@ -508,15 +508,46 @@ SOFTWARE.
 
           }
 
-          function drawHandle(node) {
-            if (options().handlePosition) {
-              drawHandleForPosition(hx, hy);
-            } else if (node) {
-              drawHandleForAngles(node);
+          function parseHandlePosition( positions ) {
+            return positions.split(',').reduce( function ( prev, item ) {
+              if(isNaN( parseInt(item)) ) {
+                const sanitized = sanitizePositionFormat( item );
+                const angle = positionXYToAngle[sanitized];
+                if(angle !== undefined) {
+                  prev.push( angle );
+                }
+              } else {
+                prev.push( item );
+              }
+
+              return prev;
+            }, [] ).join( ',' );
+          }
+
+          function sanitizePositionFormat( pos ) {
+            const posXY = pos.split( ' ' );
+            if( posXY.length !== 2 ) {
+              return 'middle middle';
+            }
+
+            if( posXY[0] !== 'left' && posXY[0] !== 'right' ) {
+              posXY[0] = 'middle';
+            }
+
+            if( posXY[1] !== 'top' && posXY[1] !== 'bottom' ) {
+              posXY[1] = 'middle';
+            }
+
+            return posXY.join( ' ' );
+          }
+
+          function drawHandle( node ) {
+            if( node ) {
+              drawHandleForAngles( node );
             }
           }
 
-          function drawHandleForPosition(hx, hy) {
+          function drawHandleForPosition( hx, hy ) {
             ctx.fillStyle = options().handleColor;
             ctx.strokeStyle = options().handleOutlineColor;
 
@@ -525,95 +556,96 @@ SOFTWARE.
             ctx.closePath();
             ctx.fill();
 
-            if(options().handleOutlineWidth) {
+            if( options().handleOutlineWidth ) {
               ctx.lineWidth = options().handleLineWidth * cy.zoom();
               ctx.stroke();
             }
 
-            if(options().handleIcon){
+            if( options().handleIcon ){
                var icon = options().handleIcon;
                var width = icon.width*cy.zoom(), height = icon.height*cy.zoom();
-               ctx.drawImage(icon, hx-(width/2), hy-(height/2), width, height);
+               ctx.drawImage( icon, hx-(width/2), hy-(height/2), width, height );
             }
 
             drawsClear = false;
           }
 
-          function drawHandleForAngles(node) {
-            const positions = getHandlePositionsForAngle(node);
+          function drawHandleForAngles( node ) {
+            const positions = getHandlePositionsForAngle( node );
 
-            positions.forEach(function (position) {
+            positions.forEach( function(position) {
               drawHandleForPosition(position.posX, position.posY);
-            });
+            } );
           }
 
-          function getHandlePositionsForAngle(node) {
-            var handles = handleAngles.filter(function (handle) {
+          function getHandlePositionsForAngle( node ) {
+            var handles = registeredHandleAngles.filter( function(handle) {
               return handle.name === node.data().edgeHandleType;
-            });
+            } );
 
+            // If there is no match in registeredHandleAngles, use default in handlePosition
             if (handles.length < 1) {
-              handles = options().handlePositionAngles;
+              handles = options().handlePosition;
             } else {
               handles = handles[0].angles;
             }
             
-            const angles = handles.split(',').reduce(function (prev, strAngle) {
+            const angles = handles.split(',').reduce( function(prev, strAngle) {
               const angle = parseInt(strAngle);
               if (!isNaN(angle)) {
                 prev.push(angle);
               }
 
               return prev;
-            }, []);
+            }, [] );
 
             const nodePos = node.renderedPosition();
             const nodeWidth = node.renderedWidth();
             const nodeHeight = node.renderedHeight();
 
-            return angles.map(function (angle) {
+            return angles.map( function(angle) {
               if (node.style().shape === 'ellipse' || !node.style().shape) {
-                return getHandleCenterForCircle(angle, nodePos, nodeWidth, nodeHeight);
+                return getHandleCenterForCircle( angle, nodePos, nodeWidth, nodeHeight );
               } else {
-                return getHandleCenterForRect(angle, nodePos, nodeWidth, nodeHeight);
+                return getHandleCenterForRect( angle, nodePos, nodeWidth, nodeHeight );
               }
-            })
+            } );
           }
 
-          function getHandleCenterForCircle(angle, pos, width, height) {
+          function getHandleCenterForCircle( angle, pos, width, height ) {
             if (angle < 0) {
               return { angle: angle, posX: pos.x, posY: pos.y };
             }
 
-            const rad = toRadian(angle);
-            const posX = pos.x + (width / 2) * Math.cos(rad);
-            const posY = pos.y - (height / 2) * Math.sin(rad);
+            const rad = toRadian( angle );
+            const posX = pos.x + ( width / 2 ) * Math.cos( rad );
+            const posY = pos.y - ( height / 2 ) * Math.sin( rad );
 
             return { angle: angle, posX: posX, posY: posY };
           }
 
-          function getHandleCenterForRect(angle, pos, width, height) {
+          function getHandleCenterForRect( angle, pos, width, height ) {
             if (angle < 0) {
               return { angle: angle, posX: pos.x, posY: pos.y };
             }
 
             var posX, posY;
-            const rad = toRadian(angle);
+            const rad = toRadian( angle );
 
-            const abssin = Math.abs(Math.sin(rad));
-            const abscos = Math.abs(Math.cos(rad));
-            const fracMax = 1 / Math.max(abssin, abscos);
+            const abssin = Math.abs( Math.sin(rad) );
+            const abscos = Math.abs( Math.cos(rad) );
+            const fracMax = 1 / Math.max( abssin, abscos );
 
             const rectRadiusX = width / 2 * fracMax;
             const rectRadiusY = height / 2 * fracMax;
-            posX = pos.x + rectRadiusX * Math.cos(rad);
-            posY = pos.y - rectRadiusY * Math.sin(rad);
+            posX = pos.x + rectRadiusX * Math.cos( rad );
+            posY = pos.y - rectRadiusY * Math.sin( rad );
             
             return { angle: angle, posX: posX, posY: posY };
           }
 
-          function toRadian (angle) {
-            return angle * (Math.PI / 180);  
+          function toRadian( angle ) {
+            return angle * ( Math.PI / 180 );  
           }
 
           var lineDrawRate = 1000 / 60;
@@ -732,17 +764,17 @@ SOFTWARE.
               return; // nothing to do :(
             }
 
-            const hits = hitTest(targets, { x: mx, y: my });
+            const hit = hitTest(targets, { x: mx, y: my });
 
             // just remove preview class if we already have the edges
             if( !src && !tgt ) {
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
 
-                if (hits.length < 1) {
+                if ( !hit ) {
                   added.remove();
                 } else {
-                  const targetHandleAngle = hits[0];
+                  const targetHandleAngle = hit;
                   options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
                   source.trigger( 'cyedgehandles.complete' );
                 }
@@ -906,52 +938,25 @@ SOFTWARE.
           }
 
           function setHandleDimensions( node ){
-            var p = node.renderedPosition();
-            var h = node.renderedHeight();
-            var w = node.renderedWidth();
-
             hr = options().handleSize / 2 * cy.zoom();
-
-            if (options().handlePositionAngles) {
-              return;
-            }
-
-            // store how much we should move the handle from origin(p.x, p.y)
-            var moveX = 0;
-            var moveY = 0;
-
-            // grab axis's
-            var axisX = options().handlePosition.split(' ')[0].toLowerCase();
-            var axisY = options().handlePosition.split(' ')[1].toLowerCase();
-
-            // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
-            if(axisX == 'left') moveX = -(w / 2);
-            else if(axisX == 'right') moveX = w / 2;
-            if(axisY == 'top') moveY = -(h / 2);
-            else if(axisY == 'bottom') moveY = h / 2;
-
-            // set handle x and y based on adjusted positions
-            hx = p.x + moveX;
-            hy = p.y + moveY;
           }
 
           function hitTest ( node, touchPos ) {
-            if (options().handlePosition) {
-              return [];
-            }
-
             const handlePositions = getHandlePositionsForAngle(node);
             const nodePos = node.renderedPosition();
             const halfHandleSize = (options().handleIcon ? options().handleIcon.width : hr) * cy.zoom() / 2;
 
-            return handlePositions.filter(function (handle) {
+            const hits = handlePositions.filter(function (handle) {
               return Math.abs(handle.posX - touchPos.x) <= halfHandleSize && 
                      Math.abs(handle.posY - touchPos.y) <= halfHandleSize;
             });
+
+            return hits[0];
           }
 
-          function highlightHandle(node, handle) {
-            if(options().handlePositionAngles && options().handleHighlightColor) {
+          function highlightHandle( node, handle ) {
+            // console.log(node, handle);
+            if( options().handleHighlightColor ) {
               const percentOffset = options().handleHighlightPercentOffset || 1.0;
               const hightlightSize = options().handleIcon ? options().handleIcon.width / 2 : hr;
               ctx.beginPath();
@@ -1040,17 +1045,11 @@ SOFTWARE.
                   return; // sorry, no right clicks allowed
                 }
 
-                if (options().handlePosition) {
-                  if( Math.abs( x - hx ) > hrTarget || Math.abs( y - hy ) > hrTarget ) {
-                    return; // only consider this a proper mousedown if on the handle
-                  }
-                } else {
-                  const hits = hitTest(node, { x: x, y: y });
-                  if (hits.length < 1) {
-                    return;
-                  }
-                  sourceHandleAngle = hits[0];
+                const hit = hitTest(node, { x: x, y: y });
+                if ( !hit ) {
+                  return;
                 }
+                sourceHandleAngle = hit;
 
                 if( inForceStart ) {
                   return; // we don't want this going off if we have the forced start to consider
@@ -1167,16 +1166,14 @@ SOFTWARE.
               }
 
               if( hoveredTarget ) {
-                const hits = hitTest( hoveredTarget, node.renderedPosition() );
+                const hit = hitTest( hoveredTarget, node.renderedPosition() );
 
-                if( hits.length === 0 ) {
-                  deHighlightHandle( hoveredTarget );
-                  drawHandle( hoveredTarget );
-                } else if( hits.length > 0 ) {
-                  deHighlightHandle( hoveredTarget );
-                  drawHandle( hoveredTarget );
-                  highlightHandle( hoveredTarget, hits[0] );
-                  hoveredTargetHandle = hits[0];
+                deHighlightHandle( hoveredTarget );
+                drawHandle( hoveredTarget );
+                
+                if( hit ) {
+                  highlightHandle( hoveredTarget, hit );
+                  hoveredTargetHandle = hit;
                 }
               }
 
