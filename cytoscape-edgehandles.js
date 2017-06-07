@@ -247,7 +247,8 @@ SOFTWARE.
             return;
           }
 
-          options.handlePosition = parseHandlePosition(options.handlePosition);
+          var options = data.options;
+          options.handlePosition = parseHandlePosition(data.options.handlePosition);
 
           if( value === undefined ) {
             if( typeof name == typeof {} ) {
@@ -325,7 +326,7 @@ SOFTWARE.
             "middle middle": -1
           };
 
-          opts.handlePosition = parseHandlePosition(params.handlePosition)
+          opts.handlePosition = parseHandlePosition(opts.handlePosition)
 
           function getDevicePixelRatio(){
             return window.devicePixelRatio || 1;
