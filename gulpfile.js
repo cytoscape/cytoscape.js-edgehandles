@@ -9,6 +9,7 @@ var jshStylish = require('jshint-stylish');
 var exec = require('child_process').exec;
 var runSequence = require('run-sequence');
 var prompt = require('gulp-prompt');
+var eslint = require('gulp-eslint');
 var version;
 
 gulp.task('default', [], function( next ){
@@ -77,20 +78,9 @@ gulp.task('npm', shell.task([
 // http://www.jshint.com/docs/options/
 gulp.task('lint', function(){
   return gulp.src( 'cytoscape-*.js' )
-    .pipe( jshint({
-      funcscope: true,
-      laxbreak: true,
-      loopfunc: true,
-      strict: true,
-      unused: 'vars',
-      eqnull: true,
-      sub: true,
-      shadow: true,
-      laxcomma: true
-    }) )
+    .pipe( eslint() )
+    .pipe( eslint.format() )
+    //.pipe( eslint.failAfterError() )
 
-    .pipe( jshint.reporter(jshStylish) )
-
-    //.pipe( jshint.reporter('fail') )
   ;
 });
