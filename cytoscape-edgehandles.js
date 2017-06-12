@@ -1126,6 +1126,10 @@ SOFTWARE.
             } ).on( 'cxttapstart tapstart', 'node', cxtstartHandler = function( e ) {
               var node = this;
 
+              if( disabled() ) {
+                return; // prevent drawing an edge whenever the extension is disabled
+              }
+
               if( node.filter( options().handleNodes ).length === 0 ) {
                 return; // skip if node not allowed
               }
