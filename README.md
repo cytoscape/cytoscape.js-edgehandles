@@ -94,6 +94,13 @@ var defaults = {
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
+  nodeHandlePosition: function( node ) {
+    // for handle positions for a specific node.
+    // set value in handlePosition for default handle positions 
+    // and return a specific positions for node in this function.
+    // return null to use the default value from handlePosition
+    return null;
+  },
   start: function( sourceNode ) {
     // fired when edgehandles interaction starts (drag on handle)
   },

@@ -204,6 +204,13 @@ SOFTWARE.
         // NB: i indicates edge index in case of edgeType: 'node'
         return {};
       },
+      nodeHandlePosition: function( node ) {
+        // for handle positions for a specific node.
+        // set value in handlePosition for default handle positions 
+        // and return a specific positions for node in this function.
+        // return null to use the default value from handlePosition
+        return null;
+      },
       start: function( sourceNode ) {
         // fired when edgehandles interaction starts (drag on handle)
       },
@@ -309,7 +316,6 @@ SOFTWARE.
           var sourceNode;
           var drawMode = false;
           var pxRatio;
-          var registeredHandleAngles = [];
           var sourceHandleAngle;
           var hoveredTarget;
           var hoveredTargetHandle = {};
@@ -393,14 +399,6 @@ SOFTWARE.
             drawMode = false;
 
             cy.autoungrabify( prevUngrabifyState );
-          } );
-
-          var registerHandler;
-          cy.on( 'cyedgehandles.registerHandle', registerHandler = function ( event, typeName, angles ) {
-            registeredHandleAngles.push({
-              name: typeName,
-              angles: parseHandlePosition( angles )
-            });
           } );
 
           var ctx = $canvas[ 0 ].getContext( '2d' );
@@ -580,16 +578,10 @@ SOFTWARE.
           }
 
           function getHandlePositionsForAngle( node ) {
-            var handles = registeredHandleAngles.filter( function(handle) {
-              return handle.name === node.data().edgeHandleType;
-            } );
-
-            // If there is no match in registeredHandleAngles, use default in handlePosition
-            if (handles.length < 1) {
-              handles = options().handlePosition;
-            } else {
-              handles = handles[0].angles;
-            }
+            const strHandles = options().nodeHandlePosition( node );
+            // If there are specific handle positions is set for this node, use that
+            // Otherwise, use default handle positions.
+            const handles = strHandles ? parseHandlePosition( strHandles ) : options().handlePosition;
             
             const angles = handles.split(',').reduce( function(prev, strAngle) {
               const angle = parseInt(strAngle);
@@ -1449,8 +1441,7 @@ SOFTWARE.
                 .off( 'cxtdrag', cxtdragHandler )
                 .off( 'cxtdragover', 'node', cxtdragoverHandler )
                 .off( 'cxtdragout', 'node', cxtdragoutHandler )
-                .off( 'tap', 'node', tapToStartHandler )
-                .off( 'cyedgehandles.registerHandle', registerHandler );
+                .off( 'tap', 'node', tapToStartHandler );
 
               cy.unbind( 'zoom pan', transformHandler );
 
@@ -1472,15 +1463,6 @@ SOFTWARE.
           cy.ready( function( e ) {
             cy.$( '#' + id ).trigger( 'cyedgehandles.forcestart' );
           } );
-        },
-
-        /**
-         * typeName: name to match against node.data().edgeHandleType.
-         * angles: handle positions in csv format of angle.
-         * ex) cy.edgehandles('registerHandle', 'left-to-right', '0,90,180');
-         */
-        registerHandle: function ( typeName, angles ) {
-          cy.trigger( 'cyedgehandles.registerHandle', [ typeName, angles ]);
         }
       };
 

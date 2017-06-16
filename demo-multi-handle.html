@@ -89,9 +89,9 @@
 					elements: {
 						nodes: [
 							{ data: { id: 'j', name: 'Jerry' } },
-							{ data: { id: 'e', name: 'Elaine', edgeHandleType: 'twoleft-tworight' } },
-							{ data: { id: 'k', name: 'Kramer', edgeHandleType: 'twoleft-right' } },
-							{ data: { id: 'g', name: 'George', edgeHandleType: 'left' } }
+							{ data: { id: 'e', name: 'Elaine' } },
+							{ data: { id: 'k', name: 'Kramer' } },
+							{ data: { id: 'g', name: 'George' } }
 						],
 						edges: [
 							{ data: { source: 'j', target: 'e' } },
@@ -108,13 +108,27 @@
 				});
 
 				cy.edgehandles({
-			   toggleOffOnLeave: true,
-			   handleNodes: "node",
-			   handleSize: 10,
-			   handleColor: '#0000ff',
-			   handlePosition: '0,180',
-			   handleHighlightPercentOffset: 1.2,
-			   edgeType: function(){ return 'flat'; }
+			    toggleOffOnLeave: true,
+			    handleNodes: "node",
+			    handleSize: 10,
+			    handleColor: '#0000ff',
+			    handlePosition: '0,180',
+			    handleHighlightPercentOffset: 1.2,
+			    edgeType: function(){ return 'flat'; },
+			    nodeHandlePosition: function(node) {
+			    	var data = node.data();
+
+			    	switch (data.id) {
+							case 'k':
+								return '0,150,210';
+
+							case 'g':
+								return '30,150,210,330';
+
+							default:
+								return null;			    		
+			    	}
+			   }
 			 });
 
 				document.querySelector('#draw-on').addEventListener('click', function(){
@@ -124,10 +138,6 @@
 				document.querySelector('#draw-off').addEventListener('click', function(){
 					cy.edgehandles('drawoff');
 				});
-
-				cy.edgehandles('registerHandle', 'left', '180');
-				cy.edgehandles('registerHandle', 'twoleft-right', '150,210,0');
-				cy.edgehandles('registerHandle', 'twoleft-tworight', '30,150,210,330');
 			});
 		</script>
 	</head>
