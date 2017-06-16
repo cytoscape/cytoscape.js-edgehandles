@@ -866,7 +866,7 @@ SOFTWARE.
             }
 
             if( !preview ) {
-              const targetHandleAngle = hits[0];
+              const targetHandleAngle = hit;
               options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
               source.trigger( 'cyedgehandles.complete' );
             }
