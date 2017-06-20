@@ -1029,8 +1029,9 @@ SOFTWARE.
                   mdownOnHandle = true; // enable the regular logic for handling going over target nodes
 
                   var moveHandler = function( me ) {
-                    var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - $container.offset().left;
-                    var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - $container.offset().top;
+                    var offset = $container.offset();
+                    var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - offset.left;
+                    var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - offset.top;
 
                     mx = x;
                     my = y;
