@@ -143,7 +143,7 @@ SOFTWARE.
     };
   };
 
-  var assign = false && Object.assign ? Object.assign.bind( Object ) : function( tgt ){
+  var assign = function( tgt ){
     for( var i = 1; i < arguments.length; i++ ){
       var obj = arguments[i];
       var keys = Object.keys( obj );
