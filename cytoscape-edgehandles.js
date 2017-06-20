@@ -1060,7 +1060,7 @@ SOFTWARE.
                     options().stop( node );
                     node.trigger( 'cyedgehandles.stop' );
 
-                    cy.off( 'tap', 'node', tapHandler );
+                    cy.off( 'tap', tapHandler );
                     node.off( 'remove', removeBeforeHandler );
                     resetToDefaultState();
                   } );
@@ -1078,21 +1078,10 @@ SOFTWARE.
               node.one( 'remove', function() {
                 $container[ 0 ].removeEventListener( 'mousedown', downHandler, true );
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
-                cy.off( 'tap', 'node', tapHandler );
+                cy.off( 'tap', tapHandler );
               } );
 
-              // case: tap a target node
-              var tapHandler;
-              cy.one( 'tap', 'node', tapHandler = function() {
-                var target = this;
-
-                var isLoop = source.id() === target.id();
-                var loopAllowed = options().loopAllowed( target );
-
-                if( !isLoop || ( isLoop && loopAllowed ) ) {
-                  makeEdges( false, source, target );
-                }
-
+              function stopForceMode( node ){
                 inForceStart = false; // now we're done so reset the flag
 
                 options().stop( node );
@@ -1102,7 +1091,29 @@ SOFTWARE.
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
                 $container[ 0 ].removeEventListener( 'mousemove', moveHandler, true );
                 node.off( 'remove', removeBeforeHandler );
+                
                 resetToDefaultState();
+              }
+
+              // case: tap a target node
+              var tapHandler;
+              cy.one( 'tap', tapHandler = function(e) {
+                var target = e.target || e.cyTarget; // 3.x | 2.x
+
+                if( target === cy ){ // tap bg cancels force gesture
+                  stopForceMode( node );
+
+                  return;
+                } else if( target.isNode() ){ // tap node completes force gesture
+                  var isLoop = source.id() === target.id();
+                  var loopAllowed = options().loopAllowed( target );
+
+                  if( !isLoop || ( isLoop && loopAllowed ) ) {
+                    makeEdges( false, source, target );
+                  }
+
+                  stopForceMode( node );
+                }
               } );
 
               // in the forced start, we use the above tap case but we can still preview on desktop mousemove
