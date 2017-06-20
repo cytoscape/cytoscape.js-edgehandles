@@ -450,7 +450,7 @@ SOFTWARE.
               .removeClass( 'edgehandles-presumptive-target')
               .removeClass( 'edgehandles-target' );
 
-            cy.$( '.edgehandles-ghost' ).remove();
+            cy.$( '.edgehandles-ghost, .edgehandles-preview' ).remove();
             //}, 1);
 
 
@@ -1091,7 +1091,7 @@ SOFTWARE.
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
                 $container[ 0 ].removeEventListener( 'mousemove', moveHandler, true );
                 node.off( 'remove', removeBeforeHandler );
-                
+
                 resetToDefaultState();
               }
 
