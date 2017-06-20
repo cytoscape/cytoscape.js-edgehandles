@@ -931,7 +931,7 @@ SOFTWARE.
               lastMdownHandler = mdownHandler;
 
 
-            } ).on( 'mouseover tapdragover', 'node', hoverHandler = function() {
+            } ).on( 'mouseover tapdragover', 'node', hoverHandler = function(e) {
               var node = this;
 
               // console.log('mouseover hoverHandler')
@@ -940,7 +940,8 @@ SOFTWARE.
                 return; // ignore preview nodes
               }
 
-              if( mdownOnHandle ) { // only handle mdown case
+              // n.b. only desktop mouse events can show hover preview in force mode
+              if( mdownOnHandle || (inForceStart && e.type === 'mouseover') ) {
 
                 // console.log( 'mouseover hoverHandler %s $o', node.id(), node );
 
@@ -949,14 +950,15 @@ SOFTWARE.
                 return false;
               }
 
-            } ).on( 'mouseout tapdragout', 'node', leaveHandler = function() {
+            } ).on( 'mouseout tapdragout', 'node', leaveHandler = function(e) {
               var node = this;
 
               if( drawMode ) {
                 return;
               }
 
-              if( mdownOnHandle ) {
+              // n.b. only desktop mouse events can show hover preview in force mode
+              if( mdownOnHandle || (inForceStart && e.type === 'mouseout') ) {
                 hoverOut( node );
               }
 
