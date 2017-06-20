@@ -1013,6 +1013,21 @@ SOFTWARE.
 
               node.trigger( 'cyedgehandles.showhandle' );
 
+              var moveHandler = function( me ) {
+                var offset = $container.offset();
+                var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - offset.left;
+                var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - offset.top;
+
+                mx = x;
+                my = y;
+
+                if( options().handleLineType !== 'ghost' ) {
+                  clearDraws();
+                  drawHandle();
+                }
+                drawLine( x, y );
+              };
+
               // case: down and drag as normal
               var downHandler = function( e ) {
 
@@ -1027,21 +1042,6 @@ SOFTWARE.
                 if( onNode ) {
                   disableGestures();
                   mdownOnHandle = true; // enable the regular logic for handling going over target nodes
-
-                  var moveHandler = function( me ) {
-                    var offset = $container.offset();
-                    var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - offset.left;
-                    var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - offset.top;
-
-                    mx = x;
-                    my = y;
-
-                    if( options().handleLineType !== 'ghost' ) {
-                      clearDraws();
-                      drawHandle();
-                    }
-                    drawLine( x, y );
-                  };
 
                   $container[ 0 ].addEventListener( 'mousemove', moveHandler, true );
                   $container[ 0 ].addEventListener( 'touchmove', moveHandler, true );
@@ -1089,9 +1089,6 @@ SOFTWARE.
 
                 if( !isLoop || ( isLoop && loopAllowed ) ) {
                   makeEdges( false, source, target );
-
-                  //options().complete( node );
-                  //node.trigger('cyedgehandles.complete');
                 }
 
                 inForceStart = false; // now we're done so reset the flag
@@ -1101,9 +1098,15 @@ SOFTWARE.
 
                 $container[ 0 ].removeEventListener( 'mousedown', downHandler, true );
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
+                $container[ 0 ].removeEventListener( 'mousemove', moveHandler, true );
                 node.off( 'remove', removeBeforeHandler );
                 resetToDefaultState();
               } );
+
+              // in the forced start, we use the above tap case but we can still preview on desktop mousemove
+              if( inForceStart ){
+                $container[ 0 ].addEventListener( 'mousemove', moveHandler, true );
+              }
 
 
             } ).on( 'remove', 'node', removeHandler = function() {
