@@ -207,6 +207,10 @@
 				cy.edgehandles('drawoff');
 			});
 
+			document.querySelector('#start').addEventListener('click', function() {
+				cy.edgehandles('start', cy.$(':selected').id());
+			});
+
 		});
 	</script>
 </head>
@@ -217,6 +221,7 @@
 	<div id="cy"></div>
 
 	<div id="buttons">
+		<button id="start">Start on selected</button>
 		<button id="draw-on">Draw mode on</button>
 		<button id="draw-off">Draw mode off</button>
 	</div>
