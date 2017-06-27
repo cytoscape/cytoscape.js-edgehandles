@@ -1215,8 +1215,6 @@ SOFTWARE.
                 if( sourceNode ) {
                   options().stop( sourceNode );
                   sourceNode.trigger( 'cyedgehandles.stop' );
-
-                  options().complete( sourceNode );
                 }
 
                 resetToDefaultState();
