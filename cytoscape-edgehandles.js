@@ -569,14 +569,14 @@ SOFTWARE.
           }
 
           function drawHandleForAngles( node ) {
-            const positions = getHandlePositionsForAngle( node );
+            const positions = getHandlePositionsForNode( node );
 
             positions.forEach( function(position) {
               drawHandleForPosition(position.posX, position.posY);
             } );
           }
 
-          function getHandlePositionsForAngle( node ) {
+          function getHandlePositionsForNode( node ) {
             const strHandles = options().nodeHandlePosition( node );
             // If there are specific handle positions is set for this node, use that
             // Otherwise, use default handle positions.
@@ -653,13 +653,18 @@ SOFTWARE.
               ctx.lineWidth = options().handleLineWidth;
             }
 
+            const positions = getHandlePositionsForNode(sourceNode);
+            const pos = positions.filter(function( position ) {
+              return position.angle === sourceHandleAngle.angle;
+            })[0];
+            const hx = pos.x;
+            const hy = pos.y;
+
             // draw line based on type
             switch( options().handleLineType ) {
               case 'ghost':
 
                 if( !ghostNode || ghostNode.removed() ) {
-
-                  drawHandle();
 
                   ghostNode = cy.add( {
                     group: 'nodes',
@@ -718,7 +723,8 @@ SOFTWARE.
                 }
 
                 ctx.beginPath();
-                ctx.moveTo( hx, hy );
+
+                ctx.moveTo( pos.x, pos.y );
 
                 for( var i = 0; i < linePoints.length; i++ ) {
                   var pt = linePoints[ i ];
@@ -934,7 +940,7 @@ SOFTWARE.
           }
 
           function hitTest ( node, touchPos ) {
-            const handlePositions = getHandlePositionsForAngle(node);
+            const handlePositions = getHandlePositionsForNode(node);
             const nodePos = node.renderedPosition();
             const halfHandleSize = (options().handleIcon ? options().handleIcon.width : hr) * cy.zoom() / 2;
 
@@ -1096,8 +1102,17 @@ SOFTWARE.
                 my = y;
 
                 if( options().handleLineType !== 'ghost' ) {
-                  clearDraws();
-                  drawHandle();
+                  if( hoveredTarget ) {
+                    const hit = hitTest( hoveredTarget, {x: mx, y: my} );
+
+                    deHighlightHandle( hoveredTarget );
+                    drawHandle( hoveredTarget );
+                    
+                    if( hit ) {
+                      highlightHandle( hoveredTarget, hit );
+                      hoveredTargetHandle = hit;
+                    }
+                  }
                 }
                 drawLine( x, y );
 
@@ -1204,7 +1219,7 @@ SOFTWARE.
 
               setHandleDimensions( node );
 
-              drawHandle();
+              drawHandle( node );
 
               node.trigger( 'cyedgehandles.showhandle' );
 
@@ -1354,7 +1369,7 @@ SOFTWARE.
 
                 setHandleDimensions( node );
 
-                drawHandle();
+                drawHandle( node );
 
                 node.trigger( 'cyedgehandles.showhandle' );
 
@@ -1432,7 +1447,6 @@ SOFTWARE.
               //     node.trigger( 'cyedgehandles.showhandle' );
               //   }, 16 );
               // }
-
             } );
 
 
