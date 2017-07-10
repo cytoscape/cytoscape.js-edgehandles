@@ -177,6 +177,8 @@ SOFTWARE.
       handleOutlineWidth: 0, // the width of the handle outline in pixels
       handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
       handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+      handleHighlightColor: '#ff0000', // the colour to highlight handle on hover
+      handleHighlightPercentOffset: '1.0', // percent offset respective to handle size
       hoverDelay: 150, // time spend over a target node before it is considered a target selection
       cxt: false, // whether cxt events trigger edgehandles (useful on touch)
       enabled: true, // whether to start the plugin in the enabled state
@@ -202,10 +204,17 @@ SOFTWARE.
         // NB: i indicates edge index in case of edgeType: 'node'
         return {};
       },
+      nodeHandlePosition: function( node ) {
+        // for handle positions for a specific node.
+        // set value in handlePosition for default handle positions 
+        // and return a specific positions for node in this function.
+        // return null to use the default value from handlePosition
+        return null;
+      },
       start: function( sourceNode ) {
         // fired when edgehandles interaction starts (drag on handle)
       },
-      complete: function( sourceNode, targetNodes, addedEntities ) {
+      complete: function( sourceNode, targetNodes, addedEntities, sourceHandleAngle, targetHandleAngle ) {
         // fired when edgehandles is done and entities are added
       },
       stop: function( sourceNode ) {
@@ -246,6 +255,7 @@ SOFTWARE.
           }
 
           var options = data.options;
+          options.handlePosition = parseHandlePosition(data.options.handlePosition);
 
           if( value === undefined ) {
             if( typeof name == typeof {} ) {
@@ -297,7 +307,7 @@ SOFTWARE.
           var mdownOnHandle = false;
           var grabbingNode = false;
           var inForceStart = false;
-          var hx, hy, hr;
+          var hr;
           var mx, my;
           var hoverTimeout;
           var drawsClear = true;
@@ -306,6 +316,23 @@ SOFTWARE.
           var sourceNode;
           var drawMode = false;
           var pxRatio;
+          var sourceHandleAngle;
+          var hoveredTarget;
+          var hoveredTargetHandle = {};
+
+          const positionXYToAngle = {
+            "right middle": 0,
+            "right top": 45,
+            "middle top": 90,
+            "left top": 135,
+            "left middle": 180,
+            "left bottom": 225,
+            "middle bottom": 270,
+            "right bottom": 315,
+            "middle middle": -1
+          };
+
+          opts.handlePosition = parseHandlePosition(opts.handlePosition)
 
           function getDevicePixelRatio(){
             return window.devicePixelRatio || 1;
@@ -480,7 +507,46 @@ SOFTWARE.
 
           }
 
-          function drawHandle() {
+          function parseHandlePosition( positions ) {
+            return positions.split(',').reduce( function ( prev, item ) {
+              if(isNaN( parseInt(item)) ) {
+                const sanitized = sanitizePositionFormat( item );
+                const angle = positionXYToAngle[sanitized];
+                if(angle !== undefined) {
+                  prev.push( angle );
+                }
+              } else {
+                prev.push( item );
+              }
+
+              return prev;
+            }, [] ).join( ',' );
+          }
+
+          function sanitizePositionFormat( pos ) {
+            const posXY = pos.split( ' ' );
+            if( posXY.length !== 2 ) {
+              return 'middle middle';
+            }
+
+            if( posXY[0] !== 'left' && posXY[0] !== 'right' ) {
+              posXY[0] = 'middle';
+            }
+
+            if( posXY[1] !== 'top' && posXY[1] !== 'bottom' ) {
+              posXY[1] = 'middle';
+            }
+
+            return posXY.join( ' ' );
+          }
+
+          function drawHandle( node ) {
+            if( node ) {
+              drawHandleForAngles( node );
+            }
+          }
+
+          function drawHandleForPosition( hx, hy ) {
             ctx.fillStyle = options().handleColor;
             ctx.strokeStyle = options().handleOutlineColor;
 
@@ -489,18 +555,90 @@ SOFTWARE.
             ctx.closePath();
             ctx.fill();
 
-            if(options().handleOutlineWidth) {
+            if( options().handleOutlineWidth ) {
               ctx.lineWidth = options().handleLineWidth * cy.zoom();
               ctx.stroke();
             }
 
-            if(options().handleIcon){
+            if( options().handleIcon ){
                var icon = options().handleIcon;
                var width = icon.width*cy.zoom(), height = icon.height*cy.zoom();
-               ctx.drawImage(icon, hx-(width/2), hy-(height/2), width, height);
+               ctx.drawImage( icon, hx-(width/2), hy-(height/2), width, height );
             }
 
             drawsClear = false;
+          }
+
+          function drawHandleForAngles( node ) {
+            const positions = getHandlePositionsForAngle( node );
+
+            positions.forEach( function(position) {
+              drawHandleForPosition(position.posX, position.posY);
+            } );
+          }
+
+          function getHandlePositionsForAngle( node ) {
+            const strHandles = options().nodeHandlePosition( node );
+            // If there are specific handle positions is set for this node, use that
+            // Otherwise, use default handle positions.
+            const handles = strHandles ? parseHandlePosition( strHandles ) : options().handlePosition;
+            
+            const angles = handles.split(',').reduce( function(prev, strAngle) {
+              const angle = parseInt(strAngle);
+              if (!isNaN(angle)) {
+                prev.push(angle);
+              }
+
+              return prev;
+            }, [] );
+
+            const nodePos = node.renderedPosition();
+            const nodeWidth = node.renderedWidth();
+            const nodeHeight = node.renderedHeight();
+
+            return angles.map( function(angle) {
+              if (node.style().shape === 'ellipse' || !node.style().shape) {
+                return getHandleCenterForCircle( angle, nodePos, nodeWidth, nodeHeight );
+              } else {
+                return getHandleCenterForRect( angle, nodePos, nodeWidth, nodeHeight );
+              }
+            } );
+          }
+
+          function getHandleCenterForCircle( angle, pos, width, height ) {
+            if (angle < 0) {
+              return { angle: angle, posX: pos.x, posY: pos.y };
+            }
+
+            const rad = toRadian( angle );
+            const posX = pos.x + ( width / 2 ) * Math.cos( rad );
+            const posY = pos.y - ( height / 2 ) * Math.sin( rad );
+
+            return { angle: angle, posX: posX, posY: posY };
+          }
+
+          function getHandleCenterForRect( angle, pos, width, height ) {
+            if (angle < 0) {
+              return { angle: angle, posX: pos.x, posY: pos.y };
+            }
+
+            var posX, posY;
+            const rad = toRadian( angle );
+
+            const abssin = Math.abs( Math.sin(rad) );
+            const abscos = Math.abs( Math.cos(rad) );
+            const fracMax = 1 / Math.max( abssin, abscos );
+
+            const rectRadiusX = width / 2 * fracMax;
+            const rectRadiusY = height / 2 * fracMax;
+            posX = pos.x + rectRadiusX * Math.cos( rad );
+            posY = pos.y - rectRadiusY * Math.sin( rad );
+            
+            return { angle: angle, posX: posX, posY: posY };
+          }
+
+          function toRadian( angle ) {
+            return angle * ( Math.PI / 180 );  
           }
 
           var lineDrawRate = 1000 / 60;
@@ -619,12 +757,21 @@ SOFTWARE.
               return; // nothing to do :(
             }
 
+            const hit = hitTest(targets, { x: mx, y: my });
+
             // just remove preview class if we already have the edges
             if( !src && !tgt ) {
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
-                options().complete( source, targets, added );
-                source.trigger( 'cyedgehandles.complete' );
+
+                if ( !hit ) {
+                  added.remove();
+                } else {
+                  const targetHandleAngle = hit;
+                  options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
+                  source.trigger( 'cyedgehandles.complete' );
+                }
+
                 return;
               } else {
                 // remove old previews
@@ -719,14 +866,16 @@ SOFTWARE.
             }
 
             if( !preview ) {
-              options().complete( source, targets, added );
+              const targetHandleAngle = hit;
+              options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
               source.trigger( 'cyedgehandles.complete' );
             }
           }
 
           function hoverOver( node ) {
             var target = node;
-
+            hoveredTarget = target;
+            
             clearTimeout( hoverTimeout );
             hoverTimeout = setTimeout( function() {
               var source = cy.nodes( '.edgehandles-source' );
@@ -773,32 +922,56 @@ SOFTWARE.
 
               removePreview( source, target );
             }
+
+            if (target.data().id !== sourceNode.data().id) {
+              deHighlightHandle( target );
+              hoveredTarget = null;
+              hoveredTargetHandle = {};
+            }
           }
 
           function setHandleDimensions( node ){
-            var p = node.renderedPosition();
-            var h = node.renderedHeight();
-            var w = node.renderedWidth();
-
             hr = options().handleSize / 2 * cy.zoom();
+          }
 
-            // store how much we should move the handle from origin(p.x, p.y)
-            var moveX = 0;
-            var moveY = 0;
+          function hitTest ( node, touchPos ) {
+            const handlePositions = getHandlePositionsForAngle(node);
+            const nodePos = node.renderedPosition();
+            const halfHandleSize = (options().handleIcon ? options().handleIcon.width : hr) * cy.zoom() / 2;
 
-            // grab axis's
-            var axisX = options().handlePosition.split(' ')[0].toLowerCase();
-            var axisY = options().handlePosition.split(' ')[1].toLowerCase();
+            const hits = handlePositions.filter(function (handle) {
+              return Math.abs(handle.posX - touchPos.x) <= halfHandleSize && 
+                     Math.abs(handle.posY - touchPos.y) <= halfHandleSize;
+            });
 
-            // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
-            if(axisX == 'left') moveX = -(w / 2);
-            else if(axisX == 'right') moveX = w / 2;
-            if(axisY == 'top') moveY = -(h / 2);
-            else if(axisY == 'bottom') moveY = h / 2;
+            return hits[0];
+          }
 
-            // set handle x and y based on adjusted positions
-            hx = p.x + moveX;
-            hy = p.y + moveY;
+          function highlightHandle( node, handle ) {
+            // console.log(node, handle);
+            if( options().handleHighlightColor ) {
+              const percentOffset = options().handleHighlightPercentOffset || 1.0;
+              const hightlightSize = options().handleIcon ? options().handleIcon.width / 2 : hr;
+              ctx.beginPath();
+              ctx.arc( handle.posX, handle.posY, hightlightSize * percentOffset, 0, 2 * Math.PI );
+              ctx.closePath();
+              
+              ctx.strokeStyle = options().handleHighlightColor;
+              ctx.lineWidth = cy.zoom();
+              ctx.stroke();
+
+              drawsClear = false;
+            }
+          }
+
+          function deHighlightHandle(node) {
+            const pos = node.renderedPosition();
+            const x = pos.x;
+            const y = pos.y;
+            const width = node.renderedOuterWidth();
+            const height = node.renderedOuterHeight();
+
+            ctx.clearRect(x - width, y - height, width * 2, height * 2);
           }
 
           cy.ready( function( e ) {
@@ -846,7 +1019,7 @@ SOFTWARE.
               setHandleDimensions( node );
 
               // add new handle
-              drawHandle();
+              drawHandle( node );
 
               node.trigger( 'cyedgehandles.showhandle' );
 
@@ -865,9 +1038,11 @@ SOFTWARE.
                   return; // sorry, no right clicks allowed
                 }
 
-                if( Math.abs( x - hx ) > hrTarget || Math.abs( y - hy ) > hrTarget ) {
-                  return; // only consider this a proper mousedown if on the handle
+                const hit = hitTest(node, { x: x, y: y });
+                if ( !hit ) {
+                  return;
                 }
+                sourceHandleAngle = hit;
 
                 if( inForceStart ) {
                   return; // we don't want this going off if we have the forced start to consider
@@ -881,6 +1056,10 @@ SOFTWARE.
                 e.stopPropagation();
 
                 sourceNode = node;
+
+                hoveredTarget = null;
+                hoveredTargetHandle = {};
+                highlightHandle(sourceNode, sourceHandleAngle);
 
                 node.addClass( 'edgehandles-source' );
                 node.trigger( 'cyedgehandles.start' );
@@ -968,7 +1147,7 @@ SOFTWARE.
                 hoverOut( node );
               }
 
-            } ).on( 'drag position', 'node', dragNodeHandler = function() {
+            } ).on( 'drag position', 'node', dragNodeHandler = function(e) {
               if( drawMode ) {
                 return;
               }
@@ -979,10 +1158,24 @@ SOFTWARE.
                 setTimeout( clearDraws, 50 );
               }
 
+              if( hoveredTarget ) {
+                const hit = hitTest( hoveredTarget, node.renderedPosition() );
+
+                deHighlightHandle( hoveredTarget );
+                drawHandle( hoveredTarget );
+                
+                if( hit ) {
+                  highlightHandle( hoveredTarget, hit );
+                  hoveredTargetHandle = hit;
+                }
+              }
+
             } ).on( 'grab', 'node', grabHandler = function() {
               //grabbingNode = true;
 
               //setTimeout(function(){
+              hoveredTarget = null;
+              hoveredTargetHandle = {};
               clearDraws();
               //}, 5);
 
