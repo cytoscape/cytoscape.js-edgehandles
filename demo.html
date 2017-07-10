@@ -2,162 +2,230 @@
 
 <html>
 
-	<head>
-		<title>cytoscape-edgehandles.js demo</title>
+<head>
+	<title>cytoscape-edgehandles.js demo</title>
 
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
-		<script src="https://unpkg.com/lodash@4.17.4"></script>
-		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+	<script src="https://unpkg.com/lodash@4.17.4"></script>
+	<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
 
-		<!-- for testing with local version of cytoscape.js -->
-		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+	<!-- for testing with local version of cytoscape.js -->
+	<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
 
-		<script src="cytoscape-edgehandles.js"></script>
+	<script src="cytoscape-edgehandles.js"></script>
 
-		<style>
-			body {
-				font-family: helvetica;
-				font-size: 14px;
-			}
+	<style>
+		body {
+			font-family: helvetica;
+			font-size: 14px;
+		}
 
-			#cy {
-				width: 100%;
-				height: 100%;
-				position: absolute;
-				left: 0;
-				top: 0;
-				z-index: 999;
-			}
+		#cy {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			left: 0;
+			top: 0;
+			z-index: 999;
+		}
 
-			h1 {
-				opacity: 0.5;
-				font-size: 1em;
-			}
+		h1 {
+			opacity: 0.5;
+			font-size: 1em;
+		}
 
-			#buttons {
-				position: absolute;
-				right: 0;
-				bottom: 0;
-				z-index: 99999;
-			}
-		</style>
+		#buttons {
+			position: absolute;
+			right: 0;
+			bottom: 0;
+			z-index: 99999;
+		}
+	</style>
 
-		<script>
-			window.addEventListener("load", function(){
+	<script>
+		window.addEventListener("load", function() {
 
-				var cy = window.cy = cytoscape({
-					container: document.getElementById('cy'),
+			var cy = window.cy = cytoscape({
+				container: document.getElementById('cy'),
 
-					ready: function(){
+				ready: function() {},
+
+				layout: {
+					name: 'grid',
+					rows: 2,
+					cols: 2
+				},
+
+				style: [{
+						selector: 'node',
+						css: {
+							'content': 'data(name)'
+						}
 					},
 
-					layout: {
-						name: 'grid',
-						rows: 2,
-						cols: 2
+					{
+						selector: 'edge',
+						css: {
+							'curve-style': 'bezier',
+							'target-arrow-shape': 'triangle'
+						}
 					},
 
-					style: [
-						{
-							selector: 'node',
-							css: {
-								'content': 'data(name)'
+					// some style for the ext
+
+					{
+						selector: '.edgehandles-hover',
+						css: {
+							'background-color': 'red'
+						}
+					},
+
+					{
+						selector: '.edgehandles-source',
+						css: {
+							'border-width': 2,
+							'border-color': 'red'
+						}
+					},
+
+					{
+						selector: '.edgehandles-target',
+						css: {
+							'border-width': 2,
+							'border-color': 'red'
+						}
+					},
+
+					{
+						selector: '.edgehandles-preview, .edgehandles-ghost-edge',
+						css: {
+							'line-color': 'red',
+							'target-arrow-color': 'red',
+							'source-arrow-color': 'red'
+						}
+					}
+				],
+
+				elements: {
+					nodes: [{
+							data: {
+								id: 'j',
+								name: 'Jerry'
 							}
 						},
-
 						{
-							selector: 'edge',
-							css: {
-								'curve-style': 'bezier',
-								'target-arrow-shape': 'triangle'
+							data: {
+								id: 'e',
+								name: 'Elaine'
 							}
 						},
-
-						// some style for the ext
-
 						{
-							selector: '.edgehandles-hover',
-							css: {
-								'background-color': 'red'
+							data: {
+								id: 'k',
+								name: 'Kramer'
 							}
 						},
-
 						{
-							selector: '.edgehandles-source',
-							css: {
-								'border-width': 2,
-								'border-color': 'red'
-							}
-						},
-
-						{
-							selector: '.edgehandles-target',
-							css: {
-								'border-width': 2,
-								'border-color': 'red'
-							}
-						},
-
-						{
-							selector: '.edgehandles-preview, .edgehandles-ghost-edge',
-							css: {
-								'line-color': 'red',
-								'target-arrow-color': 'red',
-								'source-arrow-color': 'red'
+							data: {
+								id: 'g',
+								name: 'George'
 							}
 						}
 					],
-
-					elements: {
-						nodes: [
-							{ data: { id: 'j', name: 'Jerry' } },
-							{ data: { id: 'e', name: 'Elaine' } },
-							{ data: { id: 'k', name: 'Kramer' } },
-							{ data: { id: 'g', name: 'George' } }
-						],
-						edges: [
-							{ data: { source: 'j', target: 'e' } },
-							{ data: { source: 'j', target: 'k' } },
-							{ data: { source: 'j', target: 'g' } },
-							{ data: { source: 'e', target: 'j' } },
-							{ data: { source: 'e', target: 'k' } },
-							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'g', target: 'j' } }
-						]
-					}
-				});
-
-				cy.edgehandles({
-			   toggleOffOnLeave: true,
-			   handleNodes: "node",
-			   handleSize: 10,
-			   edgeType: function(){ return 'flat'; }
-			 });
-
-				document.querySelector('#draw-on').addEventListener('click', function(){
-					cy.edgehandles('drawon');
-				});
-
-				document.querySelector('#draw-off').addEventListener('click', function(){
-					cy.edgehandles('drawoff');
-				});
-
+					edges: [{
+							data: {
+								source: 'j',
+								target: 'e'
+							}
+						},
+						{
+							data: {
+								source: 'j',
+								target: 'k'
+							}
+						},
+						{
+							data: {
+								source: 'j',
+								target: 'g'
+							}
+						},
+						{
+							data: {
+								source: 'e',
+								target: 'j'
+							}
+						},
+						{
+							data: {
+								source: 'e',
+								target: 'k'
+							}
+						},
+						{
+							data: {
+								source: 'k',
+								target: 'j'
+							}
+						},
+						{
+							data: {
+								source: 'k',
+								target: 'e'
+							}
+						},
+						{
+							data: {
+								source: 'k',
+								target: 'g'
+							}
+						},
+						{
+							data: {
+								source: 'g',
+								target: 'j'
+							}
+						}
+					]
+				}
 			});
-		</script>
-	</head>
 
-	<body>
-		<h1>cytoscape-edgehandles demo</h1>
+			cy.edgehandles({
+				toggleOffOnLeave: true,
+				handleNodes: "node",
+				handleSize: 10,
+				edgeType: function() {
+					return 'flat';
+				}
+			});
 
-		<div id="cy"></div>
+			document.querySelector('#draw-on').addEventListener('click', function() {
+				cy.edgehandles('drawon');
+			});
 
-		<div id="buttons">
-			<button id="draw-on">Draw mode on</button>
-			<button id="draw-off">Draw mode off</button>
-		</div>
+			document.querySelector('#draw-off').addEventListener('click', function() {
+				cy.edgehandles('drawoff');
+			});
 
-	</body>
+			document.querySelector('#start').addEventListener('click', function() {
+				cy.edgehandles('start', cy.$(':selected').id());
+			});
+
+		});
+	</script>
+</head>
+
+<body>
+	<h1>cytoscape-edgehandles demo</h1>
+
+	<div id="cy"></div>
+
+	<div id="buttons">
+		<button id="start">Start on selected</button>
+		<button id="draw-on">Draw mode on</button>
+		<button id="draw-off">Draw mode off</button>
+	</div>
+
+</body>
 
 </html>

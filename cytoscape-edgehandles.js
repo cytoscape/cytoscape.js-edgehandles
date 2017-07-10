@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-;( function($$) {
+( function($$) {
   'use strict';
 
   var whitespace = /\s+/;
@@ -164,6 +164,7 @@ SOFTWARE.
       return;
     } // can't register if cytoscape or dependencies unspecified
 
+    /* eslint-disable no-unused-vars */
     var defaults = {
       preview: true, // whether to show added edges preview before releasing selection
       stackOrder: 4, // Controls stack order of edgehandles canvas element by setting it's z-index
@@ -225,6 +226,7 @@ SOFTWARE.
         // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
       }
     };
+    /* eslint-enable */
 
     var edgehandles = function( params ) {
       var cy = this;
@@ -297,13 +299,11 @@ SOFTWARE.
         },
 
         init: function() {
-          var self = this;
           var opts = assign({}, defaults, params );
           var $container = $( this );
           var canvas = document.createElement('canvas');
           var $canvas = $(canvas);
-          var handle;
-          var line, linePoints;
+          var linePoints;
           var mdownOnHandle = false;
           var grabbingNode = false;
           var inForceStart = false;
@@ -312,7 +312,6 @@ SOFTWARE.
           var hoverTimeout;
           var drawsClear = true;
           var ghostNode;
-          var ghostEdge;
           var sourceNode;
           var drawMode = false;
           var pxRatio;
@@ -478,7 +477,7 @@ SOFTWARE.
               .removeClass( 'edgehandles-presumptive-target')
               .removeClass( 'edgehandles-target' );
 
-            cy.$( '.edgehandles-ghost' ).remove();
+            cy.$( '.edgehandles-ghost, .edgehandles-preview' ).remove();
             //}, 1);
 
 
@@ -678,7 +677,7 @@ SOFTWARE.
                     }
                   } );
 
-                  ghostEdge = cy.add( {
+                  cy.add( {
                     group: 'edges',
                     classes: 'edgehandles-ghost edgehandles-ghost-edge',
                     data: {
@@ -974,7 +973,7 @@ SOFTWARE.
             ctx.clearRect(x - width, y - height, width * 2, height * 2);
           }
 
-          cy.ready( function( e ) {
+          cy.ready( function() {
             lastPanningEnabled = cy.panningEnabled();
             lastZoomingEnabled = cy.zoomingEnabled();
             lastBoxSelectionEnabled = cy.boxSelectionEnabled();
@@ -991,7 +990,7 @@ SOFTWARE.
             var lastMdownHandler;
 
             var startHandler, hoverHandler, leaveHandler, grabNodeHandler, freeNodeHandler, dragNodeHandler, forceStartHandler, removeHandler, cxtstartHandler, tapToStartHandler, cxtdragHandler, cxtdragoverHandler, cxtdragoutHandler, cxtendHandler, dragHandler, grabHandler;
-            cy.on( 'mouseover tap', 'node', startHandler = function( e ) {
+            cy.on( 'mouseover tap', 'node', startHandler = function() {
               var node = this;
 
               if( disabled() || drawMode || mdownOnHandle || grabbingNode || this.hasClass( 'edgehandles-preview' ) || inForceStart || this.hasClass( 'edgehandles-ghost-node' ) || node.filter( options().handleNodes ).length === 0 ) {
@@ -1005,11 +1004,6 @@ SOFTWARE.
                 $container[ 0 ].removeEventListener( 'mousedown', lastMdownHandler, true );
                 $container[ 0 ].removeEventListener( 'touchstart', lastMdownHandler, true );
               }
-
-              var source = this;
-              var p = node.renderedPosition();
-              var h = node.renderedOuterHeight();
-              var w = node.renderedOuterWidth();
 
               lastActiveId = node.id();
 
@@ -1064,14 +1058,13 @@ SOFTWARE.
                 node.addClass( 'edgehandles-source' );
                 node.trigger( 'cyedgehandles.start' );
 
-                function doneMoving( dmEvent ) {
+                function doneMoving() {
                   // console.log('doneMoving %s %o', node.id(), node);
 
                   if( !mdownOnHandle || inForceStart ) {
                     return;
                   }
 
-                  var $this = $( this );
                   mdownOnHandle = false;
                   $( window ).off( 'mousemove touchmove', moveHandler );
 
@@ -1117,9 +1110,8 @@ SOFTWARE.
               lastMdownHandler = mdownHandler;
 
 
-            } ).on( 'mouseover tapdragover', 'node', hoverHandler = function() {
+            } ).on( 'mouseover tapdragover', 'node', hoverHandler = function(e) {
               var node = this;
-              var target = this;
 
               // console.log('mouseover hoverHandler')
 
@@ -1127,7 +1119,8 @@ SOFTWARE.
                 return; // ignore preview nodes
               }
 
-              if( mdownOnHandle ) { // only handle mdown case
+              // n.b. only desktop mouse events can show hover preview in force mode
+              if( mdownOnHandle || (inForceStart && e.type === 'mouseover') ) {
 
                 // console.log( 'mouseover hoverHandler %s $o', node.id(), node );
 
@@ -1136,14 +1129,15 @@ SOFTWARE.
                 return false;
               }
 
-            } ).on( 'mouseout tapdragout', 'node', leaveHandler = function() {
+            } ).on( 'mouseout tapdragout', 'node', leaveHandler = function(e) {
               var node = this;
 
               if( drawMode ) {
                 return;
               }
 
-              if( mdownOnHandle ) {
+              // n.b. only desktop mouse events can show hover preview in force mode
+              if( mdownOnHandle || (inForceStart && e.type === 'mouseout') ) {
                 hoverOut( node );
               }
 
@@ -1214,6 +1208,21 @@ SOFTWARE.
 
               node.trigger( 'cyedgehandles.showhandle' );
 
+              var moveHandler = function( me ) {
+                var offset = $container.offset();
+                var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - offset.left;
+                var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - offset.top;
+
+                mx = x;
+                my = y;
+
+                if( options().handleLineType !== 'ghost' ) {
+                  clearDraws();
+                  drawHandle();
+                }
+                drawLine( x, y );
+              };
+
               // case: down and drag as normal
               var downHandler = function( e ) {
 
@@ -1228,20 +1237,6 @@ SOFTWARE.
                 if( onNode ) {
                   disableGestures();
                   mdownOnHandle = true; // enable the regular logic for handling going over target nodes
-
-                  var moveHandler = function( me ) {
-                    var x = ( me.pageX !== undefined ? me.pageX : me.touches[ 0 ].pageX ) - $container.offset().left;
-                    var y = ( me.pageY !== undefined ? me.pageY : me.touches[ 0 ].pageY ) - $container.offset().top;
-
-                    mx = x;
-                    my = y;
-
-                    if( options().handleLineType !== 'ghost' ) {
-                      clearDraws();
-                      drawHandle();
-                    }
-                    drawLine( x, y );
-                  }
 
                   $container[ 0 ].addEventListener( 'mousemove', moveHandler, true );
                   $container[ 0 ].addEventListener( 'touchmove', moveHandler, true );
@@ -1258,7 +1253,7 @@ SOFTWARE.
                     options().stop( node );
                     node.trigger( 'cyedgehandles.stop' );
 
-                    cy.off( 'tap', 'node', tapHandler );
+                    cy.off( 'tap', tapHandler );
                     node.off( 'remove', removeBeforeHandler );
                     resetToDefaultState();
                   } );
@@ -1276,24 +1271,10 @@ SOFTWARE.
               node.one( 'remove', function() {
                 $container[ 0 ].removeEventListener( 'mousedown', downHandler, true );
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
-                cy.off( 'tap', 'node', tapHandler );
+                cy.off( 'tap', tapHandler );
               } );
 
-              // case: tap a target node
-              var tapHandler;
-              cy.one( 'tap', 'node', tapHandler = function() {
-                var target = this;
-
-                var isLoop = source.id() === target.id();
-                var loopAllowed = options().loopAllowed( target );
-
-                if( !isLoop || ( isLoop && loopAllowed ) ) {
-                  makeEdges( false, source, target );
-
-                  //options().complete( node );
-                  //node.trigger('cyedgehandles.complete');
-                }
-
+              function stopForceMode( node ){
                 inForceStart = false; // now we're done so reset the flag
 
                 options().stop( node );
@@ -1301,9 +1282,37 @@ SOFTWARE.
 
                 $container[ 0 ].removeEventListener( 'mousedown', downHandler, true );
                 $container[ 0 ].removeEventListener( 'touchstart', downHandler, true );
+                $container[ 0 ].removeEventListener( 'mousemove', moveHandler, true );
                 node.off( 'remove', removeBeforeHandler );
+
                 resetToDefaultState();
+              }
+
+              // case: tap a target node
+              var tapHandler;
+              cy.one( 'tap', tapHandler = function(e) {
+                var target = e.target || e.cyTarget; // 3.x | 2.x
+
+                if( target === cy ){ // tap bg cancels force gesture
+                  stopForceMode( node );
+
+                  return;
+                } else if( target.isNode() ){ // tap node completes force gesture
+                  var isLoop = source.id() === target.id();
+                  var loopAllowed = options().loopAllowed( target );
+
+                  if( !isLoop || ( isLoop && loopAllowed ) ) {
+                    makeEdges( false, source, target );
+                  }
+
+                  stopForceMode( node );
+                }
               } );
+
+              // in the forced start, we use the above tap case but we can still preview on desktop mousemove
+              if( inForceStart ){
+                $container[ 0 ].addEventListener( 'mousemove', moveHandler, true );
+              }
 
 
             } ).on( 'remove', 'node', removeHandler = function() {
@@ -1336,8 +1345,7 @@ SOFTWARE.
 
                 disableGestures(); // cases like draw mode need this
 
-                var node = sourceNode = this;
-                var source = node;
+                node = sourceNode = this;
 
                 lastActiveId = node.id();
 
@@ -1400,32 +1408,30 @@ SOFTWARE.
                 if( sourceNode ) {
                   options().stop( sourceNode );
                   sourceNode.trigger( 'cyedgehandles.stop' );
-
-                  options().complete( sourceNode );
                 }
 
                 resetToDefaultState();
               }
 
             } ).on( 'tap', 'node', tapToStartHandler = function() {
-              return;
-              var node = this;
-
-              if( !sourceNode ) { // must not be active
-                setTimeout( function() {
-                  if( node.filter( options().handleNodes ).length === 0 ) {
-                    return; // skip if node not allowed
-                  }
-
-                  clearDraws(); // clear just in case
-
-                  setHandleDimensions( node );
-
-                  drawHandle();
-
-                  node.trigger( 'cyedgehandles.showhandle' );
-                }, 16 );
-              }
+              // TODO can this be re-enabled and exposed behind an option?
+              // var node = this;
+              //
+              // if( !sourceNode ) { // must not be active
+              //   setTimeout( function() {
+              //     if( node.filter( options().handleNodes ).length === 0 ) {
+              //       return; // skip if node not allowed
+              //     }
+              //
+              //     clearDraws(); // clear just in case
+              //
+              //     setHandleDimensions( node );
+              //
+              //     drawHandle();
+              //
+              //     node.trigger( 'cyedgehandles.showhandle' );
+              //   }, 16 );
+              // }
 
             } );
 
@@ -1445,7 +1451,10 @@ SOFTWARE.
                 .off( 'cxtdrag', cxtdragHandler )
                 .off( 'cxtdragover', 'node', cxtdragoverHandler )
                 .off( 'cxtdragout', 'node', cxtdragoutHandler )
-                .off( 'tap', 'node', tapToStartHandler );
+                .off( 'tap', 'node', tapToStartHandler )
+                .off( 'drag', 'node', dragHandler )
+                .off( 'grab', 'node', grabHandler )
+              ;
 
               cy.unbind( 'zoom pan', transformHandler );
 
@@ -1462,9 +1471,7 @@ SOFTWARE.
         },
 
         start: function( id ) {
-          var $container = $( this );
-
-          cy.ready( function( e ) {
+          cy.ready( function() {
             cy.$( '#' + id ).trigger( 'cyedgehandles.forcestart' );
           } );
         }
@@ -1475,7 +1482,7 @@ SOFTWARE.
       } else if( typeof fn == 'object' || !fn ) {
         return functions.init.apply( container, arguments );
       } else {
-        console.error( 'No such function `' + fn + '` for edgehandles' );
+        throw new Error( 'No such function `' + fn + '` for edgehandles' );
       }
     };
 
@@ -1483,10 +1490,12 @@ SOFTWARE.
 
   };
 
+  /* global _, define, cytoscape */
+
   if( typeof module !== 'undefined' && module.exports ) { // expose as a commonjs module
     module.exports = function( $$ ){
       register( $$, require('lodash.debounce'), require('lodash.throttle') );
-    }
+    };
   } else if( typeof define !== 'undefined' && define.amd ) { // expose as an amd/requirejs module
     define( 'cytoscape-edgehandles', function() {
       return register;
