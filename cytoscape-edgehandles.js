@@ -564,8 +564,6 @@ SOFTWARE.
                var width = icon.width*cy.zoom(), height = icon.height*cy.zoom();
                ctx.drawImage( icon, hx-(width/2), hy-(height/2), width, height );
             }
-
-            drawsClear = false;
           }
 
           function drawHandleForAngles( node ) {
@@ -574,6 +572,8 @@ SOFTWARE.
             positions.forEach( function(position) {
               drawHandleForPosition(position.posX, position.posY);
             } );
+
+            drawsClear = false;
           }
 
           function getHandlePositionsForNode( node ) {
@@ -653,12 +653,12 @@ SOFTWARE.
               ctx.lineWidth = options().handleLineWidth;
             }
 
-            const positions = getHandlePositionsForNode(sourceNode);
-            const pos = positions.filter(function( position ) {
-              return position.angle === sourceHandleAngle.angle;
+            const handles = getHandlePositionsForNode(sourceNode);
+            const sourceHandle = handles.filter(function( handle ) {
+              return handle.angle === sourceHandleAngle.angle;
             })[0];
-            const hx = pos.x;
-            const hy = pos.y;
+            const hx = sourceHandle.posX;
+            const hy = sourceHandle.posY;
 
             // draw line based on type
             switch( options().handleLineType ) {
@@ -724,7 +724,7 @@ SOFTWARE.
 
                 ctx.beginPath();
 
-                ctx.moveTo( pos.x, pos.y );
+                ctx.moveTo( hx, hy );
 
                 for( var i = 0; i < linePoints.length; i++ ) {
                   var pt = linePoints[ i ];
@@ -1102,6 +1102,9 @@ SOFTWARE.
                 my = y;
 
                 if( options().handleLineType !== 'ghost' ) {
+                  clearDraws();
+                  drawHandle( sourceNode );
+
                   if( hoveredTarget ) {
                     const hit = hitTest( hoveredTarget, {x: mx, y: my} );
 
