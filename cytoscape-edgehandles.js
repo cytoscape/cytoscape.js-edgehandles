@@ -773,7 +773,11 @@ SOFTWARE.
                   added.remove();
                 } else {
                   const targetHandleAngle = hit;
-                  options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
+                  if (options().toggleOffOnLeave) {
+                    options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
+                  } else {
+                    options().complete( source, targets, added );
+                  }
                   source.trigger( 'cyedgehandles.complete' );
                 }
 
@@ -872,7 +876,11 @@ SOFTWARE.
 
             if( !preview ) {
               const targetHandleAngle = hit;
-              options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
+              if (options().toggleOffOnLeave) {
+                options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
+              } else {
+                options().complete( source, targets, added ); 
+              }
               source.trigger( 'cyedgehandles.complete' );
             }
           }

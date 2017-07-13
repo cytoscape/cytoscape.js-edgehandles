@@ -172,8 +172,7 @@ All function can be called via `cy.edgehandles('function-name')`:
  * `cy.edgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
  * `cy.edgehandles('drawon')` : enable draw mode
  * `cy.edgehandles('drawoff')` : disable draw mode
- * `cy.edgehandles('registerHandle', 'left-right', '0,180')` : register a node specific handle with type name and angles. Each node can be bind to specific handle type by setting edgeHandleType = 'left-right' in node data. If node doesn't have edgeHandleType, values from handlePosition is used. 
-
+ 
 
 ## Publishing instructions
 
