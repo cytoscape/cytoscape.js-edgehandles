@@ -1174,7 +1174,7 @@ SOFTWARE.
               var cxtOk = options().cxt && e.type === 'cxtdrag';
               var tapOk = drawMode && e.type === 'tapdrag';
 
-              if( ( cxtOk || tapOk ) && sourceNode ) {
+              if( !disabled() && ( cxtOk || tapOk ) && sourceNode ) {
                 var rpos = e.renderedPosition || e.cyRenderedPosition;
 
                 drawLine( rpos.x, rpos.y );
