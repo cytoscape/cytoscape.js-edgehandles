@@ -1,6 +1,6 @@
 cytoscape-edgehandles
 ================================================================================
-
+[![DOI](https://zenodo.org/badge/16078488.svg)](https://zenodo.org/badge/latestdoi/16078488)
 
 ![Preview](https://raw.githubusercontent.com/cytoscape/cytoscape.js-edgehandles/master/img/preview.png)
 
@@ -172,3 +172,4 @@ This project is set up to automatically be published to npm and bower.  To publi
 1. Set the version number environment variable: `export VERSION=1.2.3`
 1. Publish: `gulp publish`
 1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edgehandles https://github.com/cytoscape/cytoscape.js-edgehandles.git`
+1. Make a release on GitHub to automatically register a new Zenodo DOI
