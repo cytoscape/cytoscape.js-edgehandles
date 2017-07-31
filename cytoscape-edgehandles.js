@@ -184,6 +184,8 @@ SOFTWARE.
       cxt: false, // whether cxt events trigger edgehandles (useful on touch)
       enabled: true, // whether to start the plugin in the enabled state
       toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
+      addEdgeOnHitHandle: false, // whether an edge is created on drag end only on edge handle (true), or anywhere on node (false)
+                                 // addEdgeOnHitHandle true only works with toggleOffOnLeave true
       edgeType: function( sourceNode, targetNode ) {
         // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
         // returning null/undefined means an edge can't be added between the two nodes
@@ -259,6 +261,10 @@ SOFTWARE.
           var options = data.options;
           options.handlePosition = parseHandlePosition(data.options.handlePosition);
 
+          if( opts.addEdgeOnHitHandle ) {
+            options.toggleOffOnLeave = true;
+          }
+
           if( value === undefined ) {
             if( typeof name == typeof {} ) {
               var newOpts = name;
@@ -332,6 +338,10 @@ SOFTWARE.
           };
 
           opts.handlePosition = parseHandlePosition(opts.handlePosition)
+
+          if( opts.addEdgeOnHitHandle ) {
+            opts.toggleOffOnLeave = true;
+          }
 
           function getDevicePixelRatio(){
             return window.devicePixelRatio || 1;
@@ -769,10 +779,11 @@ SOFTWARE.
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
 
-                if ( !hit ) {
+                if ( !hit && options().addEdgeOnHitHandle) {
                   added.remove();
                 } else {
                   const targetHandleAngle = hit;
+                  // TODO: Make it possible to track source/target angle when toggleOffOnLeave is false
                   if (options().toggleOffOnLeave) {
                     options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
                   } else {
