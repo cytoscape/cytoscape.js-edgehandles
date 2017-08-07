@@ -237,6 +237,51 @@ SOFTWARE.
       var fn = params;
       var container = cy.container();
 
+      const positionXYToAngle = {
+        "right middle": 0,
+        "right top": 45,
+        "middle top": 90,
+        "left top": 135,
+        "left middle": 180,
+        "left bottom": 225,
+        "middle bottom": 270,
+        "right bottom": 315,
+        "middle middle": -1
+      };
+
+      function sanitizePositionFormat( pos ) {
+        const posXY = pos.split( ' ' );
+        if( posXY.length !== 2 ) {
+          return 'middle middle';
+        }
+
+        if( posXY[0] !== 'left' && posXY[0] !== 'right' ) {
+          posXY[0] = 'middle';
+        }
+
+        if( posXY[1] !== 'top' && posXY[1] !== 'bottom' ) {
+          posXY[1] = 'middle';
+        }
+
+        return posXY.join( ' ' );
+      }
+
+      function parseHandlePosition( positions ) {
+        return positions.split(',').reduce( function ( prev, item ) {
+          if(isNaN( parseInt(item)) ) {
+            const sanitized = sanitizePositionFormat( item );
+            const angle = positionXYToAngle[sanitized];
+            if(angle !== undefined) {
+              prev.push( angle );
+            }
+          } else {
+            prev.push( item );
+          }
+
+          return prev;
+        }, [] ).join( ',' );
+      }
+
       var functions = {
         destroy: function() {
           var $container = $( this );
@@ -263,7 +308,7 @@ SOFTWARE.
           var options = data.options;
           options.handlePosition = parseHandlePosition(data.options.handlePosition);
 
-          if( opts.addEdgeOnHitHandle || opts.highlightHandleOnHover ) {
+          if( options.addEdgeOnHitHandle || options.highlightHandleOnHover ) {
             options.toggleOffOnLeave = true;
           }
 
@@ -327,19 +372,7 @@ SOFTWARE.
           var hoveredTarget;
           var hoveredTargetHandle = {};
 
-          const positionXYToAngle = {
-            "right middle": 0,
-            "right top": 45,
-            "middle top": 90,
-            "left top": 135,
-            "left middle": 180,
-            "left bottom": 225,
-            "middle bottom": 270,
-            "right bottom": 315,
-            "middle middle": -1
-          };
-
-          opts.handlePosition = parseHandlePosition(opts.handlePosition)
+          opts.handlePosition = parseHandlePosition(opts.handlePosition);
 
           if( opts.addEdgeOnHitHandle || opts.highlightHandleOnHover ){
             opts.toggleOffOnLeave = true;
@@ -516,39 +549,6 @@ SOFTWARE.
 
             target.trigger( 'cyedgehandles.removepreview' );
 
-          }
-
-          function parseHandlePosition( positions ) {
-            return positions.split(',').reduce( function ( prev, item ) {
-              if(isNaN( parseInt(item)) ) {
-                const sanitized = sanitizePositionFormat( item );
-                const angle = positionXYToAngle[sanitized];
-                if(angle !== undefined) {
-                  prev.push( angle );
-                }
-              } else {
-                prev.push( item );
-              }
-
-              return prev;
-            }, [] ).join( ',' );
-          }
-
-          function sanitizePositionFormat( pos ) {
-            const posXY = pos.split( ' ' );
-            if( posXY.length !== 2 ) {
-              return 'middle middle';
-            }
-
-            if( posXY[0] !== 'left' && posXY[0] !== 'right' ) {
-              posXY[0] = 'middle';
-            }
-
-            if( posXY[1] !== 'top' && posXY[1] !== 'bottom' ) {
-              posXY[1] = 'middle';
-            }
-
-            return posXY.join( ' ' );
           }
 
           function drawHandle( node ) {
@@ -956,13 +956,12 @@ SOFTWARE.
             }
           }
 
-          function setHandleDimensions( node ){
+          function setHandleDimensions(){
             hr = options().handleSize / 2 * cy.zoom();
           }
 
           function hitTest ( node, touchPos ) {
             const handlePositions = getHandlePositionsForNode(node);
-            const nodePos = node.renderedPosition();
             const halfHandleSize = (options().handleIcon ? options().handleIcon.width : hr) * cy.zoom() / 2;
 
             const hits = handlePositions.filter(function (handle) {
@@ -1039,7 +1038,7 @@ SOFTWARE.
               // remove old handle
               clearDraws();
 
-              setHandleDimensions( node );
+              setHandleDimensions();
 
               // add new handle
               drawHandle( node );
@@ -1082,7 +1081,7 @@ SOFTWARE.
 
                 hoveredTarget = null;
                 hoveredTargetHandle = {};
-                highlightHandle(sourceNode, sourceHandleAngle);
+                highlightHandle( sourceNode, sourceHandleAngle );
 
                 node.addClass( 'edgehandles-source' );
                 node.trigger( 'cyedgehandles.start' );
@@ -1243,7 +1242,7 @@ SOFTWARE.
               var h = node.renderedOuterHeight();
               var w = node.renderedOuterWidth();
 
-              setHandleDimensions( node );
+              setHandleDimensions();
 
               drawHandle( node );
 
@@ -1393,7 +1392,7 @@ SOFTWARE.
                 node.trigger( 'cyedgehandles.start' );
                 node.addClass( 'edgehandles-source' );
 
-                setHandleDimensions( node );
+                setHandleDimensions();
 
                 drawHandle( node );
 

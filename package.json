@@ -22,9 +22,11 @@
   "devDependencies": {
     "gulp": "^3.8.8",
     "gulp-eslint": "^3.0.1",
+    "gulp-jshint": "^2.0.4",
     "gulp-prompt": "^0.1.1",
     "gulp-replace": "^0.4.0",
     "gulp-shell": "^0.2.9",
+    "jshint": "^2.9.5",
     "jshint-stylish": "^1.0.0",
     "run-sequence": "^1.0.0"
   },
