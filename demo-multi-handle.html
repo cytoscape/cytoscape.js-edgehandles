@@ -108,18 +108,17 @@
 				});
 
 				cy.edgehandles({
-			    toggleOffOnLeave: false,
+			    toggleOffOnLeave: true,
 			    handleNodes: "node",
 			    handleSize: 10,
 			    handleColor: '#0000ff',
 			    handlePosition: '0,180',
 			    handleLineType: 'ghost',
 			    preview: true,
+			    addEdgeOnHitHandle: true,
+			    highlightHandleOnHover: true,
 			    handleHighlightPercentOffset: 1.2,
 			    edgeType: function(){ return 'flat'; },
-			    complete: function (a, b, c, d, e) {
-			    	console.log(a, b, d, e);
-			    },
 			    nodeHandlePosition: function(node) {
 			    	var data = node.data();
 

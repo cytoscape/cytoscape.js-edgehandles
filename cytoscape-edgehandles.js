@@ -184,6 +184,8 @@ SOFTWARE.
       cxt: false, // whether cxt events trigger edgehandles (useful on touch)
       enabled: true, // whether to start the plugin in the enabled state
       toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
+      highlightHandleOnHover: false, // whether a handle should be highlighted on hover (true), or not (false)
+                                     // highlightHandleOnHover true only works with toggleOffOnLeave true
       addEdgeOnHitHandle: false, // whether an edge is created on drag end only on edge handle (true), or anywhere on node (false)
                                  // addEdgeOnHitHandle true only works with toggleOffOnLeave true
       edgeType: function( sourceNode, targetNode ) {
@@ -261,7 +263,7 @@ SOFTWARE.
           var options = data.options;
           options.handlePosition = parseHandlePosition(data.options.handlePosition);
 
-          if( opts.addEdgeOnHitHandle ) {
+          if( opts.addEdgeOnHitHandle || opts.highlightHandleOnHover ) {
             options.toggleOffOnLeave = true;
           }
 
@@ -339,7 +341,7 @@ SOFTWARE.
 
           opts.handlePosition = parseHandlePosition(opts.handlePosition)
 
-          if( opts.addEdgeOnHitHandle ) {
+          if( opts.addEdgeOnHitHandle || opts.highlightHandleOnHover ){
             opts.toggleOffOnLeave = true;
           }
 
@@ -973,7 +975,7 @@ SOFTWARE.
 
           function highlightHandle( node, handle ) {
             // console.log(node, handle);
-            if( options().handleHighlightColor ) {
+            if( options().highlightHandleOnHover && options().handleHighlightColor ) {
               const percentOffset = options().handleHighlightPercentOffset || 1.0;
               const hightlightSize = options().handleIcon ? options().handleIcon.width / 2 : hr;
               ctx.beginPath();
@@ -989,13 +991,15 @@ SOFTWARE.
           }
 
           function deHighlightHandle(node) {
-            const pos = node.renderedPosition();
-            const x = pos.x;
-            const y = pos.y;
-            const width = node.renderedOuterWidth();
-            const height = node.renderedOuterHeight();
+            if( options().highlightHandleOnHover ) {
+              const pos = node.renderedPosition();
+              const x = pos.x;
+              const y = pos.y;
+              const width = node.renderedOuterWidth();
+              const height = node.renderedOuterHeight();
 
-            ctx.clearRect(x - width, y - height, width * 2, height * 2);
+              ctx.clearRect(x - width, y - height, width * 2, height * 2);
+            }
           }
 
           cy.ready( function() {

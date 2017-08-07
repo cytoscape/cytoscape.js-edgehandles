@@ -76,6 +76,8 @@ var defaults = {
   toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
   addEdgeOnHitHandle: false, // whether an edge is created on drag end only on edge handle (true), or anywhere on node (false)
                              // addEdgeOnHitHandle true only works with toggleOffOnLeave true
+  highlightHandleOnHover: false, // whether a handle should be highlighted on hover (true), or not (false)
+                                 // highlightHandleOnHover true only works with toggleOffOnLeave true
   edgeType: function( sourceNode, targetNode ) {
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
     // returning null/undefined means an edge can't be added between the two nodes
