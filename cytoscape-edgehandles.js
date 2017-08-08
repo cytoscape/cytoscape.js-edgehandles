@@ -1178,8 +1178,11 @@ SOFTWARE.
                 var rpos = e.renderedPosition || e.cyRenderedPosition;
 
                 drawLine( rpos.x, rpos.y );
-
+                mx = rpos.x;
+                my = rpos.y;
               }
+
+
 
 
             } ).on( 'cxtdragover tapdragover', 'node', cxtdragoverHandler = function( e ) {
