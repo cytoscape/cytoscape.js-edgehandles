@@ -1275,6 +1275,8 @@ SOFTWARE.
                 .off( 'cyedgehandles.resize', ctrResizeHandler )
                 .off( 'cyedgehandles.drawon', ctrDrawonHandler )
                 .off( 'cyedgehandles.drawoff', ctrDrawoffHandler );
+              //Before unbinding data, make sure that the handle is cleared.
+              clearDraws();
             };
           } );
 
