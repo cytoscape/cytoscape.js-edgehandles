@@ -402,7 +402,7 @@ SOFTWARE.
 
           function addClassesToEleJson( json, classes ){
             if( json.classes ){
-              json.classes += classes;
+              json.classes += ' ' + classes;
             } else {
               json.classes = classes;
             }
