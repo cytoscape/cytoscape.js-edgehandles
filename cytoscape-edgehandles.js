@@ -234,6 +234,9 @@ SOFTWARE.
           }
 
           data.unbind();
+
+          data.canvas.parentNode.removeChild( data.canvas );
+
           $container.data( 'cyedgehandles', {} );
 
           return $container;
@@ -381,6 +384,7 @@ SOFTWARE.
             data = {};
           }
           data.options = opts;
+          data.canvas = canvas;
 
           var optCache;
 
