@@ -13,6 +13,7 @@ This extension creates handles on nodes that can be dragged to create edges betw
 ## Dependencies
 
  * Cytoscape.js ^2.2.8 || ^3.0.0
+ * Lodash ^4.17.0, if not using dependency management
 
 
 ## Usage instructions
@@ -100,7 +101,7 @@ var defaults = {
   },
   stop: function( sourceNode ) {
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
-  }, 
+  },
   cancel: function( sourceNode, renderedPosition, invalidTarget ){
     // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
         // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
