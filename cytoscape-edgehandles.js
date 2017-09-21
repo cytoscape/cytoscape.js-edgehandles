@@ -215,6 +215,12 @@ SOFTWARE.
       cancel: function( sourceNode, renderedPosition, invalidTarget ) {
         // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
         // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
+      },
+      hoverover: function( targetNode ) {
+        // fired when a target is hovered
+      },
+      hoverout: function( targetNode ) {
+        // fired when a target isn't hovered anymore
       }
     };
     /* eslint-enable */
@@ -750,6 +756,9 @@ SOFTWARE.
                 node.addClass( 'edgehandles-hover' );
                 node.toggleClass( 'edgehandles-target' );
 
+                options().hoverover( node );
+                node.trigger( 'cyedgehandles.hoverover' );
+
                 if( options().preview ) {
                   if( node.hasClass( 'edgehandles-target' ) ) {
                     makePreview( source, target );
@@ -765,6 +774,9 @@ SOFTWARE.
             var target = node;
 
             node.removeClass( 'edgehandles-hover' );
+
+            options().hoverout( node );
+            node.trigger( 'cyedgehandles.hoverout' );
 
             clearTimeout( hoverTimeout );
 
