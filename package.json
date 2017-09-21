@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-edgehandles",
-  "version": "2.13.3",
+  "version": "2.14.0",
   "description": "Edge creation extension for Cytoscape.js",
   "main": "cytoscape-edgehandles.js",
   "scripts": {
