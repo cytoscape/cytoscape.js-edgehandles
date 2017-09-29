@@ -120,6 +120,12 @@ var defaults = {
   cancel: function( sourceNode, renderedPosition, invalidTarget ){
     // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
         // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
+  },
+  hoverover: function( targetNode ) {
+    // fired when a target is hovered
+  },
+  hoverout: function( targetNode ) {
+    // fired when a target isn't hovered anymore
   }
 };
 
@@ -153,6 +159,8 @@ On the source node:
 
 On the target node:
 
+ * `cyedgehandles.hoverover` : when a target is hovered
+ * `cyedgehandles.hoverout` : when a target isn't hovered anymore
  * `cyedgehandles.addpreview` : when a preview is shown (i.e. target selected)
  * `cyedgehandles.removepreview` : when a preview is removed (i.e. target unselected)
 
