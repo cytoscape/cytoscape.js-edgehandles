@@ -67,11 +67,18 @@ var defaults = {
   handleOutlineColor: '#000000', // the colour of the handle outline
   handleOutlineWidth: 0, // the width of the handle outline in pixels
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
-  handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+  handlePosition: 'middle top', // sets the position of the handle in the csv format of "X-AXIS Y-AXIS" such as "left top,middle top" OR 
+                                // angle format "0,180" (angle: 0,1,...,359,360 where 0 is at right, 180 is at left of node or -1 for middle of the node).
+  handleHighlightColor: '#ff0000', // the colour to highlight handle on hover
+  handleHighlightPercentOffset: '1.0', // percent offset respective to handle size
   hoverDelay: 150, // time spend over a target node before it is considered a target selection
   cxt: false, // whether cxt events trigger edgehandles (useful on touch)
   enabled: true, // whether to start the plugin in the enabled state
   toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
+  addEdgeOnHitHandle: false, // whether an edge is created on drag end only on edge handle (true), or anywhere on node (false)
+                             // addEdgeOnHitHandle true only works with toggleOffOnLeave true
+  highlightHandleOnHover: false, // whether a handle should be highlighted on hover (true), or not (false)
+                                 // highlightHandleOnHover true only works with toggleOffOnLeave true
   edgeType: function( sourceNode, targetNode ) {
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
     // returning null/undefined means an edge can't be added between the two nodes
@@ -93,11 +100,19 @@ var defaults = {
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
+  nodeHandlePosition: function( node ) {
+    // for handle positions for a specific node.
+    // set value in handlePosition for default handle positions 
+    // and return a specific positions for node in this function.
+    // return null to use the default value from handlePosition
+    return null;
+  },
   start: function( sourceNode ) {
     // fired when edgehandles interaction starts (drag on handle)
   },
-  complete: function( sourceNode, targetNodes, addedEntities ) {
+  complete: function( sourceNode, targetNodes, addedEntities, sourceHandleAngle, targetHandleAngle ) {
     // fired when edgehandles is done and entities are added
+    // sourceHandleAngle, targetHandleAngle are only returned when toggleOffOnLeave is true
   },
   stop: function( sourceNode ) {
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
@@ -164,7 +179,7 @@ All function can be called via `cy.edgehandles('function-name')`:
  * `cy.edgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
  * `cy.edgehandles('drawon')` : enable draw mode
  * `cy.edgehandles('drawoff')` : disable draw mode
-
+ 
 
 ## Publishing instructions
 
