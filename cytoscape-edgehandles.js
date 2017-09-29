@@ -797,7 +797,7 @@ SOFTWARE.
                 } else {
                   const targetHandleAngle = hit;
                   // TODO: Make it possible to track source/target angle when toggleOffOnLeave is false
-                  if (options().toggleOffOnLeave) {
+                  if (options().toggleOffOnLeave && options().addEdgeOnHitHandle) {
                     options().complete( source, targets, added, sourceHandleAngle.angle, targetHandleAngle.angle );
                   } else {
                     options().complete( source, targets, added );
@@ -980,10 +980,11 @@ SOFTWARE.
           function hitTest ( node, touchPos ) {
             const handlePositions = getHandlePositionsForNode(node);
             const halfHandleSize = (options().handleIcon ? options().handleIcon.width : hr) * cy.zoom() / 2;
+            const hitDistance = halfHandleSize + options().handleHitThreshold;
 
             const hits = handlePositions.filter(function (handle) {
-              return Math.abs(handle.posX - touchPos.x) <= halfHandleSize && 
-                     Math.abs(handle.posY - touchPos.y) <= halfHandleSize;
+              return Math.abs(handle.posX - touchPos.x) <= hitDistance && 
+                     Math.abs(handle.posY - touchPos.y) <= hitDistance;
             });
 
             return hits[0];
@@ -1071,8 +1072,7 @@ SOFTWARE.
                 var pageY = !e.touches ? e.pageY : e.touches[ 0 ].pageY;
                 var x = pageX - $container.offset().left;
                 var y = pageY - $container.offset().top;
-                var hrTarget = hr + options().handleHitThreshold;
-
+                
                 if( e.button !== 0 && !e.touches ) {
                   return; // sorry, no right clicks allowed
                 }
