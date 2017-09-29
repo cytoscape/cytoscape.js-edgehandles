@@ -112,7 +112,7 @@ var defaults = {
   },
   complete: function( sourceNode, targetNodes, addedEntities, sourceHandleAngle, targetHandleAngle ) {
     // fired when edgehandles is done and entities are added
-    // sourceHandleAngle, targetHandleAngle are only returned when toggleOffOnLeave is true
+    // sourceHandleAngle, targetHandleAngle are only returned when toggleOffOnLeave is true and addEdgeOnHitHandle is true
   },
   stop: function( sourceNode ) {
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
