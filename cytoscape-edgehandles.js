@@ -632,7 +632,7 @@ SOFTWARE.
             if( !src && !tgt ) {
               if( !preview && options().preview ) {
                 added = cy.elements( '.edgehandles-preview' ).removeClass( 'edgehandles-preview' );
-                options().complete( source, targets, added );
+                options().complete( source, targets, added, {x: mx, y: my} );
                 source.trigger( 'cyedgehandles.complete' );
                 return;
               } else {
