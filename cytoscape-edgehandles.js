@@ -53,9 +53,16 @@ SOFTWARE.
         return this;
       },
       trigger: function(eventName){
-        var evt = new Event(eventName);
+        var event;
 
-        this[0].dispatchEvent(evt);
+        if(window.CustomEvent){
+          event = new CustomEvent(eventName);
+        } else {
+          event = document.createEvent('CustomEvent');
+          event.initCustomEvent(eventName, true, true);
+        }
+
+        d.dispatchEvent(event);
 
         return this;
       },
