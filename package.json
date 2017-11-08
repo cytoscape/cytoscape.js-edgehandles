@@ -1,37 +1,52 @@
 {
   "name": "cytoscape-edgehandles",
   "version": "2.15.0",
-  "description": "Edge creation extension for Cytoscape.js",
+  "description": "Edge creation UI extension for Cytoscape",
   "main": "cytoscape-edgehandles.js",
+  "author": {
+    "name": "Max Franz",
+    "email": "maxkfranz@gmail.com"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postpublish": "run-s gh-pages:demo gh-pages:deploy",
+    "gh-pages:demo": "cpy demo.html . --rename=index.html",
+    "gh-pages:deploy": "gh-pages -d .",
+    "lint": "eslint src",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:min": "cross-env NODE_ENV=production MIN=true webpack",
+    "watch": "webpack --progress --watch",
+    "dev": "webpack-dev-server --open",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cytoscape/cytoscape.js-edgehandles.git"
+    "url": "https://github.com/cytoscape/edgehandles.git"
   },
   "keywords": [
     "cytoscape",
-    "cyext"
+    "cytoscape-extension"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cytoscape/cytoscape.js-edgehandles/issues"
+    "url": "https://github.com/cytoscape/edgehandles/issues"
   },
-  "homepage": "https://github.com/cytoscape/cytoscape.js-edgehandles",
+  "homepage": "https://github.com/cytoscape/edgehandles",
   "devDependencies": {
-    "gulp": "^3.8.8",
-    "gulp-eslint": "^3.0.1",
-    "gulp-prompt": "^0.1.1",
-    "gulp-replace": "^0.4.0",
-    "gulp-shell": "^0.2.9",
-    "run-sequence": "^1.0.0"
-  },
-  "dependencies": {
-    "lodash.debounce": "^4.0.8",
-    "lodash.throttle": "^4.1.1"
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.1",
+    "camelcase": "^4.1.0",
+    "chai": "4.0.2",
+    "cross-env": "^5.0.0",
+    "eslint": "^3.9.1",
+    "mocha": "3.4.2",
+    "webpack": "^2.6.1",
+    "webpack-dev-server": "^2.4.5",
+    "cpy-cli": "^1.0.1",
+    "npm-run-all": "^4.1.2",
+    "gh-pages": "^1.0.0"
   },
   "peerDependencies": {
-    "cytoscape": "^2.2.8 || ^3.0.0"
+    "cytoscape": "^3.2.0"
   }
 }

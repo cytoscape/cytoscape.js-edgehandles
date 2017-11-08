@@ -1,19 +1,19 @@
 cytoscape-edgehandles
 ================================================================================
+
 [![DOI](https://zenodo.org/badge/16078488.svg)](https://zenodo.org/badge/latestdoi/16078488)
 
 ![Preview](https://raw.githubusercontent.com/cytoscape/cytoscape.js-edgehandles/master/img/preview.png)
 
-
 ## Description
+
 
 This extension creates handles on nodes that can be dragged to create edges between nodes.
 
 
 ## Dependencies
 
- * Cytoscape.js ^2.2.8 || ^3.0.0
- * Lodash ^4.17.0, if not using dependency management
+ * Cytoscape.js ^3.2.0
 
 
 ## Usage instructions
@@ -23,17 +23,28 @@ Download the library:
  * via bower: `bower install cytoscape-edgehandles`, or
  * via direct download in the repository (probably from a tag).
 
-`require()` the library as appropriate for your project:
+Import the library as appropriate for your project:
 
-CommonJS:
+ES import:
+
 ```js
-var cytoscape = require('cytoscape');
-var edgehandles = require('cytoscape-edgehandles');
+import cytoscape from 'cytoscape';
+import edgehandles from 'cytoscape-edgehandles';
 
-edgehandles( cytoscape ); // register extension
+cytoscape.use( edgehandles );
+```
+
+CommonJS require:
+
+```js
+let cytoscape = require('cytoscape');
+let edgehandles = require('cytoscape-edgehandles');
+
+cytoscape.use( edgehandles ); // register extension
 ```
 
 AMD:
+
 ```js
 require(['cytoscape', 'cytoscape-edgehandles'], function( cytoscape, edgehandles ){
   edgehandles( cytoscape ); // register extension
@@ -43,142 +54,181 @@ require(['cytoscape', 'cytoscape-edgehandles'], function( cytoscape, edgehandles
 Plain HTML/JS has the extension registered for you automatically, because no `require()` is needed.
 
 
+
 ## Initialisation
 
 You initialise the extension on the Cytoscape instance:
 
 ```js
 
-var cy = cytoscape({
+let cy = cytoscape({
   container: document.getElementById('#cy'),
 	/* ... */
 });
 
 // the default values of each option are outlined below:
-var defaults = {
+let defaults = {
   preview: true, // whether to show added edges preview before releasing selection
-  stackOrder: 4, // Controls stack order of edgehandles canvas element by setting it's z-index
-  handleSize: 10, // the size of the edge handle put on nodes
-  handleHitThreshold: 6, // a threshold for hit detection that makes it easier to grab the handle
-  handleIcon: false, // an image to put on the handle
-  handleColor: '#ff0000', // the colour of the handle and the line drawn from it
-  handleLineType: 'ghost', // can be 'ghost' for real edge, 'straight' for a straight line, or 'draw' for a draw-as-you-go line
-  handleLineWidth: 1, // width of handle line in pixels
-  handleOutlineColor: '#000000', // the colour of the handle outline
-  handleOutlineWidth: 0, // the width of the handle outline in pixels
+  hoverDelay: 150, // time spent hovering over a target node before it is considered selected
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
   handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
-  hoverDelay: 150, // time spend over a target node before it is considered a target selection
-  cxt: false, // whether cxt events trigger edgehandles (useful on touch)
-  enabled: true, // whether to start the plugin in the enabled state
-  toggleOffOnLeave: false, // whether an edge is cancelled by leaving a node (true), or whether you need to go over again to cancel (false; allows multiple edges in one pass)
-  edgeType: function( sourceNode, targetNode ) {
+  handleInDrawMode: false, // whether to show the handle in draw mode
+  edgeType: function( sourceNode, targetNode ){
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
     // returning null/undefined means an edge can't be added between the two nodes
     return 'flat';
   },
-  loopAllowed: function( node ) {
+  loopAllowed: function( node ){
     // for the specified node, return whether edges from itself to itself are allowed
     return false;
   },
   nodeLoopOffset: -50, // offset for edgeType: 'node' loops
-  nodeParams: function( sourceNode, targetNode ) {
+  nodeParams: function( sourceNode, targetNode ){
     // for edges between the specified source and target
     // return element object to be passed to cy.add() for intermediary node
     return {};
   },
-  edgeParams: function( sourceNode, targetNode, i ) {
+  edgeParams: function( sourceNode, targetNode, i ){
     // for edges between the specified source and target
     // return element object to be passed to cy.add() for edge
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
-  start: function( sourceNode ) {
+  show: function( sourceNode ){
+    // fired when handle is shown
+  },
+  hide: function( sourceNode ){
+    // fired when the handle is hidden
+  },
+  start: function( sourceNode ){
     // fired when edgehandles interaction starts (drag on handle)
   },
-  complete: function( sourceNode, targetNodes, addedEntities ) {
-    // fired when edgehandles is done and entities are added
+  complete: function( sourceNode, targetNode, addedEles ){
+    // fired when edgehandles is done and elements are added
   },
-  stop: function( sourceNode ) {
+  stop: function( sourceNode ){
     // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
   },
-  cancel: function( sourceNode, renderedPosition, invalidTarget ){
-    // fired when edgehandles are cancelled ( incomplete - nothing has been added ) - renderedPosition is where the edgehandle was released, invalidTarget is
-        // a collection on which the handle was released, but which for other reasons (loopAllowed | edgeType) is an invalid target
+  cancel: function( sourceNode, cancelledTargets ){
+    // fired when edgehandles are cancelled (incomplete gesture)
   },
-  hoverover: function( targetNode ) {
+  hoverover: function( sourceNode, targetNode ){
     // fired when a target is hovered
   },
-  hoverout: function( targetNode ) {
+  hoverout: function( sourceNode, targetNode ){
     // fired when a target isn't hovered anymore
+  },
+  previewon: function( sourceNode, targetNode, previewEles ){
+    // fired when preview is shown
+  },
+  previewoff: function( sourceNode, targetNode, previewEles ){
+    // fired when preview is hidden
+  },
+  drawon: function(){
+    // fired when draw mode enabled
+  },
+  drawoff: function(){
+    // fired when draw mode disabled
   }
 };
 
-cy.edgehandles( defaults );
+let eh = cy.edgehandles( defaults );
 
 ```
+
+
+## API
+
+The object returned by `cy.edgehandles()` has several functions available on it:
+
+* `start()` : manually start the gesture (as if the handle were already held)
+* `stop()` : manually completes or cancels the gesture
+* `disable()` : disables edgehandles behaviour
+* `enable()` : enables edgehandles behaviour
+* `enableDrawMode()` : turn on draw mode (the entire node body acts like the handle)
+* `disableDrawMode()` : turn off draw mode
+* `destroy()` : remove edgehandles behaviour
+
 
 ## Classes
 
 These classes can be used for styling the graph as it interacts with the extension:
 
-* `edgehandles-source` : The source node
-* `edgehandles-target` : A target node
-* `edgehandles-preview` : Preview elements (used with `options.preview: true`)
-* `edgehandles-hover` : Added to nodes as they are hovered over as targets
-* `edgehandles-ghost-edge` : The ghost handle line edge
-* `edgehandles-presumptive-target` : A node that, during an edge drag, may become a target when released
+* `eh-source` : The source node
+* `eh-target` : A target node
+* `eh-preview` : Preview elements (used with `options.preview: true`)
+* `eh-hover` : Added to nodes as they are hovered over as targets
+* `eh-ghost-edge` : The ghost handle line edge
+* `eh-presumptive-target` : A node that, during an edge drag, may become a target when released
 
 
 ## Events
 
-During the course of a user's interaction with the extension, several events are generated and triggered on the corresponding elements:
+During the course of a user's interaction with the extension, several events are generated and triggered on the core.  Each event callback has a number of extra parameters, and certain events have associated positions.
 
-On the source node:
-
- * `cyedgehandles.showhandle` : when the handle is shown
- * `cyedgehandles.start` : when starting to drag on the handle
- * `cyedgehandles.stop` : when the handle is released
- * `cyedgehandles.complete` : when the handle has been released and edges are created
- * `cyedgehandles.cancel` : when the handle has been released but not on a valid target. The handler receives two arguments - the renderedPosition at which the handle was released and a collection of presumptive targets. Presumptive targets are nodes that would have become targets but were, for some reason, deemed invalid. Possible reasons include `edgeType` or `loopAllowed` returning null.
-
-On the target node:
-
- * `cyedgehandles.hoverover` : when a target is hovered
- * `cyedgehandles.hoverout` : when a target isn't hovered anymore
- * `cyedgehandles.addpreview` : when a preview is shown (i.e. target selected)
- * `cyedgehandles.removepreview` : when a preview is removed (i.e. target unselected)
+* `eh-show` : when the handle is shown
+  * `(event, sourceNode)`
+  * `event.position` : handle position
+* `eh-hide` : when the handle is hidden
+  * `(event, sourceNode)`
+  * `event.position` : handle position
+* `eh-start` : when the edge creation gesture starts
+  * `(event, sourceNode)`
+  * `event.position` : handle position
+* `eh-complete` : when the edge creation gesture is successfully completed
+  * `(event, sourceNode, targetNode, addedEles)`
+  * `event.position` : cursor/finger position
+* `eh-stop` : when the edge creation gesture is stopped (either successfully completed or cancelled)
+  * `(event, sourceNode)`
+  * `event.position` : cursor/finger position
+* `eh-cancel` : when the edge creation gesture is cancelled
+  * `(event, sourceNode, cancelledTargets)`
+  * `event.position` : cursor/finger position
+* `eh-hoverover` : when hovering over a target
+  * `(event, sourceNode, targetNode)`
+  * `event.position` : cursor/finger position
+* `eh-hoverout` : when leaving a target node
+  * `(event, sourceNode, targetNode)`
+  * `event.position` : cursor/finger position
+* `eh-previewon` : when a preview is shown
+  * `(event, sourceNode, targetNode, previewEles)`
+  * `event.position` : cursor/finger position
+* `eh-previewoff` : when the preview is removed
+  * `(event, sourceNode, targetNode, previewEles)`
+  * `event.position` : cursor/finger position
+* `eh-drawon` : when draw mode is enabled
+  * `(event)`
+* `eh-drawoff` : when draw mode is disabled
+  * `(event)`
 
 Example binding:
 
 ```js
-cy.on('cyedgehandles.start', 'node', function(e){
-	var srcNode = this;
+cy.on('eh-complete', (event, sourceNode, targetNode, addedEles) => {
+	let { position } = event;
 
-	// ...
+  // ...
 });
 ```
 
-## Extension functions
+## Build targets
 
-All function can be called via `cy.edgehandles('function-name')`:
+* `npm run test` : Run Mocha tests in `./test`
+* `npm run build` : Build `./src/**` into `cytoscape-edgehandles.js`
+* `npm run watch` : Automatically build on changes with live reloading (N.b. you must already have an HTTP server running)
+* `npm run dev` : Automatically build on changes with live reloading with webpack dev server
+* `npm run lint` : Run eslint on the source
 
- * `cy.edgehandles('enable')` : enable the extension
- * `cy.edgehandles('disable')` : disable the extension
- * `cy.edgehandles('option', 'preview', false)` : set individual option (e.g. `'preview'`)
- * `cy.edgehandles('option', { /* options */ })` : set all options
- * `cy.edgehandles('option', 'preview')` : get option value (e.g. `'preview'`)
- * `cy.edgehandles('destroy')` : destroy the extension instance
- * `cy.edgehandles('start', 'some-node-id')` : start the handle drag state on node with specified id (e.g. `'some-node-id'`)
- * `cy.edgehandles('drawon')` : enable draw mode
- * `cy.edgehandles('drawoff')` : disable draw mode
+N.b. all builds use babel, so modern ES features can be used in the `src`.
 
 
 ## Publishing instructions
 
 This project is set up to automatically be published to npm and bower.  To publish:
 
-1. Set the version number environment variable: `export VERSION=1.2.3`
-1. Publish: `gulp publish`
-1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edgehandles https://github.com/cytoscape/cytoscape.js-edgehandles.git`
-1. Make a release on GitHub to automatically register a new Zenodo DOI
+1. Build the extension : `npm run build`
+1. Commit the build : `git commit -am "Build for release"`
+1. Bump the version number and tag: `npm version major|minor|patch`
+1. Push to origin: `git push && git push --tags`
+1. Publish to npm: `npm publish .`
+1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edgehandles https://github.com/cytoscape&#x2F;edgehandles.git`

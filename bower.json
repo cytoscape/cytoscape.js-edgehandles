@@ -1,10 +1,13 @@
 {
   "name": "cytoscape-edgehandles",
-  "description": "Edge creation extension for Cytoscape.js",
+  "description": "Edge creation UI extension for Cytoscape",
   "main": "cytoscape-edgehandles.js",
+  "dependencies": {
+    "cytoscape": "^3.2.0"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cytoscape/cytoscape.js-edgehandles.git"
+    "url": "https://github.com/cytoscape/edgehandles.git"
   },
   "ignore": [
     "**/.*",
@@ -15,10 +18,7 @@
   ],
   "keywords": [
     "cytoscape",
-    "cyext"
+    "cytoscape-extension"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "cytoscape": "^2.2.8 || ^3.0.0"
-  }
+  "license": "MIT"
 }
