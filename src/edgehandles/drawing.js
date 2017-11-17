@@ -25,7 +25,7 @@ function makeEdges( preview = false ) {
   if( !target || target.size() === 0 ){
     previewEles.remove();
 
-    this.emit( 'cancel', this.mp(), [source, presumptiveTargets, cy.collection()] );
+    this.emit( 'cancel', this.mp(), source, presumptiveTargets );
 
     return;
   }
@@ -34,7 +34,7 @@ function makeEdges( preview = false ) {
   if( !preview && options.preview ) {
     previewEles.removeClass('eh-preview');
 
-    this.emit( 'complete', this.mp(), [source, target, previewEles] );
+    this.emit( 'complete', this.mp(), source, target, previewEles );
 
     return;
   }
@@ -115,7 +115,7 @@ function makeEdges( preview = false ) {
   if( preview ) {
     this.previewEles = added;
   } else {
-    this.emit( 'complete', this.mp(), [source, target, added] );
+    this.emit( 'complete', this.mp(), source, target, added );
   }
 
   return this;

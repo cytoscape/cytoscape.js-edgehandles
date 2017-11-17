@@ -31,7 +31,7 @@ function show( node ){
 
   this.setHandleFor( node );
 
-  this.emit( 'show', this.hp() );
+  this.emit( 'show', this.hp(), this.sourceNode );
 
   return this;
 }
@@ -43,7 +43,7 @@ function hide(){
 
   this.sourceNode = cy.collection();
 
-  this.emit( 'hide', this.hp() );
+  this.emit( 'hide', this.hp(), this.sourceNode );
 
   return this;
 }
@@ -58,7 +58,7 @@ function start( node ){
 
   this.disableGestures();
 
-  this.emit( 'start', this.hp() );
+  this.emit( 'start', this.hp(), node );
 }
 
 function update( pos ){
@@ -98,14 +98,14 @@ function preview( target ) {
     if( !isLoop || ( isLoop && loopAllowed ) ) {
       target.addClass('eh-target');
 
-      this.emit( 'hoverover', this.mp(), [ source, target ] );
+      this.emit( 'hoverover', this.mp(), source, target );
 
       if( options.preview ){
         target.addClass('eh-preview');
 
         this.makePreview();
 
-        this.emit( 'previewon', this.mp(), [ source, target, previewEles ] );
+        this.emit( 'previewon', this.mp(), source, target, previewEles );
       }
     }
   }, options.hoverDelay );
@@ -126,8 +126,8 @@ function unpreview( target ) {
 
   this.removePreview( source, target );
 
-  this.emit( 'hoverout', this.mp(), [ source, target ] );
-  this.emit( 'previewoff', this.mp(), [ source, target, previewEles ] );
+  this.emit( 'hoverout', this.mp(), source, target );
+  this.emit( 'previewoff', this.mp(), source, target, previewEles );
 
   return this;
 }
@@ -152,7 +152,7 @@ function stop(){
 
   this.resetGestures();
 
-  this.emit( 'stop', this.mp(), [ sourceNode, targetNode ] );
+  this.emit( 'stop', this.mp(), sourceNode );
 
   return this;
 }

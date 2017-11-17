@@ -166,45 +166,45 @@ These classes can be used for styling the graph as it interacts with the extensi
 
 During the course of a user's interaction with the extension, several events are generated and triggered on the core.  Each event callback has a number of extra parameters, and certain events have associated positions.
 
-* `eh-show` : when the handle is shown
+* `ehshow` : when the handle is shown
   * `(event, sourceNode)`
   * `event.position` : handle position
-* `eh-hide` : when the handle is hidden
+* `ehhide` : when the handle is hidden
   * `(event, sourceNode)`
   * `event.position` : handle position
-* `eh-start` : when the edge creation gesture starts
+* `ehstart` : when the edge creation gesture starts
   * `(event, sourceNode)`
   * `event.position` : handle position
-* `eh-complete` : when the edge creation gesture is successfully completed
+* `ehcomplete` : when the edge creation gesture is successfully completed
   * `(event, sourceNode, targetNode, addedEles)`
   * `event.position` : cursor/finger position
-* `eh-stop` : when the edge creation gesture is stopped (either successfully completed or cancelled)
+* `ehstop` : when the edge creation gesture is stopped (either successfully completed or cancelled)
   * `(event, sourceNode)`
   * `event.position` : cursor/finger position
-* `eh-cancel` : when the edge creation gesture is cancelled
+* `ehcancel` : when the edge creation gesture is cancelled
   * `(event, sourceNode, cancelledTargets)`
   * `event.position` : cursor/finger position
-* `eh-hoverover` : when hovering over a target
+* `ehhoverover` : when hovering over a target
   * `(event, sourceNode, targetNode)`
   * `event.position` : cursor/finger position
-* `eh-hoverout` : when leaving a target node
+* `ehhoverout` : when leaving a target node
   * `(event, sourceNode, targetNode)`
   * `event.position` : cursor/finger position
-* `eh-previewon` : when a preview is shown
+* `ehpreviewon` : when a preview is shown
   * `(event, sourceNode, targetNode, previewEles)`
   * `event.position` : cursor/finger position
-* `eh-previewoff` : when the preview is removed
+* `ehpreviewoff` : when the preview is removed
   * `(event, sourceNode, targetNode, previewEles)`
   * `event.position` : cursor/finger position
-* `eh-drawon` : when draw mode is enabled
+* `ehdrawon` : when draw mode is enabled
   * `(event)`
-* `eh-drawoff` : when draw mode is disabled
+* `ehdrawoff` : when draw mode is disabled
   * `(event)`
 
 Example binding:
 
 ```js
-cy.on('eh-complete', (event, sourceNode, targetNode, addedEles) => {
+cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
 	let { position } = event;
 
   // ...
