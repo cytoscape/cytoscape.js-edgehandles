@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-edgehandles",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Edge creation UI extension for Cytoscape",
   "main": "cytoscape-edgehandles.js",
   "author": {
