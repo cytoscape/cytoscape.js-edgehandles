@@ -86,7 +86,7 @@ function removeListener( target, event, selector, callback, options ){
 function emit( type, position, ...args ){
   let { options, cy } = this;
 
-  cy.emit( { type, position }, args );
+  cy.emit( { type: `eh${type}`, position }, args );
 
   options[ type ]( ...args );
 

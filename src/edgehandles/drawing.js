@@ -25,7 +25,7 @@ function makeEdges( preview = false ) {
   if( !target || target.size() === 0 ){
     previewEles.remove();
 
-    this.emit( 'cancel', this.mp(), [source, presumptiveTargets, cy.collection()] );
+    this.emit( 'cancel', this.mp(), source, presumptiveTargets );
 
     return;
   }
@@ -34,7 +34,7 @@ function makeEdges( preview = false ) {
   if( !preview && options.preview ) {
     previewEles.removeClass('eh-preview');
 
-    this.emit( 'complete', this.mp(), [source, target, previewEles] );
+    this.emit( 'complete', this.mp(), source, target, previewEles );
 
     return;
   }
@@ -115,7 +115,7 @@ function makeEdges( preview = false ) {
   if( preview ) {
     this.previewEles = added;
   } else {
-    this.emit( 'complete', this.mp(), [source, target, added] );
+    this.emit( 'complete', this.mp(), source, target, added );
   }
 
   return this;
@@ -184,14 +184,15 @@ function setHandleFor( node ){
   if( this.handleShown() ){
     this.handleNode.position( pos );
   } else {
-    this.handleNode = cy.add({
-      classes: 'eh-handle',
-      position: pos,
-      grabbable: false,
-      style: {
-        'z-index': 9007199254740991
-      }
-    });
+    cy.batch( () => {
+      this.handleNode = cy.add({
+        classes: 'eh-handle',
+        position: pos,
+        grabbable: false
+      });
+
+      this.handleNode.style('z-index', 9007199254740991);
+    } );
   }
 
   return this;
@@ -209,32 +210,36 @@ function updateEdge() {
   if( !ghostNode || ghostNode.length === 0 || ghostNode.removed() ) {
     ghostEles = this.ghostEles = cy.collection();
 
-    ghostNode = this.ghostNode = cy.add( {
-      group: 'nodes',
-      classes: 'eh-ghost eh-ghost-node',
-      css: {
+    cy.batch( () => {
+      ghostNode = this.ghostNode = cy.add( {
+        group: 'nodes',
+        classes: 'eh-ghost eh-ghost-node',
+        position: {
+          x: 0,
+          y: 0
+        }
+      } );
+
+      ghostNode.style({
         'background-color': 'blue',
         'width': 0.0001,
         'height': 0.0001,
         'opacity': 0,
         'events': 'no'
-      },
-      position: {
-        x: 0,
-        y: 0
-      }
-    } );
+      });
 
-    ghostEdge = cy.add( {
-      group: 'edges',
-      classes: 'eh-ghost eh-ghost-edge',
-      data: {
-        source: sourceNode.id(),
-        target: ghostNode.id()
-      },
-      css: {
+      ghostEdge = cy.add( {
+        group: 'edges',
+        classes: 'eh-ghost eh-ghost-edge',
+        data: {
+          source: sourceNode.id(),
+          target: ghostNode.id()
+        }
+      } );
+
+      ghostEdge.style({
         'events': 'no'
-      }
+      });
     } );
 
     ghostEles.merge( ghostNode ).merge( ghostEdge );
