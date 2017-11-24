@@ -8,7 +8,7 @@ cytoscape-edgehandles
 ## Description
 
 
-This extension creates handles on nodes that can be dragged to create edges between nodes.
+This extension creates handles on nodes that can be dragged to create edges between nodes ([demo](https://cytoscape.github.io/cytoscape.js-edgehandles/))
 
 
 ## Dependencies
