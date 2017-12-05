@@ -137,6 +137,8 @@ function stop(){
 
   let { sourceNode, targetNode, handleNode, ghostEles, presumptiveTargets } = this;
 
+  clearTimeout( this.previewTimeout );
+
   this.active = false;
 
   this.makeEdges();
