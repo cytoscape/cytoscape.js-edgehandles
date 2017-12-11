@@ -154,6 +154,7 @@ The object returned by `cy.edgehandles()` has several functions available on it:
 
 These classes can be used for styling the graph as it interacts with the extension:
 
+* `eh-handle` : The handle node
 * `eh-source` : The source node
 * `eh-target` : A target node
 * `eh-preview` : Preview elements (used with `options.preview: true`)
