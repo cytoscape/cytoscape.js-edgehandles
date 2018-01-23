@@ -807,7 +807,8 @@ function unpreview(target) {
 
   var previewTimeout = this.previewTimeout,
       sourceNode = this.sourceNode,
-      previewEles = this.previewEles;
+      previewEles = this.previewEles,
+      cy = this.cy;
 
   clearTimeout(previewTimeout);
   this.previewTimeout = null;
@@ -815,6 +816,8 @@ function unpreview(target) {
   var source = sourceNode;
 
   target.removeClass('eh-preview eh-target eh-presumptive-target');
+
+  this.targetNode = cy.collection();
 
   this.removePreview(source, target);
 
