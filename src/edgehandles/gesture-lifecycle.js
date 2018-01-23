@@ -116,13 +116,15 @@ function preview( target ) {
 function unpreview( target ) {
   if( !this.active || target.same( this.handleNode ) ){ return; }
 
-  let { previewTimeout, sourceNode, previewEles } = this;
+  let { previewTimeout, sourceNode, previewEles, cy } = this;
   clearTimeout( previewTimeout );
   this.previewTimeout = null;
 
   let source = sourceNode;
 
   target.removeClass('eh-preview eh-target eh-presumptive-target');
+
+  this.targetNode = cy.collection();
 
   this.removePreview( source, target );
 
