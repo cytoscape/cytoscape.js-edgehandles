@@ -8,7 +8,7 @@ cytoscape-edgehandles
 ## Description
 
 
-This extension creates handles on nodes that can be dragged to create edges between nodes.
+This extension creates handles on nodes that can be dragged to create edges between nodes ([demo](https://cytoscape.github.io/cytoscape.js-edgehandles/))
 
 
 ## Dependencies
@@ -143,6 +143,7 @@ The object returned by `cy.edgehandles()` has several functions available on it:
 
 * `start()` : manually start the gesture (as if the handle were already held)
 * `stop()` : manually completes or cancels the gesture
+* `hide()` : remove the handle node from the graph
 * `disable()` : disables edgehandles behaviour
 * `enable()` : enables edgehandles behaviour
 * `enableDrawMode()` : turn on draw mode (the entire node body acts like the handle)
@@ -154,6 +155,7 @@ The object returned by `cy.edgehandles()` has several functions available on it:
 
 These classes can be used for styling the graph as it interacts with the extension:
 
+* `eh-handle` : The handle node
 * `eh-source` : The source node
 * `eh-target` : A target node
 * `eh-preview` : Preview elements (used with `options.preview: true`)
@@ -226,9 +228,10 @@ N.b. all builds use babel, so modern ES features can be used in the `src`.
 
 This project is set up to automatically be published to npm and bower.  To publish:
 
-1. Build the extension : `npm run build`
+1. Build the extension : `npm run build:release`
 1. Commit the build : `git commit -am "Build for release"`
 1. Bump the version number and tag: `npm version major|minor|patch`
 1. Push to origin: `git push && git push --tags`
 1. Publish to npm: `npm publish .`
-1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edgehandles https://github.com/cytoscape&#x2F;edgehandles.git`
+1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edgehandles https://github.com/cytoscape&#x2F;edgehandles.git`a
+1. [Make a new release](https://github.com/cytoscape/cytoscape.js-edgehandles/releases/new) for Zenodo.
