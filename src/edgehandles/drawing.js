@@ -152,6 +152,8 @@ function removeHandle(){
 function setHandleFor( node ){
   let { options, cy } = this;
 
+  let handlePosition = typeof options.handlePosition === typeof '' ? () => options.handlePosition : options.handlePosition;
+
   let p = node.position();
   let h = node.outerHeight();
   let w = node.outerWidth();
@@ -160,8 +162,8 @@ function setHandleFor( node ){
   let moveX = 0;
   let moveY = 0;
 
-  // grab axis's
-  let axes = options.handlePosition.toLowerCase().split(' ');
+  // grab axes
+  let axes = handlePosition( node ).toLowerCase().split(/\s+/);
   let axisX = axes[0];
   let axisY = axes[1];
 
