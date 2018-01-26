@@ -71,7 +71,9 @@ let defaults = {
   preview: true, // whether to show added edges preview before releasing selection
   hoverDelay: 150, // time spent hovering over a target node before it is considered selected
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
-  handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+  handlePosition: function( node ){
+    return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+  },
   handleInDrawMode: false, // whether to show the handle in draw mode
   edgeType: function( sourceNode, targetNode ){
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
@@ -141,7 +143,7 @@ let eh = cy.edgehandles( defaults );
 
 The object returned by `cy.edgehandles()` has several functions available on it:
 
-* `start()` : manually start the gesture (as if the handle were already held)
+* `start( sourceNode )` : manually start the gesture (as if the handle were already held)
 * `stop()` : manually completes or cancels the gesture
 * `hide()` : remove the handle node from the graph
 * `disable()` : disables edgehandles behaviour

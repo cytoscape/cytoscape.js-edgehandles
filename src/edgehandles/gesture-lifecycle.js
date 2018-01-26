@@ -137,7 +137,7 @@ function unpreview( target ) {
 function stop(){
   if( !this.active ){ return; }
 
-  let { sourceNode, targetNode, handleNode, ghostEles, presumptiveTargets } = this;
+  let { sourceNode, targetNode, ghostEles, presumptiveTargets } = this;
 
   clearTimeout( this.previewTimeout );
 
@@ -149,7 +149,8 @@ function stop(){
   targetNode.removeClass('eh-target eh-preview eh-hover');
   presumptiveTargets.removeClass('eh-presumptive-target');
 
-  handleNode.remove();
+  this.removeHandle();
+
   ghostEles.remove();
 
   this.clearCollections();

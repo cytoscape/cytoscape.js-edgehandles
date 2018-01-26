@@ -14,9 +14,7 @@ function addCytoscapeListeners(){
   this.addListener( cy, 'tap', 'node', e => {
     let node = e.target;
 
-    if( node.same( this.handleNode ) ){
-      this.hide();
-    } else {
+    if( !node.same( this.handleNode ) ){
       this.show( node );
     }
   } );
@@ -61,6 +59,13 @@ function addCytoscapeListeners(){
   // stop gesture on tapend
   this.addListener( cy, 'tapend', () => {
     this.stop();
+  } );
+
+  // hide handle if source node is removed
+  this.addListener( cy, 'remove', e => {
+    if( e.target.same( this.sourceNode ) ){
+      this.hide();
+    }
   } );
 
   return this;
