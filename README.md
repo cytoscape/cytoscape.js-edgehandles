@@ -141,7 +141,7 @@ let eh = cy.edgehandles( defaults );
 
 The object returned by `cy.edgehandles()` has several functions available on it:
 
-* `start()` : manually start the gesture (as if the handle were already held)
+* `start( sourceNode )` : manually start the gesture (as if the handle were already held)
 * `stop()` : manually completes or cancels the gesture
 * `hide()` : remove the handle node from the graph
 * `disable()` : disables edgehandles behaviour
