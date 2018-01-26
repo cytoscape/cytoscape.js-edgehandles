@@ -63,6 +63,13 @@ function addCytoscapeListeners(){
     this.stop();
   } );
 
+  // hide handle if source node is removed
+  this.addListener( cy, 'remove', e => {
+    if( e.target.same( this.sourceNode ) ){
+      this.hide();
+    }
+  } );
+
   return this;
 }
 
