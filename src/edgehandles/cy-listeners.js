@@ -14,9 +14,7 @@ function addCytoscapeListeners(){
   this.addListener( cy, 'tap', 'node', e => {
     let node = e.target;
 
-    if( node.same( this.handleNode ) ){
-      this.hide();
-    } else {
+    if( !node.same( this.handleNode ) ){
       this.show( node );
     }
   } );
