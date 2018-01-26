@@ -179,9 +179,7 @@ function addCytoscapeListeners() {
   this.addListener(cy, 'tap', 'node', function (e) {
     var node = e.target;
 
-    if (node.same(_this.handleNode)) {
-      _this.hide();
-    } else {
+    if (!node.same(_this.handleNode)) {
       _this.show(node);
     }
   });
@@ -228,6 +226,13 @@ function addCytoscapeListeners() {
     _this.stop();
   });
 
+  // hide handle if source node is removed
+  this.addListener(cy, 'remove', function (e) {
+    if (e.target.same(_this.sourceNode)) {
+      _this.hide();
+    }
+  });
+
   return this;
 }
 
@@ -245,7 +250,9 @@ var defaults = {
   preview: true, // whether to show added edges preview before releasing selection
   hoverDelay: 150, // time spent hovering over a target node before it is considered selected
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
-  handlePosition: 'middle top', // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+  handlePosition: function handlePosition(node) {
+    return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+  },
   handleInDrawMode: false, // whether to show the handle in draw mode
   edgeType: function edgeType(sourceNode, targetNode) {
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
@@ -358,6 +365,8 @@ module.exports = { toggleDrawMode: toggleDrawMode, enableDrawMode: enableDrawMod
 
 "use strict";
 
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var assign = __webpack_require__(0);
 
@@ -505,6 +514,10 @@ function setHandleFor(node) {
       cy = this.cy;
 
 
+  var handlePosition = _typeof(options.handlePosition) === _typeof('') ? function () {
+    return options.handlePosition;
+  } : options.handlePosition;
+
   var p = node.position();
   var h = node.outerHeight();
   var w = node.outerWidth();
@@ -513,8 +526,8 @@ function setHandleFor(node) {
   var moveX = 0;
   var moveY = 0;
 
-  // grab axis's
-  var axes = options.handlePosition.toLowerCase().split(' ');
+  // grab axes
+  var axes = handlePosition(node).toLowerCase().split(/\s+/);
   var axisX = axes[0];
   var axisY = axes[1];
 
@@ -834,7 +847,6 @@ function stop() {
 
   var sourceNode = this.sourceNode,
       targetNode = this.targetNode,
-      handleNode = this.handleNode,
       ghostEles = this.ghostEles,
       presumptiveTargets = this.presumptiveTargets;
 
@@ -849,7 +861,8 @@ function stop() {
   targetNode.removeClass('eh-target eh-preview eh-hover');
   presumptiveTargets.removeClass('eh-presumptive-target');
 
-  handleNode.remove();
+  this.removeHandle();
+
   ghostEles.remove();
 
   this.clearCollections();
