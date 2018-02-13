@@ -385,13 +385,25 @@ function makeEdges() {
   var cy = this.cy,
       options = this.options,
       presumptiveTargets = this.presumptiveTargets,
-      previewEles = this.previewEles;
+      previewEles = this.previewEles,
+      active = this.active;
 
 
   var source = this.sourceNode;
   var target = this.targetNode;
   var classes = preview ? 'eh-preview' : '';
   var added = cy.collection();
+  var edgeType = options.edgeType(source, target);
+
+  // can't make edges outside of regular gesture lifecycle
+  if (!active) {
+    return;
+  }
+
+  // must have a non-empty edge type
+  if (!edgeType) {
+    return;
+  }
 
   // can't make preview if disabled
   if (preview && !options.preview) {
@@ -431,8 +443,6 @@ function makeEdges() {
       y: (p1.y + p2.y) / 2
     };
   }
-
-  var edgeType = options.edgeType(source, target);
 
   if (edgeType === 'node') {
     var interNode = cy.add(addClassesToEleJson(assign({
@@ -721,12 +731,7 @@ function show(node) {
 }
 
 function hide() {
-  var cy = this.cy;
-
-
   this.removeHandle();
-
-  this.sourceNode = cy.collection();
 
   this.emit('hide', this.hp(), this.sourceNode);
 
@@ -766,34 +771,31 @@ function update(pos) {
 function preview(target) {
   var _this = this;
 
-  if (!this.active || target.same(this.handleNode)) {
-    return;
-  }
-
   var options = this.options,
       sourceNode = this.sourceNode,
       ghostNode = this.ghostNode,
       presumptiveTargets = this.presumptiveTargets,
-      previewEles = this.previewEles;
+      previewEles = this.previewEles,
+      active = this.active;
 
   var source = sourceNode;
+  var isLoop = target.same(source);
+  var loopAllowed = options.loopAllowed(target);
+  var isGhost = target.same(ghostNode);
+  var noEdge = !options.edgeType(source, target);
+  var isHandle = target.same(this.handleNode);
+
+  if (!active || isHandle || isGhost || noEdge) {
+    return;
+  }
 
   clearTimeout(this.previewTimeout);
 
   this.previewTimeout = setTimeout(function () {
-    var isLoop = target.same(source);
-    var loopAllowed = options.loopAllowed(target);
-    var isGhost = target.same(ghostNode);
-    var noEdge = options.edgeType(source, target) == null;
-
     _this.targetNode = target;
     presumptiveTargets.merge(target);
 
     target.addClass('eh-presumptive-target');
-
-    if (isGhost || noEdge) {
-      return;
-    }
 
     if (!isLoop || isLoop && loopAllowed) {
       target.addClass('eh-target');
@@ -853,13 +855,11 @@ function stop() {
 
   clearTimeout(this.previewTimeout);
 
-  this.active = false;
-
-  this.makeEdges();
-
   sourceNode.removeClass('eh-source');
   targetNode.removeClass('eh-target eh-preview eh-hover');
   presumptiveTargets.removeClass('eh-presumptive-target');
+
+  this.makeEdges();
 
   this.removeHandle();
 
@@ -868,6 +868,8 @@ function stop() {
   this.clearCollections();
 
   this.resetGestures();
+
+  this.active = false;
 
   this.emit('stop', this.mp(), sourceNode);
 

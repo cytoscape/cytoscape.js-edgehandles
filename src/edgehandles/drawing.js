@@ -11,12 +11,19 @@ function addClassesToEleJson( json, classes ){
 }
 
 function makeEdges( preview = false ) {
-  let { cy, options, presumptiveTargets, previewEles } = this;
+  let { cy, options, presumptiveTargets, previewEles, active } = this;
 
   let source = this.sourceNode;
   let target = this.targetNode;
   let classes = preview ? 'eh-preview' : '';
   let added = cy.collection();
+  let edgeType = options.edgeType( source, target );
+
+  // can't make edges outside of regular gesture lifecycle
+  if( !active ){ return; }
+
+  // must have a non-empty edge type
+  if( !edgeType ){ return; }
 
   // can't make preview if disabled
   if( preview && !options.preview ){ return; }
@@ -54,8 +61,6 @@ function makeEdges( preview = false ) {
       y: ( p1.y + p2.y ) / 2
     };
   }
-
-  let edgeType = options.edgeType( source, target );
 
   if( edgeType === 'node' ){
     let interNode = cy.add(

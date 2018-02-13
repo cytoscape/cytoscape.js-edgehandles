@@ -37,11 +37,7 @@ function show( node ){
 }
 
 function hide(){
-  let { cy } = this;
-
   this.removeHandle();
-
-  this.sourceNode = cy.collection();
 
   this.emit( 'hide', this.hp(), this.sourceNode );
 
@@ -74,26 +70,24 @@ function update( pos ){
   return this;
 }
 
-function preview( target ) {
-  if( !this.active || target.same( this.handleNode ) ){ return; }
-
-  let { options, sourceNode, ghostNode, presumptiveTargets, previewEles } = this;
+function preview( target ){
+  let { options, sourceNode, ghostNode, presumptiveTargets, previewEles, active } = this;
   let source = sourceNode;
+  let isLoop = target.same( source );
+  let loopAllowed = options.loopAllowed( target );
+  let isGhost = target.same( ghostNode );
+  let noEdge = !options.edgeType( source, target );
+  let isHandle = target.same( this.handleNode );
+
+  if( !active || isHandle || isGhost || noEdge ) { return; }
 
   clearTimeout( this.previewTimeout );
 
   this.previewTimeout = setTimeout( () => {
-    let isLoop = target.same( source );
-    let loopAllowed = options.loopAllowed( target );
-    let isGhost = target.same( ghostNode );
-    let noEdge = options.edgeType( source, target ) == null;
-
     this.targetNode = target;
     presumptiveTargets.merge( target );
 
     target.addClass('eh-presumptive-target');
-
-    if( isGhost || noEdge ) { return; }
 
     if( !isLoop || ( isLoop && loopAllowed ) ) {
       target.addClass('eh-target');
@@ -141,13 +135,11 @@ function stop(){
 
   clearTimeout( this.previewTimeout );
 
-  this.active = false;
-
-  this.makeEdges();
-
   sourceNode.removeClass('eh-source');
   targetNode.removeClass('eh-target eh-preview eh-hover');
   presumptiveTargets.removeClass('eh-presumptive-target');
+
+  this.makeEdges();
 
   this.removeHandle();
 
@@ -156,6 +148,8 @@ function stop(){
   this.clearCollections();
 
   this.resetGestures();
+
+  this.active = false;
 
   this.emit( 'stop', this.mp(), sourceNode );
 
