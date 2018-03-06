@@ -141,7 +141,7 @@
 					}
 				});
 
-				var eh = cy.edgehandles();
+				var eh = cy.edgehandles({draw: true});
 
 				document.querySelector('#draw-on').addEventListener('click', function() {
 					eh.enableDrawMode();
