@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 let defaults = {
   preview: true, // whether to show added edges preview before releasing selection
+  draw: false, // whether to enable drawing edges from node with right-click mousedrag or two-finger tabdrag
   hoverDelay: 150, // time spent hovering over a target node before it is considered selected
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
   handlePosition: function( node ){

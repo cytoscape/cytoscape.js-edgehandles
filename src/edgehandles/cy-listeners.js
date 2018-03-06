@@ -61,6 +61,47 @@ function addCytoscapeListeners(){
     this.stop();
   } );
 
+  // start on cxttapstart (right-click mousedown or twofinger tabstart)
+  this.addListener( cy, 'cxttapstart', 'node', e => {
+    if (!this.options.draw) return;
+
+    let node = e.target;
+
+    if( node.same( this.handleNode ) ){
+      this.start( this.sourceNode );
+    } else {
+      this.start( node );
+    }
+  } );
+
+  // update line on drag
+  this.addListener( cy, 'tapdrag', e => {
+      if (!this.options.draw) return;
+
+      this.update( e.position );
+  } );
+
+  // hover over preview
+  this.addListener( cy, 'cxtdragover', 'node', e => {
+      if (!this.options.draw) return;
+
+      this.preview( e.target );
+  } );
+
+  // hover out unpreview
+  this.addListener( cy, 'cxtdragout', 'node', e => {
+      if (!this.options.draw) return;
+
+      this.unpreview( e.target );
+  } );
+
+  // stop gesture on cxttapend
+  this.addListener( cy, 'cxttapend', () => {
+      if (!this.options.draw) return;
+
+      this.stop();
+  } );
+
   // hide handle if source node is removed
   this.addListener( cy, 'remove', e => {
     if( e.target.same( this.sourceNode ) ){
