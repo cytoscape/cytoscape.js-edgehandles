@@ -512,7 +512,9 @@ function handleShown() {
 }
 
 function removeHandle() {
-  this.handleNode.remove();
+  if (this.handleShown()) {
+    this.handleNode.remove();
+  }
 
   return this;
 }
