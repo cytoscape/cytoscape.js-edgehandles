@@ -197,7 +197,8 @@ function setHandleFor( node ){
       this.handleNode = cy.add({
         classes: 'eh-handle',
         position: pos,
-        grabbable: false
+        grabbable: false,
+        selectable: false
       });
 
       this.handleNode.style('z-index', 9007199254740991);
