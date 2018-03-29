@@ -1073,7 +1073,11 @@ function emit(type, position) {
 
   cy.emit({ type: 'eh' + type, position: position }, args);
 
-  options[type].apply(options, args);
+  var handler = options[type];
+
+  if (handler != null) {
+    handler.apply(undefined, args);
+  }
 
   return this;
 }
