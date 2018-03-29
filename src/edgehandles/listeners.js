@@ -88,7 +88,11 @@ function emit( type, position, ...args ){
 
   cy.emit( { type: `eh${type}`, position }, args );
 
-  options[ type ]( ...args );
+  let handler = options[ type ];
+
+  if( handler != null ){
+    handler( ...args );
+  }
 
   return this;
 }
