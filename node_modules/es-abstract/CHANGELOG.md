@@ -1,3 +1,16 @@
+1.11.0 / 2018-03-21
+=================
+  * [New] `ES2015+`: add iterator abstract ops
+  * [Dev Deps] update `eslint`, `nsp`, `object.assign`, `semver`, `tape`
+  * [Tests] up to `node` `v9.8`, `v8.10`, `v6.13`
+
+1.10.0 / 2017-11-24
+=================
+  * [New] ES2015+: `AdvanceStringIndex`
+  * [Dev Deps] update `eslint`, `nsp`
+  * [Tests] require node 0.6 to pass again
+  * [Tests] up to `node` `v9.2`, `v8.9`, `v6.12`; use `nvm install-latest-npm`; pin included builds to LTS
+
 1.9.0 / 2017-09-30
 =================
   * [New] `es2015+`: add `ArraySpeciesCreate`

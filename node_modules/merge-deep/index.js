@@ -30,7 +30,7 @@ module.exports = function mergeDeep(orig, objects) {
 
 function merge(target, obj) {
   for (var key in obj) {
-    if (!hasOwn(obj, key)) {
+    if (key === '__proto__' || !hasOwn(obj, key)) {
       continue;
     }
 

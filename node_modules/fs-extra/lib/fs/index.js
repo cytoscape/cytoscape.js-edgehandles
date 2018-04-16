@@ -9,6 +9,7 @@ const api = [
   'chmod',
   'chown',
   'close',
+  'copyFile',
   'fchmod',
   'fchown',
   'fdatasync',
@@ -20,8 +21,8 @@ const api = [
   'link',
   'lstat',
   'mkdir',
+  'mkdtemp',
   'open',
-  'read',
   'readFile',
   'readdir',
   'readlink',
@@ -33,11 +34,14 @@ const api = [
   'truncate',
   'unlink',
   'utimes',
-  'write',
   'writeFile'
-]
-// fs.mkdtemp() was added in Node.js v5.10.0, so check if it exists
-typeof fs.mkdtemp === 'function' && api.push('mkdtemp')
+].filter(key => {
+  // Some commands are not available on some systems. Ex:
+  // fs.copyFile was added in Node.js v8.5.0
+  // fs.mkdtemp was added in Node.js v5.10.0
+  // fs.lchown is not available on at least some Linux
+  return typeof fs[key] === 'function'
+})
 
 // Export all keys:
 Object.keys(fs).forEach(key => {
@@ -57,5 +61,47 @@ exports.exists = function (filename, callback) {
   }
   return new Promise(resolve => {
     return fs.exists(filename, resolve)
+  })
+}
+
+// fs.read() & fs.write need special treatment due to multiple callback args
+
+exports.read = function (fd, buffer, offset, length, position, callback) {
+  if (typeof callback === 'function') {
+    return fs.read(fd, buffer, offset, length, position, callback)
+  }
+  return new Promise((resolve, reject) => {
+    fs.read(fd, buffer, offset, length, position, (err, bytesRead, buffer) => {
+      if (err) return reject(err)
+      resolve({ bytesRead, buffer })
+    })
+  })
+}
+
+// Function signature can be
+// fs.write(fd, buffer[, offset[, length[, position]]], callback)
+// OR
+// fs.write(fd, string[, position[, encoding]], callback)
+// so we need to handle both cases
+exports.write = function (fd, buffer, a, b, c, callback) {
+  if (typeof arguments[arguments.length - 1] === 'function') {
+    return fs.write(fd, buffer, a, b, c, callback)
+  }
+
+  // Check for old, depricated fs.write(fd, string[, position[, encoding]], callback)
+  if (typeof buffer === 'string') {
+    return new Promise((resolve, reject) => {
+      fs.write(fd, buffer, a, b, (err, bytesWritten, buffer) => {
+        if (err) return reject(err)
+        resolve({ bytesWritten, buffer })
+      })
+    })
+  }
+
+  return new Promise((resolve, reject) => {
+    fs.write(fd, buffer, a, b, c, (err, bytesWritten, buffer) => {
+      if (err) return reject(err)
+      resolve({ bytesWritten, buffer })
+    })
   })
 }

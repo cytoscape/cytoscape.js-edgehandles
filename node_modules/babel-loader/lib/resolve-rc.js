@@ -4,7 +4,7 @@ var path = require("path");
 var exists = require("./utils/exists");
 
 module.exports = function find(fileSystem, start) {
-  var _arr = [".babelrc", ".babelrc.js", "package.json"];
+  var _arr = [".babelrc", "package.json"];
 
   for (var _i = 0; _i < _arr.length; _i++) {
     var fileName = _arr[_i];
