@@ -1,5 +1,5 @@
 function addCytoscapeListeners(){
-  let { cy } = this;
+  let { cy, options } = this;
 
   // grabbing nodes
   this.addListener( cy, 'drag', () => this.grabbingNode = true );
@@ -53,7 +53,11 @@ function addCytoscapeListeners(){
 
   // hover out unpreview
   this.addListener( cy, 'tapdragout', 'node', e => {
-    this.unpreview( e.target );
+    if( options.snap && e.target.same(this.targetNode) ){
+      // then keep the preview
+    } else {
+      this.unpreview( e.target );
+    }
   } );
 
   // stop gesture on tapend

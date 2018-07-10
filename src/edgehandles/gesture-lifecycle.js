@@ -1,3 +1,5 @@
+const memoize = require('../memoize');
+
 function canStartOn( node ){
   const { options, previewEles, ghostEles, handleNode } = this;
   const isPreview = el => previewEles.anySame(el);
@@ -66,11 +68,45 @@ function update( pos ){
   this.my = p.y;
 
   this.updateEdge();
+  this.snap();
 
   return this;
 }
 
-function preview( target ){
+function snap(){
+  if( !this.active || !this.options.snap ){ return false; }
+
+  let cy = this.cy;
+  let tgt = this.targetNode;
+  let threshold = this.options.snapThreshold;
+  let sqThreshold = threshold * threshold;
+  let mousePos = this.mp();
+  let sqDist = (p1, p2) => (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+  let nodeSqDist = memoize(n => sqDist(n.position(), mousePos), n => n.id());
+  let isWithinTheshold = n => nodeSqDist(n) <= sqThreshold;
+  let cmpSqDist = (n1, n2) => nodeSqDist(n1) - nodeSqDist(n2);
+  let allowHoverDelay = false;
+
+  let nodesByDist = cy.nodes(isWithinTheshold).sort(cmpSqDist);
+  let snapped = false;
+
+  if( tgt.nonempty() && !isWithinTheshold(tgt) ){
+    this.unpreview(tgt);
+  }
+
+  for(let i = 0; i < nodesByDist.length; i++){
+    let n = nodesByDist[i];
+
+    if( n.same(tgt) || this.preview(n, allowHoverDelay) ){
+      snapped = true;
+      break;
+    }
+  }
+
+  return snapped;
+}
+
+function preview( target, allowHoverDelay = true ){
   let { options, sourceNode, ghostNode, presumptiveTargets, previewEles, active } = this;
   let source = sourceNode;
   let isLoop = target.same( source );
@@ -78,33 +114,42 @@ function preview( target ){
   let isGhost = target.same( ghostNode );
   let noEdge = !options.edgeType( source, target );
   let isHandle = target.same( this.handleNode );
+  let isExistingTgt = target.same( this.targetNode );
 
-  if( !active || isHandle || isGhost || noEdge ) { return; }
+  if( !active || isHandle || isGhost || noEdge || isExistingTgt || (isLoop && !loopAllowed) ) { return false; }
+
+  if( this.targetNode.nonempty() ){
+    this.unpreview( this.targetNode );
+  }
 
   clearTimeout( this.previewTimeout );
 
-  this.previewTimeout = setTimeout( () => {
+  let applyPreview = () => {
     this.targetNode = target;
+
     presumptiveTargets.merge( target );
 
     target.addClass('eh-presumptive-target');
+    target.addClass('eh-target');
 
-    if( !isLoop || ( isLoop && loopAllowed ) ) {
-      target.addClass('eh-target');
+    this.emit( 'hoverover', this.mp(), source, target );
 
-      this.emit( 'hoverover', this.mp(), source, target );
+    if( options.preview ){
+      target.addClass('eh-preview');
 
-      if( options.preview ){
-        target.addClass('eh-preview');
+      this.makePreview();
 
-        this.makePreview();
-
-        this.emit( 'previewon', this.mp(), source, target, previewEles );
-      }
+      this.emit( 'previewon', this.mp(), source, target, previewEles );
     }
-  }, options.hoverDelay );
+  };
 
-  return this;
+  if( allowHoverDelay && options.hoverDelay > 0 ){
+    this.previewTimeout = setTimeout( applyPreview, options.hoverDelay );
+  } else {
+    applyPreview();
+  }
+
+  return true;
 }
 
 function unpreview( target ) {
@@ -157,6 +202,6 @@ function stop(){
 }
 
 module.exports = {
-  show, hide, start, update, preview, unpreview, stop,
+  show, hide, start, update, preview, unpreview, stop, snap,
   canStartOn, canStartDrawModeOn, canStartNonDrawModeOn
 };
