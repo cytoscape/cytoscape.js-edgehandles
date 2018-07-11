@@ -10,7 +10,7 @@
   "scripts": {
     "postpublish": "run-s gh-pages:demo gh-pages:deploy gh-pages:cleanup",
     "gh-pages:demo": "cpy demo.html . --rename=index.html",
-    "gh-pages:deploy": "gh-pages -d . -v node_modules/**",
+    "gh-pages:deploy": "gh-pages -d . -v node_modules",
     "gh-pages:cleanup": "rimraf index.html",
     "copyright": "update license",
     "lint": "eslint src",
