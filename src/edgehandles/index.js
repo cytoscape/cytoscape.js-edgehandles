@@ -1,5 +1,6 @@
 const defaults = require('./defaults');
 const assign = require('../assign');
+const throttle = require('lodash.throttle');
 
 const cyGesturesToggle = require('./cy-gestures-toggle');
 const cyListeners = require('./cy-listeners');
@@ -8,6 +9,7 @@ const drawing = require('./drawing');
 const enabling = require('./enabling');
 const gestureLifecycle = require('./gesture-lifecycle');
 const listeners = require('./listeners');
+const edgeEvents = require('./edge-events-toggle');
 
 function Edgehandles( options ){
   let cy = options.cy;
@@ -38,6 +40,8 @@ function Edgehandles( options ){
 
   this.saveGestureState();
   this.addListeners();
+
+  this.throttledSnap = throttle( this.snap.bind(this), 1000/options.snapFrequency );
 }
 
 let proto = Edgehandles.prototype = {};
@@ -77,7 +81,8 @@ proto.clearCollections = function(){
   drawing,
   enabling,
   gestureLifecycle,
-  listeners
+  listeners,
+  edgeEvents
 ].forEach( extend );
 
 module.exports = Edgehandles;

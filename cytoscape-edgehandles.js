@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
+		module.exports = factory(require("lodash.memoize"), require("lodash.throttle"));
 	else if(typeof define === 'function' && define.amd)
-		define([], factory);
+		define(["lodash.memoize", "lodash.throttle"], factory);
 	else if(typeof exports === 'object')
-		exports["cytoscapeEdgehandles"] = factory();
+		exports["cytoscapeEdgehandles"] = factory(require("lodash.memoize"), require("lodash.throttle"));
 	else
-		root["cytoscapeEdgehandles"] = factory();
-})(this, function() {
+		root["cytoscapeEdgehandles"] = factory(root["_"]["memoize"], root["_"]["throttle"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_14__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -106,7 +106,7 @@ module.exports = Object.assign != null ? Object.assign.bind(Object) : function (
 "use strict";
 
 
-var Edgehandles = __webpack_require__(9);
+var Edgehandles = __webpack_require__(10);
 var assign = __webpack_require__(0);
 
 module.exports = function (options) {
@@ -159,7 +159,8 @@ module.exports = { disableGestures: disableGestures, resetGestures: resetGesture
 function addCytoscapeListeners() {
   var _this = this;
 
-  var cy = this.cy;
+  var cy = this.cy,
+      options = this.options;
 
   // grabbing nodes
 
@@ -218,7 +219,11 @@ function addCytoscapeListeners() {
 
   // hover out unpreview
   this.addListener(cy, 'tapdragout', 'node', function (e) {
-    _this.unpreview(e.target);
+    if (options.snap && e.target.same(_this.targetNode)) {
+      // then keep the preview
+    } else {
+      _this.unpreview(e.target);
+    }
   });
 
   // stop gesture on tapend
@@ -250,6 +255,10 @@ var defaults = {
   preview: true, // whether to show added edges preview before releasing selection
   hoverDelay: 150, // time spent hovering over a target node before it is considered selected
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
+  snap: false, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
+  snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
+  snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
+  noEdgeEventsInDraw: false, // set events:no to edges during draws, prevents mouseouts on compounds
   handlePosition: function handlePosition(node) {
     return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
   },
@@ -421,7 +430,7 @@ function makeEdges() {
 
   // just remove preview class if we already have the edges
   if (!preview && options.preview) {
-    previewEles.removeClass('eh-preview');
+    previewEles.removeClass('eh-preview').style('events', '');
 
     this.emit('complete', this.mp(), source, target, previewEles);
 
@@ -447,7 +456,8 @@ function makeEdges() {
   if (edgeType === 'node') {
     var interNode = cy.add(addClassesToEleJson(assign({
       group: 'nodes',
-      position: p
+      position: p,
+      style: { 'events': 'no' }
     }, options.nodeParams(source, target)), classes));
 
     var source2inter = cy.add(addClassesToEleJson(assign({
@@ -455,7 +465,8 @@ function makeEdges() {
       data: {
         source: source.id(),
         target: interNode.id()
-      }
+      },
+      style: { 'events': 'no' }
     }, options.edgeParams(source, target, 0)), classes));
 
     var inter2target = cy.add(addClassesToEleJson(assign({
@@ -463,7 +474,8 @@ function makeEdges() {
       data: {
         source: interNode.id(),
         target: target.id()
-      }
+      },
+      style: { 'events': 'no' }
     }, options.edgeParams(source, target, 1)), classes));
 
     added = added.merge(interNode).merge(source2inter).merge(inter2target);
@@ -474,7 +486,8 @@ function makeEdges() {
       data: {
         source: source.id(),
         target: target.id()
-      }
+      },
+      style: { 'events': 'no' }
     }, options.edgeParams(source, target, 0)), classes));
 
     added = added.merge(source2target);
@@ -652,6 +665,31 @@ module.exports = {
 "use strict";
 
 
+function disableEdgeEvents() {
+  if (this.options.noEdgeEventsInDraw) {
+    this.cy.edges().style('events', 'no');
+  }
+
+  return this;
+}
+
+function enableEdgeEvents() {
+  if (this.options.noEdgeEventsInDraw) {
+    this.cy.edges().style('events', '');
+  }
+
+  return this;
+}
+
+module.exports = { disableEdgeEvents: disableEdgeEvents, enableEdgeEvents: enableEdgeEvents };
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 function enable() {
   this.enabled = true;
 
@@ -671,11 +709,13 @@ function disable() {
 module.exports = { enable: enable, disable: disable };
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+var memoize = __webpack_require__(13);
 
 function canStartOn(node) {
   var options = this.options,
@@ -752,6 +792,7 @@ function start(node) {
   this.sourceNode.addClass('eh-source');
 
   this.disableGestures();
+  this.disableEdgeEvents();
 
   this.emit('start', this.hp(), node);
 }
@@ -767,16 +808,69 @@ function update(pos) {
   this.my = p.y;
 
   this.updateEdge();
+  this.throttledSnap();
 
   return this;
+}
+
+function snap() {
+  if (!this.active || !this.options.snap) {
+    return false;
+  }
+
+  var cy = this.cy;
+  var tgt = this.targetNode;
+  var threshold = this.options.snapThreshold;
+  var sqThreshold = function sqThreshold(n) {
+    var r = getRadius(n);var t = r + threshold;return t * t;
+  };
+  var mousePos = this.mp();
+  var sqDist = function sqDist(p1, p2) {
+    return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+  };
+  var getRadius = function getRadius(n) {
+    return (n.outerWidth() + n.outerHeight()) / 4;
+  };
+  var nodeSqDist = memoize(function (n) {
+    return sqDist(n.position(), mousePos);
+  }, function (n) {
+    return n.id();
+  });
+  var isWithinTheshold = function isWithinTheshold(n) {
+    return nodeSqDist(n) <= sqThreshold(n);
+  };
+  var cmpSqDist = function cmpSqDist(n1, n2) {
+    return nodeSqDist(n1) - nodeSqDist(n2);
+  };
+  var allowHoverDelay = false;
+
+  var nodesByDist = cy.nodes(isWithinTheshold).sort(cmpSqDist);
+  var snapped = false;
+
+  if (tgt.nonempty() && !isWithinTheshold(tgt)) {
+    this.unpreview(tgt);
+  }
+
+  for (var i = 0; i < nodesByDist.length; i++) {
+    var n = nodesByDist[i];
+
+    if (n.same(tgt) || this.preview(n, allowHoverDelay)) {
+      snapped = true;
+      break;
+    }
+  }
+
+  return snapped;
 }
 
 function preview(target) {
   var _this = this;
 
+  var allowHoverDelay = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
   var options = this.options,
       sourceNode = this.sourceNode,
       ghostNode = this.ghostNode,
+      ghostEles = this.ghostEles,
       presumptiveTargets = this.presumptiveTargets,
       previewEles = this.previewEles,
       active = this.active;
@@ -787,35 +881,48 @@ function preview(target) {
   var isGhost = target.same(ghostNode);
   var noEdge = !options.edgeType(source, target);
   var isHandle = target.same(this.handleNode);
+  var isExistingTgt = target.same(this.targetNode);
 
-  if (!active || isHandle || isGhost || noEdge) {
-    return;
+  if (!active || isHandle || isGhost || noEdge || isExistingTgt || isLoop && !loopAllowed) {
+    return false;
+  }
+
+  if (this.targetNode.nonempty()) {
+    this.unpreview(this.targetNode);
   }
 
   clearTimeout(this.previewTimeout);
 
-  this.previewTimeout = setTimeout(function () {
+  var applyPreview = function applyPreview() {
     _this.targetNode = target;
+
     presumptiveTargets.merge(target);
 
     target.addClass('eh-presumptive-target');
+    target.addClass('eh-target');
 
-    if (!isLoop || isLoop && loopAllowed) {
-      target.addClass('eh-target');
+    _this.emit('hoverover', _this.mp(), source, target);
 
-      _this.emit('hoverover', _this.mp(), source, target);
+    if (options.preview) {
+      target.addClass('eh-preview');
 
-      if (options.preview) {
-        target.addClass('eh-preview');
+      ghostEles.addClass('eh-preview-active');
+      sourceNode.addClass('eh-preview-active');
+      target.addClass('eh-preview-active');
 
-        _this.makePreview();
+      _this.makePreview();
 
-        _this.emit('previewon', _this.mp(), source, target, previewEles);
-      }
+      _this.emit('previewon', _this.mp(), source, target, previewEles);
     }
-  }, options.hoverDelay);
+  };
 
-  return this;
+  if (allowHoverDelay && options.hoverDelay > 0) {
+    this.previewTimeout = setTimeout(applyPreview, options.hoverDelay);
+  } else {
+    applyPreview();
+  }
+
+  return true;
 }
 
 function unpreview(target) {
@@ -826,6 +933,7 @@ function unpreview(target) {
   var previewTimeout = this.previewTimeout,
       sourceNode = this.sourceNode,
       previewEles = this.previewEles,
+      ghostEles = this.ghostEles,
       cy = this.cy;
 
   clearTimeout(previewTimeout);
@@ -833,7 +941,9 @@ function unpreview(target) {
 
   var source = sourceNode;
 
-  target.removeClass('eh-preview eh-target eh-presumptive-target');
+  target.removeClass('eh-preview eh-target eh-presumptive-target eh-preview-active');
+  ghostEles.removeClass('eh-preview-active');
+  sourceNode.removeClass('eh-preview-active');
 
   this.targetNode = cy.collection();
 
@@ -871,6 +981,7 @@ function stop() {
   this.clearCollections();
 
   this.resetGestures();
+  this.enableEdgeEvents();
 
   this.active = false;
 
@@ -880,12 +991,12 @@ function stop() {
 }
 
 module.exports = {
-  show: show, hide: hide, start: start, update: update, preview: preview, unpreview: unpreview, stop: stop,
+  show: show, hide: hide, start: start, update: update, preview: preview, unpreview: unpreview, stop: stop, snap: snap,
   canStartOn: canStartOn, canStartDrawModeOn: canStartDrawModeOn, canStartNonDrawModeOn: canStartNonDrawModeOn
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -893,14 +1004,16 @@ module.exports = {
 
 var defaults = __webpack_require__(4);
 var assign = __webpack_require__(0);
+var throttle = __webpack_require__(14);
 
 var cyGesturesToggle = __webpack_require__(2);
 var cyListeners = __webpack_require__(3);
 var drawMode = __webpack_require__(5);
 var drawing = __webpack_require__(6);
-var enabling = __webpack_require__(7);
-var gestureLifecycle = __webpack_require__(8);
-var listeners = __webpack_require__(10);
+var enabling = __webpack_require__(8);
+var gestureLifecycle = __webpack_require__(9);
+var listeners = __webpack_require__(11);
+var edgeEvents = __webpack_require__(7);
 
 function Edgehandles(options) {
   var cy = options.cy;
@@ -931,6 +1044,8 @@ function Edgehandles(options) {
 
   this.saveGestureState();
   this.addListeners();
+
+  this.throttledSnap = throttle(this.snap.bind(this), 1000 / options.snapFrequency);
 }
 
 var proto = Edgehandles.prototype = {};
@@ -966,12 +1081,12 @@ proto.clearCollections = function () {
   this.presumptiveTargets = cy.collection();
 };
 
-[cyGesturesToggle, cyListeners, drawMode, drawing, enabling, gestureLifecycle, listeners].forEach(extend);
+[cyGesturesToggle, cyListeners, drawMode, drawing, enabling, gestureLifecycle, listeners, edgeEvents].forEach(extend);
 
 module.exports = Edgehandles;
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1085,7 +1200,7 @@ function emit(type, position) {
 module.exports = { addListener: addListener, addListeners: addListeners, removeListener: removeListener, removeListeners: removeListeners, emit: emit };
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1108,6 +1223,18 @@ if (typeof cytoscape !== 'undefined') {
 }
 
 module.exports = register;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
 
 /***/ })
 /******/ ]);

@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-edgehandles",
-  "version": "3.2.4",
+  "version": "3.3.0",
   "description": "Edge creation UI extension for Cytoscape",
   "main": "cytoscape-edgehandles.js",
   "author": {
@@ -10,7 +10,7 @@
   "scripts": {
     "postpublish": "run-s gh-pages:demo gh-pages:deploy gh-pages:cleanup",
     "gh-pages:demo": "cpy demo.html . --rename=index.html",
-    "gh-pages:deploy": "gh-pages -d .",
+    "gh-pages:deploy": "gh-pages -d . -v node_modules/**",
     "gh-pages:cleanup": "rimraf index.html",
     "copyright": "update license",
     "lint": "eslint src",
@@ -54,5 +54,9 @@
   },
   "peerDependencies": {
     "cytoscape": "^3.2.0"
+  },
+  "dependencies": {
+    "lodash.memoize": "^4.1.2",
+    "lodash.throttle": "^4.1.1"
   }
 }
