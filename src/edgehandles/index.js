@@ -9,6 +9,7 @@ const drawing = require('./drawing');
 const enabling = require('./enabling');
 const gestureLifecycle = require('./gesture-lifecycle');
 const listeners = require('./listeners');
+const edgeEvents = require('./edge-events-toggle');
 
 function Edgehandles( options ){
   let cy = options.cy;
@@ -80,7 +81,8 @@ proto.clearCollections = function(){
   drawing,
   enabling,
   gestureLifecycle,
-  listeners
+  listeners,
+  edgeEvents
 ].forEach( extend );
 
 module.exports = Edgehandles;

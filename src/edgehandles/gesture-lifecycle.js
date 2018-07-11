@@ -55,6 +55,7 @@ function start( node ){
   this.sourceNode.addClass('eh-source');
 
   this.disableGestures();
+  this.disableEdgeEvents();
 
   this.emit( 'start', this.hp(), node );
 }
@@ -199,6 +200,7 @@ function stop(){
   this.clearCollections();
 
   this.resetGestures();
+  this.enableEdgeEvents();
 
   this.active = false;
 
