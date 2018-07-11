@@ -164,6 +164,7 @@ These classes can be used for styling the graph as it interacts with the extensi
 * `eh-hover` : Added to nodes as they are hovered over as targets
 * `eh-ghost-edge` : The ghost handle line edge
 * `eh-presumptive-target` : A node that, during an edge drag, may become a target when released
+* `eh-preview-active` : Applied to the source, target, and ghost edge when the preview is active
 
 
 ## Events

@@ -107,7 +107,7 @@ function snap(){
 }
 
 function preview( target, allowHoverDelay = true ){
-  let { options, sourceNode, ghostNode, presumptiveTargets, previewEles, active } = this;
+  let { options, sourceNode, ghostNode, ghostEles, presumptiveTargets, previewEles, active } = this;
   let source = sourceNode;
   let isLoop = target.same( source );
   let loopAllowed = options.loopAllowed( target );
@@ -137,6 +137,10 @@ function preview( target, allowHoverDelay = true ){
     if( options.preview ){
       target.addClass('eh-preview');
 
+      ghostEles.addClass('eh-preview-active');
+      sourceNode.addClass('eh-preview-active');
+      target.addClass('eh-preview-active');
+
       this.makePreview();
 
       this.emit( 'previewon', this.mp(), source, target, previewEles );
@@ -155,13 +159,15 @@ function preview( target, allowHoverDelay = true ){
 function unpreview( target ) {
   if( !this.active || target.same( this.handleNode ) ){ return; }
 
-  let { previewTimeout, sourceNode, previewEles, cy } = this;
+  let { previewTimeout, sourceNode, previewEles, ghostEles, cy } = this;
   clearTimeout( previewTimeout );
   this.previewTimeout = null;
 
   let source = sourceNode;
 
-  target.removeClass('eh-preview eh-target eh-presumptive-target');
+  target.removeClass('eh-preview eh-target eh-presumptive-target eh-preview-active');
+  ghostEles.removeClass('eh-preview-active');
+  sourceNode.removeClass('eh-preview-active');
 
   this.targetNode = cy.collection();
 
