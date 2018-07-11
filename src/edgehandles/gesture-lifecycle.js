@@ -68,7 +68,7 @@ function update( pos ){
   this.my = p.y;
 
   this.updateEdge();
-  this.snap();
+  this.throttledSnap();
 
   return this;
 }

@@ -5,6 +5,7 @@ let defaults = {
   handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
   snap: false, // when enabled, the edge can be drawn by just moving close to a target node
   snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
+  snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
   handlePosition: function( node ){
     return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
   },

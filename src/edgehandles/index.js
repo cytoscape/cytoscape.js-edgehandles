@@ -1,5 +1,6 @@
 const defaults = require('./defaults');
 const assign = require('../assign');
+const throttle = require('lodash.throttle');
 
 const cyGesturesToggle = require('./cy-gestures-toggle');
 const cyListeners = require('./cy-listeners');
@@ -38,6 +39,8 @@ function Edgehandles( options ){
 
   this.saveGestureState();
   this.addListeners();
+
+  this.throttledSnap = throttle( this.snap.bind(this), 1000/options.snapFrequency );
 }
 
 let proto = Edgehandles.prototype = {};
