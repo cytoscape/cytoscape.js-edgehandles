@@ -22,7 +22,20 @@ let config = {
       { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' }
     ]
   },
-  externals: PROD ? Object.keys( pkg.dependencies || {} ) : [],
+  externals: {
+    'lodash.memoize': {
+      commonjs: 'lodash.memoize',
+      commonjs2: 'lodash.memoize',
+      amd: 'lodash.memoize',
+      root: ['_', 'memoize']
+    },
+    'lodash.throttle': {
+      commonjs: 'lodash.throttle',
+      commonjs2: 'lodash.throttle',
+      amd: 'lodash.throttle',
+      root: ['_', 'throttle']
+    }
+  },
   plugins: MIN ? [
     new webpack.optimize.UglifyJsPlugin({
       compress: {
