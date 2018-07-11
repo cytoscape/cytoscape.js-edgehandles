@@ -54,5 +54,8 @@
   },
   "peerDependencies": {
     "cytoscape": "^3.2.0"
+  },
+  "dependencies": {
+    "lodash.memoize": "^4.1.2"
   }
 }

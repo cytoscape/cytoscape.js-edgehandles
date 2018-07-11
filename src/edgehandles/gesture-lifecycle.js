@@ -1,4 +1,4 @@
-const memoize = require('../memoize');
+const memoize = require('lodash.memoize');
 
 function canStartOn( node ){
   const { options, previewEles, ghostEles, handleNode } = this;
