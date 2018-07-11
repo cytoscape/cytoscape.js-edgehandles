@@ -39,7 +39,7 @@ function makeEdges( preview = false ) {
 
   // just remove preview class if we already have the edges
   if( !preview && options.preview ) {
-    previewEles.removeClass('eh-preview');
+    previewEles.removeClass('eh-preview').style('events', '');
 
     this.emit( 'complete', this.mp(), source, target, previewEles );
 
@@ -67,7 +67,8 @@ function makeEdges( preview = false ) {
       addClassesToEleJson( assign(
         {
           group: 'nodes',
-          position: p
+          position: p,
+          style: { 'events': 'no' }
         },
         options.nodeParams( source, target )
       ), classes )
@@ -80,7 +81,8 @@ function makeEdges( preview = false ) {
           data: {
             source: source.id(),
             target: interNode.id()
-          }
+          },
+          style: { 'events': 'no' }
         },
         options.edgeParams( source, target, 0 )
       ), classes )
@@ -93,7 +95,8 @@ function makeEdges( preview = false ) {
           data: {
             source: interNode.id(),
             target: target.id()
-          }
+          },
+          style: { 'events': 'no' }
         },
         options.edgeParams( source, target, 1 )
       ), classes )
@@ -108,7 +111,8 @@ function makeEdges( preview = false ) {
           data: {
             source: source.id(),
             target: target.id()
-          }
+          },
+          style: { 'events': 'no' }
         },
         options.edgeParams( source, target, 0 )
       ), classes )
