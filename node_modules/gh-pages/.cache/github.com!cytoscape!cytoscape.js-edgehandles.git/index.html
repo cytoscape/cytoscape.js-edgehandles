@@ -1,0 +1,183 @@
+<!DOCTYPE>
+
+<html>
+
+  <head>
+    <title>cytoscape-edgehandles.js demo</title>
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
+    <script src="cytoscape-edgehandles.js"></script>
+
+    <style>
+      body {
+        font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+        font-size: 14px;
+      }
+
+      #cy {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 999;
+      }
+
+      h1 {
+        opacity: 0.5;
+        font-size: 1em;
+        font-weight: bold;
+      }
+
+      #buttons {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        z-index: 99999;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+
+        var cy = window.cy = cytoscape({
+          container: document.getElementById('cy'),
+
+          layout: {
+            name: 'grid',
+            rows: 2,
+            cols: 2
+          },
+
+          style: [
+            {
+              selector: 'node',
+              style: {
+                'content': 'data(name)'
+              }
+            },
+
+            {
+              selector: 'edge',
+              style: {
+                'curve-style': 'bezier',
+                'target-arrow-shape': 'triangle'
+              }
+            },
+
+            // some style for the extension
+
+            {
+              selector: '.eh-handle',
+              style: {
+                'background-color': 'red',
+                'width': 12,
+                'height': 12,
+                'shape': 'ellipse',
+                'overlay-opacity': 0,
+                'border-width': 12, // makes the handle easier to hit
+                'border-opacity': 0
+              }
+            },
+
+            {
+              selector: '.eh-hover',
+              style: {
+                'background-color': 'red'
+              }
+            },
+
+            {
+              selector: '.eh-source',
+              style: {
+                'border-width': 2,
+                'border-color': 'red'
+              }
+            },
+
+            {
+              selector: '.eh-target',
+              style: {
+                'border-width': 2,
+                'border-color': 'red'
+              }
+            },
+
+            {
+              selector: '.eh-preview, .eh-ghost-edge',
+              style: {
+                'background-color': 'red',
+                'line-color': 'red',
+                'target-arrow-color': 'red',
+                'source-arrow-color': 'red'
+              }
+            },
+
+            {
+              selector: '.eh-ghost-edge.eh-preview-active',
+              style: {
+                'opacity': 0
+              }
+            }
+          ],
+
+          elements: {
+            nodes: [
+              { data: { id: 'j', name: 'Jerry' } },
+              { data: { id: 'e', name: 'Elaine' } },
+              { data: { id: 'k', name: 'Kramer' } },
+              { data: { id: 'g', name: 'George' } }
+            ],
+            edges: [
+              { data: { source: 'j', target: 'e' } },
+              { data: { source: 'j', target: 'k' } },
+              { data: { source: 'j', target: 'g' } },
+              { data: { source: 'e', target: 'j' } },
+              { data: { source: 'e', target: 'k' } },
+              { data: { source: 'k', target: 'j' } },
+              { data: { source: 'k', target: 'e' } },
+              { data: { source: 'k', target: 'g' } },
+              { data: { source: 'g', target: 'j' } }
+            ]
+          }
+        });
+
+        var eh = cy.edgehandles();
+
+        document.querySelector('#draw-on').addEventListener('click', function() {
+          eh.enableDrawMode();
+        });
+
+        document.querySelector('#draw-off').addEventListener('click', function() {
+          eh.disableDrawMode();
+        });
+
+        document.querySelector('#start').addEventListener('click', function() {
+          eh.start( cy.$('node:selected') );
+        });
+
+      });
+    </script>
+  </head>
+
+  <body>
+    <h1>cytoscape-edgehandles demo</h1>
+
+    <div id="cy"></div>
+
+    <div id="buttons">
+      <button id="start">Start on selected</button>
+      <button id="draw-on">Draw mode on</button>
+      <button id="draw-off">Draw mode off</button>
+    </div>
+
+  </body>
+
+</html>
