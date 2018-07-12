@@ -127,11 +127,27 @@ function disableGestures() {
 
   this.cy.zoomingEnabled(false).panningEnabled(false).boxSelectionEnabled(false);
 
+  if (this.options.disableBrowserGestures) {
+    var wlOpts = this.windowListenerOptions;
+
+    window.addEventListener('touchstart', this.preventDefault, wlOpts);
+    window.addEventListener('touchmove', this.preventDefault, wlOpts);
+    window.addEventListener('wheel', this.preventDefault, wlOpts);
+  }
+
   return this;
 }
 
 function resetGestures() {
   this.cy.zoomingEnabled(this.lastZoomingEnabled).panningEnabled(this.lastPanningEnabled).boxSelectionEnabled(this.lastBoxSelectionEnabled);
+
+  if (this.options.disableBrowserGestures) {
+    var wlOpts = this.windowListenerOptions;
+
+    window.removeEventListener('touchstart', this.preventDefault, wlOpts);
+    window.removeEventListener('touchmove', this.preventDefault, wlOpts);
+    window.removeEventListener('wheel', this.preventDefault, wlOpts);
+  }
 
   return this;
 }
@@ -259,6 +275,7 @@ var defaults = {
   snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
   snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
   noEdgeEventsInDraw: false, // set events:no to edges during draws, prevents mouseouts on compounds
+  disableBrowserGestures: true, // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
   handlePosition: function handlePosition(node) {
     return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
   },
@@ -1046,6 +1063,27 @@ function Edgehandles(options) {
   this.addListeners();
 
   this.throttledSnap = throttle(this.snap.bind(this), 1000 / options.snapFrequency);
+
+  this.preventDefault = function (e) {
+    return e.preventDefault();
+  };
+
+  var supportsPassive = false;
+  try {
+    var opts = Object.defineProperty({}, 'passive', {
+      get: function get() {
+        supportsPassive = true;
+      }
+    });
+
+    window.addEventListener('test', null, opts);
+  } catch (err) {}
+
+  if (supportsPassive) {
+    this.windowListenerOptions = { capture: true, passive: false };
+  } else {
+    this.windowListenerOptions = true;
+  }
 }
 
 var proto = Edgehandles.prototype = {};
