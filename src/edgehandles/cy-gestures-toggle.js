@@ -7,6 +7,14 @@ function disableGestures(){
     .boxSelectionEnabled( false )
   );
 
+  if( this.options.disableBrowserGestures ){
+    let wlOpts = this.windowListenerOptions;
+
+    window.addEventListener('touchstart', this.preventDefault, wlOpts);
+    window.addEventListener('touchmove', this.preventDefault, wlOpts);
+    window.addEventListener('wheel', this.preventDefault, wlOpts);
+  }
+
   return this;
 }
 
@@ -16,6 +24,14 @@ function resetGestures(){
     .panningEnabled( this.lastPanningEnabled )
     .boxSelectionEnabled( this.lastBoxSelectionEnabled )
   );
+
+  if( this.options.disableBrowserGestures ){
+    let wlOpts = this.windowListenerOptions;
+
+    window.removeEventListener('touchstart', this.preventDefault, wlOpts);
+    window.removeEventListener('touchmove', this.preventDefault, wlOpts);
+    window.removeEventListener('wheel', this.preventDefault, wlOpts);
+  }
 
   return this;
 }

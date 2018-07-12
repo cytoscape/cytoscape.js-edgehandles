@@ -42,6 +42,25 @@ function Edgehandles( options ){
   this.addListeners();
 
   this.throttledSnap = throttle( this.snap.bind(this), 1000/options.snapFrequency );
+
+  this.preventDefault = e => e.preventDefault();
+
+  let supportsPassive = false;
+  try {
+    let opts = Object.defineProperty( {}, 'passive', {
+      get: function(){
+        supportsPassive = true;
+      }
+    } );
+
+    window.addEventListener( 'test', null, opts );
+  } catch( err ){}
+
+  if( supportsPassive ){
+    this.windowListenerOptions = { capture: true, passive: false };
+  } else {
+    this.windowListenerOptions = true;
+  }
 }
 
 let proto = Edgehandles.prototype = {};
