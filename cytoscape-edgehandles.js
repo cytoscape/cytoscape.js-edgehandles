@@ -513,6 +513,8 @@ function makeEdges() {
   if (preview) {
     this.previewEles = added;
   } else {
+    added.style('events', '');
+
     this.emit('complete', this.mp(), source, target, added);
   }
 
