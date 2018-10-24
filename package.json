@@ -9,7 +9,7 @@
   },
   "scripts": {
     "postpublish": "run-s gh-pages",
-    "gh-pages": "gh-pages -d gh-pages",
+    "gh-pages": "gh-pages -d pages",
     "copyright": "update license",
     "lint": "eslint src",
     "build": "cross-env NODE_ENV=production webpack",
