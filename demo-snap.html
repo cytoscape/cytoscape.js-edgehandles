@@ -52,8 +52,8 @@
 
           layout: {
             name: 'concentric',
-            concentric: n => n.id() === 'j' ? 200 : 0,
-            levelWidth: nodes => 100,
+            concentric: function(n){ return n.id() === 'j' ? 200 : 0; },
+            levelWidth: function(nodes){ return 100; },
             minNodeSpacing: 100
           },
 

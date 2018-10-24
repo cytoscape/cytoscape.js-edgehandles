@@ -90,7 +90,9 @@ module.exports = Object.assign != null ? Object.assign.bind(Object) : function (
     srcs[_key - 1] = arguments[_key];
   }
 
-  srcs.forEach(function (src) {
+  srcs.filter(function (src) {
+    return src != null;
+  }).forEach(function (src) {
     Object.keys(src).forEach(function (k) {
       return tgt[k] = src[k];
     });
