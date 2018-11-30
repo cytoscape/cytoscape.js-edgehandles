@@ -397,12 +397,28 @@ module.exports = { toggleDrawMode: toggleDrawMode, enableDrawMode: enableDrawMod
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var assign = __webpack_require__(0);
+var isString = function isString(x) {
+  return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === _typeof('');
+};
+var isArray = function isArray(x) {
+  return (typeof x === 'undefined' ? 'undefined' : _typeof(x)) === _typeof([]) && x.length != null;
+};
 
-function addClassesToEleJson(json, classes) {
-  if (json.classes) {
-    json.classes += ' ' + classes;
+function getEleJson(overrides, params, addedClasses) {
+  var json = {};
+
+  // basic values
+  assign(json, params, overrides);
+
+  // make sure params can specify data but that overrides take precedence
+  assign(json.data, params.data, overrides.data);
+
+  if (isString(params.classes)) {
+    json.classes = params.classes + ' ' + addedClasses;
+  } else if (isArray(params.classes)) {
+    json.classes = params.classes.join(' ') + ' ' + addedClasses;
   } else {
-    json.classes = classes;
+    json.classes = addedClasses;
   }
 
   return json;
@@ -473,41 +489,41 @@ function makeEdges() {
   }
 
   if (edgeType === 'node') {
-    var interNode = cy.add(addClassesToEleJson(assign({
+    var interNode = cy.add(getEleJson({
       group: 'nodes',
       position: p,
       style: { 'events': 'no' }
-    }, options.nodeParams(source, target)), classes));
+    }, options.nodeParams(source, target), classes));
 
-    var source2inter = cy.add(addClassesToEleJson(assign({
+    var source2inter = cy.add(getEleJson({
       group: 'edges',
       data: {
         source: source.id(),
         target: interNode.id()
       },
       style: { 'events': 'no' }
-    }, options.edgeParams(source, target, 0)), classes));
+    }, options.edgeParams(source, target, 1), classes));
 
-    var inter2target = cy.add(addClassesToEleJson(assign({
+    var inter2target = cy.add(getEleJson({
       group: 'edges',
       data: {
         source: interNode.id(),
         target: target.id()
       },
       style: { 'events': 'no' }
-    }, options.edgeParams(source, target, 1)), classes));
+    }, options.edgeParams(source, target, 1), classes));
 
     added = added.merge(interNode).merge(source2inter).merge(inter2target);
   } else {
     // flat
-    var source2target = cy.add(addClassesToEleJson(assign({
+    var source2target = cy.add(getEleJson({
       group: 'edges',
       data: {
         source: source.id(),
         target: target.id()
       },
       style: { 'events': 'no' }
-    }, options.edgeParams(source, target, 0)), classes));
+    }, options.edgeParams(source, target, 0), classes));
 
     added = added.merge(source2target);
   }
