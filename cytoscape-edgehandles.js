@@ -303,6 +303,11 @@ var defaults = {
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
+  ghostEdgeParams: function ghostEdgeParams() {
+    // return element object to be passed to cy.add() for the ghost edge
+    // (default classes are always added for you)
+    return {};
+  },
   show: function show(sourceNode) {
     // fired when handle is shown
   },
