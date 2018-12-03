@@ -502,7 +502,7 @@ function makeEdges() {
         target: interNode.id()
       },
       style: { 'events': 'no' }
-    }, options.edgeParams(source, target, 1), classes));
+    }, options.edgeParams(source, target, 0), classes));
 
     var inter2target = cy.add(getEleJson({
       group: 'edges',
@@ -634,7 +634,8 @@ function updateEdge() {
       ghostNode = this.ghostNode,
       cy = this.cy,
       mx = this.mx,
-      my = this.my;
+      my = this.my,
+      options = this.options;
 
   var x = mx;
   var y = my;
@@ -667,14 +668,17 @@ function updateEdge() {
         'events': 'no'
       });
 
-      ghostEdge = cy.add({
+      var ghostEdgeParams = options.ghostEdgeParams();
+
+      ghostEdge = cy.add(assign({}, ghostEdgeParams, {
         group: 'edges',
-        classes: 'eh-ghost eh-ghost-edge',
-        data: {
+        data: assign({}, ghostEdgeParams.data, {
           source: sourceNode.id(),
           target: ghostNode.id()
-        }
-      });
+        })
+      }));
+
+      ghostEdge.addClass('eh-ghost eh-ghost-edge');
 
       ghostEdge.style({
         'events': 'no'
