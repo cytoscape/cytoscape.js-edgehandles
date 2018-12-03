@@ -97,7 +97,7 @@ function makeEdges( preview = false ) {
           },
           style: { 'events': 'no' }
         },
-        options.edgeParams( source, target, 1 ),
+        options.edgeParams( source, target, 0 ),
         classes
       )
     );
@@ -231,7 +231,7 @@ function setHandleFor( node ){
 }
 
 function updateEdge() {
-  let { sourceNode, ghostNode, cy, mx, my } = this;
+  let { sourceNode, ghostNode, cy, mx, my, options } = this;
   let x = mx;
   let y = my;
   let ghostEdge, ghostEles;
@@ -260,14 +260,17 @@ function updateEdge() {
         'events': 'no'
       });
 
-      ghostEdge = cy.add( {
+      let ghostEdgeParams = options.ghostEdgeParams();
+
+      ghostEdge = cy.add( assign({}, ghostEdgeParams, {
         group: 'edges',
-        classes: 'eh-ghost eh-ghost-edge',
-        data: {
+        data: assign({}, ghostEdgeParams.data, {
           source: sourceNode.id(),
           target: ghostNode.id()
-        }
-      } );
+        })
+      }) );
+
+      ghostEdge.addClass('eh-ghost eh-ghost-edge');
 
       ghostEdge.style({
         'events': 'no'
