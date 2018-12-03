@@ -101,6 +101,11 @@ let defaults = {
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
+  ghostEdgeParams: function(){
+    // return element object to be passed to cy.add() for the ghost edge
+    // (default classes are always added for you)
+    return {};
+  },
   show: function( sourceNode ){
     // fired when handle is shown
   },
