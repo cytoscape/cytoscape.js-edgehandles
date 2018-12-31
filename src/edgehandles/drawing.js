@@ -25,20 +25,13 @@ function getEleJson( overrides, params, addedClasses ){
 function makeEdges( preview = false ) {
   let { cy, options, presumptiveTargets, previewEles, active } = this;
 
-  let source = this.sourceNode;
-  let target = this.targetNode;
-  let classes = preview ? 'eh-preview' : '';
-  let added = cy.collection();
-  let edgeType = options.edgeType( source, target );
-
   // can't make edges outside of regular gesture lifecycle
   if( !active ){ return; }
 
-  // must have a non-empty edge type
-  if( !edgeType ){ return; }
-
   // can't make preview if disabled
   if( preview && !options.preview ){ return; }
+
+  let target = this.targetNode;
 
   // detect cancel
   if( !target || target.size() === 0 ){
@@ -50,13 +43,21 @@ function makeEdges( preview = false ) {
   }
 
   // just remove preview class if we already have the edges
-  if( !preview && options.preview ) {
+  if( !preview && previewEles ) {
     previewEles.removeClass('eh-preview').style('events', '');
 
     this.emit( 'complete', this.mp(), source, target, previewEles );
 
     return;
   }
+
+  let source = this.sourceNode;
+  let classes = preview ? 'eh-preview' : '';
+  let added = cy.collection();
+  let edgeType = options.edgeType( source, target );
+
+  // must have a non-empty edge type
+  if( !edgeType ){ return; }
 
   let p1 = source.position();
   let p2 = target.position();
