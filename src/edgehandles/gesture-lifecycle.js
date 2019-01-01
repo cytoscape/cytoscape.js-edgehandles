@@ -192,11 +192,11 @@ function stop(){
   targetNode.removeClass('eh-target eh-preview eh-hover');
   presumptiveTargets.removeClass('eh-presumptive-target');
 
-  this.makeEdges();
-
   this.removeHandle();
 
   ghostEles.remove();
+
+  this.makeEdges();
 
   this.clearCollections();
 
