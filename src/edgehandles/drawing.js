@@ -31,6 +31,7 @@ function makeEdges( preview = false ) {
   // can't make preview if disabled
   if( preview && !options.preview ){ return; }
 
+  let source = this.sourceNode;
   let target = this.targetNode;
 
   // detect cancel
@@ -51,7 +52,6 @@ function makeEdges( preview = false ) {
     return;
   }
 
-  let source = this.sourceNode;
   let classes = preview ? 'eh-preview' : '';
   let added = cy.collection();
   let edgeType = options.edgeType( source, target );
