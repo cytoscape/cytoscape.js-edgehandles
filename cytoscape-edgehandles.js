@@ -437,20 +437,9 @@ function makeEdges() {
       previewEles = this.previewEles,
       active = this.active;
 
-
-  var source = this.sourceNode;
-  var target = this.targetNode;
-  var classes = preview ? 'eh-preview' : '';
-  var added = cy.collection();
-  var edgeType = options.edgeType(source, target);
-
   // can't make edges outside of regular gesture lifecycle
-  if (!active) {
-    return;
-  }
 
-  // must have a non-empty edge type
-  if (!edgeType) {
+  if (!active) {
     return;
   }
 
@@ -458,6 +447,9 @@ function makeEdges() {
   if (preview && !options.preview) {
     return;
   }
+
+  var source = this.sourceNode;
+  var target = this.targetNode;
 
   // detect cancel
   if (!target || target.size() === 0) {
@@ -469,11 +461,20 @@ function makeEdges() {
   }
 
   // just remove preview class if we already have the edges
-  if (!preview && options.preview) {
+  if (!preview && previewEles) {
     previewEles.removeClass('eh-preview').style('events', '');
 
     this.emit('complete', this.mp(), source, target, previewEles);
 
+    return;
+  }
+
+  var classes = preview ? 'eh-preview' : '';
+  var added = cy.collection();
+  var edgeType = options.edgeType(source, target);
+
+  // must have a non-empty edge type
+  if (!edgeType) {
     return;
   }
 
@@ -1018,11 +1019,11 @@ function stop() {
   targetNode.removeClass('eh-target eh-preview eh-hover');
   presumptiveTargets.removeClass('eh-presumptive-target');
 
-  this.makeEdges();
-
   this.removeHandle();
 
   ghostEles.remove();
+
+  this.makeEdges();
 
   this.clearCollections();
 
