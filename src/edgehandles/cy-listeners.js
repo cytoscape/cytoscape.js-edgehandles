@@ -10,13 +10,9 @@ function addCytoscapeListeners(){
     this.show( e.target );
   } );
 
-  // hide handle on tap handle
+  // show handle on tap node
   this.addListener( cy, 'tap', 'node', e => {
-    let node = e.target;
-
-    if( !node.same( this.handleNode ) ){
-      this.show( node );
-    }
+    this.show( e.target );
   } );
 
   // hide handle when source node moved
@@ -32,7 +28,7 @@ function addCytoscapeListeners(){
   this.addListener( cy, 'tapstart', 'node', e => {
     let node = e.target;
 
-    if( node.same( this.handleNode ) ){
+    if( node.anySame( this.handleNodes ) ){
       this.start( this.sourceNode );
     } else if( this.drawMode ){
       this.start( node );
@@ -53,7 +49,7 @@ function addCytoscapeListeners(){
 
   // hover out unpreview
   this.addListener( cy, 'tapdragout', 'node', e => {
-    if( options.snap && e.target.same(this.targetNode) ){
+    if( options.snap && e.target.same( this.targetNode ) ){
       // then keep the preview
     } else {
       this.unpreview( e.target );

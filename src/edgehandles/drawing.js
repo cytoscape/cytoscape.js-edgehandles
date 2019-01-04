@@ -168,12 +168,12 @@ function removePreview() {
 }
 
 function handleShown(){
-  return this.handleNode.nonempty() && this.handleNode.inside();
+  return this.handleNodes.nonempty() && this.handleNodes.inside();
 }
 
 function removeHandle(){
   if( this.handleShown() ){
-    this.handleNode.remove();
+    this.handleNodes.remove();
   }
 
   return this;
@@ -214,17 +214,17 @@ function setHandleFor( node ){
   let pos = { x: hx, y: hy };
 
   if( this.handleShown() ){
-    this.handleNode.position( pos );
+    this.handleNodes.position( pos );
   } else {
     cy.batch( () => {
-      this.handleNode = cy.add({
+      this.handleNodes = cy.add({
         classes: 'eh-handle',
         position: pos,
         grabbable: false,
         selectable: false
       });
 
-      this.handleNode.style('z-index', 9007199254740991);
+      this.handleNodes.style('z-index', 9007199254740991);
     } );
   }
 

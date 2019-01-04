@@ -24,7 +24,7 @@ function Edgehandles( options ){
   this.grabbingNode = false;
 
   // edgehandles elements
-  this.handleNode = cy.collection();
+  this.handleNodes = cy.collection();
   this.clearCollections();
 
   // handle

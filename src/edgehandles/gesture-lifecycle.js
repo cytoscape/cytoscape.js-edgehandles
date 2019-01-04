@@ -1,18 +1,18 @@
 const memoize = require('lodash.memoize');
 
 function canStartOn( node ){
-  const { options, previewEles, ghostEles, handleNode } = this;
+  const { options, previewEles, ghostEles, handleNodes } = this;
   const isPreview = el => previewEles.anySame(el);
   const isGhost = el => ghostEles.anySame(el);
   const userFilter = el => el.filter( options.handleNodes ).length > 0;
-  const isHandle = el => handleNode.same(el);
+  const isHandle = el => handleNodes.anySame(el);
   const isTemp = el => isPreview(el) || isHandle(el) || isGhost(el);
 
   const { enabled, active, grabbingNode } = this;
 
   return (
     enabled && !active && !grabbingNode
-    && ( node == null || (!isTemp(node) && userFilter(node)) )
+    && node != null && node.inside() && !isTemp(node) && userFilter(node)
   );
 }
 
@@ -115,7 +115,7 @@ function preview( target, allowHoverDelay = true ){
   let loopAllowed = options.loopAllowed( target );
   let isGhost = target.same( ghostNode );
   let noEdge = !options.edgeType( source, target );
-  let isHandle = target.same( this.handleNode );
+  let isHandle = target.anySame( this.handleNodes );
   let isExistingTgt = target.same( this.targetNode );
 
   if( !active || isHandle || isGhost || noEdge || isExistingTgt || (isLoop && !loopAllowed) ) { return false; }
@@ -159,7 +159,7 @@ function preview( target, allowHoverDelay = true ){
 }
 
 function unpreview( target ) {
-  if( !this.active || target.same( this.handleNode ) ){ return; }
+  if( !this.active || target.anySame( this.handleNodes ) ){ return; }
 
   let { previewTimeout, sourceNode, previewEles, ghostEles, cy } = this;
   clearTimeout( previewTimeout );
