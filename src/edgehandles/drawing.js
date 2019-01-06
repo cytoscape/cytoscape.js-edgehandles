@@ -44,7 +44,7 @@ function makeEdges( preview = false ) {
   }
 
   // just remove preview class if we already have the edges
-  if( !preview && previewEles ) {
+  if( !preview && previewEles.length > 0 ) {
     previewEles.removeClass('eh-preview').style('events', '');
 
     this.emit( 'complete', this.mp(), source, target, previewEles );
