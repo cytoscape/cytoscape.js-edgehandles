@@ -1,69 +1,46 @@
 const assign = require('../assign');
-const isString = x => typeof x === typeof '';
-const isArray = x => typeof x === typeof [] && x.length != null;
-
-function getEleJson( overrides, params, addedClasses ){
-  let json = {};
-
-  // basic values
-  assign( json, params, overrides );
-
-  // make sure params can specify data but that overrides take precedence
-  assign( json.data, params.data, overrides.data );
-
-  if( isString(params.classes) ){
-    json.classes = params.classes + ' ' + addedClasses;
-  } else if( isArray(params.classes) ){
-    json.classes = params.classes.join(' ') + ' ' + addedClasses;
-  } else {
-    json.classes = addedClasses;
-  }
-
-  return json;
-}
 
 function makeEdges( preview = false ) {
-  let { cy, options, presumptiveTargets, previewEles, active } = this;
-
   // can't make edges outside of regular gesture lifecycle
-  if( !active ){ return; }
+  if( !this.active ){ return; }
+
+  let { cy, options, presumptiveTargets, previewEles } = this;
 
   // can't make preview if disabled
   if( preview && !options.preview ){ return; }
 
-  let source = this.sourceNode;
-  let target = this.targetNode;
+  let { sourceNode, targetNode } = this;
 
   // detect cancel
-  if( !target || target.size() === 0 ){
-    previewEles.remove();
+  if( !targetNode || targetNode.length === 0 ){
+    this.removePreview();
 
-    this.emit( 'cancel', this.mp(), source, presumptiveTargets );
+    this.emit( 'cancel', this.mp(), sourceNode, presumptiveTargets );
 
     return;
   }
 
   // just remove preview class if we already have the edges
-  if( !preview && previewEles ) {
+  if( !preview && previewEles.length > 0 ) {
+    cy.startBatch();
     previewEles.removeClass('eh-preview').style('events', '');
+    cy.endBatch();
 
-    this.emit( 'complete', this.mp(), source, target, previewEles );
+    this.emit( 'complete', this.mp(), sourceNode, targetNode, previewEles );
 
     return;
   }
 
-  let classes = preview ? 'eh-preview' : '';
-  let added = cy.collection();
-  let edgeType = options.edgeType( source, target );
+  let edgeType = options.edgeType( sourceNode, targetNode );
 
   // must have a non-empty edge type
   if( !edgeType ){ return; }
 
-  let p1 = source.position();
-  let p2 = target.position();
-
   let p;
-  if( source.same( target ) ) {
+  let p1 = sourceNode.position();
+  let p2 = targetNode.position();
+
+  if( sourceNode.same( targetNode ) ) {
     p = {
       x: p1.x + options.nodeLoopOffset,
       y: p1.y + options.nodeLoopOffset
@@ -75,111 +52,92 @@ function makeEdges( preview = false ) {
     };
   }
 
+  let added = cy.collection();
+  let edgeParams = options.edgeParams( sourceNode, targetNode, 0 );
+
+  cy.startBatch();
+
   if( edgeType === 'node' ){
-    let interNode = cy.add(
-      getEleJson(
-        {
-          group: 'nodes',
-          position: p,
-          style: { 'events': 'no' }
-        },
-        options.nodeParams( source, target ),
-        classes
-      )
-    );
+    let interNodeParams = options.nodeParams( sourceNode, targetNode );
+    let edgeParams2 = options.edgeParams( sourceNode, targetNode, 1 );
 
-    let source2inter = cy.add(
-      getEleJson(
-        {
-          group: 'edges',
-          data: {
-            source: source.id(),
-            target: interNode.id()
-          },
-          style: { 'events': 'no' }
-        },
-        options.edgeParams( source, target, 0 ),
-        classes
-      )
-    );
+    let interNode = cy.add( assign({}, interNodeParams, {
+      group: 'nodes',
+      position: p
+    }) );
 
-    let inter2target = cy.add(
-      getEleJson(
-        {
-          group: 'edges',
-          data: {
-            source: interNode.id(),
-            target: target.id()
-          },
-          style: { 'events': 'no' }
-        },
-        options.edgeParams( source, target, 1 ),
-        classes
-      )
-    );
+    let sourceEdge = cy.add( assign({}, edgeParams, {
+      group: 'edges',
+      data: assign({}, edgeParams.data, {
+        source: sourceNode.id(),
+        target: interNode.id()
+      })
+    }) );
 
-    added = added.merge( interNode ).merge( source2inter ).merge( inter2target );
+    let targetEdge = cy.add( assign({}, edgeParams2, {
+      group: 'edges',
+      data: assign({}, edgeParams2.data, {
+        source: interNode.id(),
+        target: targetNode.id()
+      })
+    }) );
+
+    added = added.merge( interNode ).merge( sourceEdge ).merge( targetEdge );
+
   } else { // flat
-    let source2target = cy.add(
-      getEleJson(
-        {
-          group: 'edges',
-          data: {
-            source: source.id(),
-            target: target.id()
-          },
-          style: { 'events': 'no' }
-        },
-        options.edgeParams( source, target, 0 ),
-        classes
-      )
-    );
-
-    added = added.merge( source2target );
+    added = cy.add( assign({}, edgeParams, {
+      group: 'edges',
+      data: assign({}, edgeParams.data, {
+        source: sourceNode.id(),
+        target: targetNode.id()
+      })
+    }) );
   }
 
   if( preview ) {
+    added.style('events', 'no');
+    added.addClass('eh-preview');
     this.previewEles = added;
-  } else {
-    added.style('events', '');
+  }
 
-    this.emit( 'complete', this.mp(), source, target, added );
+  cy.endBatch();
+
+  if( !preview ) {
+    this.emit( 'complete', this.mp(), sourceNode, targetNode, added );
   }
 
   return this;
 }
 
-function makePreview() {
+function makePreview(){
   this.makeEdges( true );
 
   return this;
 }
 
-function previewShown(){
-  return this.previewEles.nonempty() && this.previewEles.inside();
-}
-
-function removePreview() {
-  if( this.previewShown() ){
+function removePreview(){
+  if( this.previewEles.length > 0 ){
     this.previewEles.remove();
+    this.previewEles = this.cy.collection();
   }
 
   return this;
 }
 
 function handleShown(){
-  return this.handleNodes.nonempty() && this.handleNodes.inside();
+  return this.handleNodes.length > 0;
 }
 
 function removeHandle(){
-  if( this.handleShown() ){
+  if( this.handleNodes.length > 0 ){
     this.handleNodes.remove();
+    this.handleNodes = this.cy.collection();
   }
 
   return this;
 }
 
-function setHandleFor( node ){
+function makeHandle( node ) {
   let { options, cy } = this;
 
   let handlePosition = typeof options.handlePosition === typeof '' ? () => options.handlePosition : options.handlePosition;
@@ -213,20 +171,18 @@ function setHandleFor( node ){
   let hy = this.hy = p.y + moveY;
   let pos = { x: hx, y: hy };
 
-  if( this.handleShown() ){
-    this.handleNodes.position( pos );
-  } else {
-    cy.batch( () => {
-      this.handleNodes = cy.add({
-        classes: 'eh-handle',
-        position: pos,
-        grabbable: false,
-        selectable: false
-      });
-
-      this.handleNodes.style('z-index', 9007199254740991);
-    } );
-  }
+  cy.startBatch();
+  this.removeHandle();
+  this.handleNodes = cy.add([
+    {
+      classes: 'eh-handle',
+      position: pos,
+      grabbable: false,
+      selectable: false
+    }
+  ]);
+  this.handleNodes.style('z-index', 9007199254740991);
+  cy.endBatch();
 
   return this;
 }
@@ -240,54 +196,51 @@ function updateEdge() {
   // can't draw a line without having the starting node
   if( !sourceNode ){ return; }
 
-  if( !ghostNode || ghostNode.length === 0 || ghostNode.removed() ) {
+  if( ghostNode.length === 0 || ghostNode.removed() ) {
     ghostEles = this.ghostEles = cy.collection();
 
-    cy.batch( () => {
-      ghostNode = this.ghostNode = cy.add( {
-        group: 'nodes',
-        classes: 'eh-ghost eh-ghost-node',
-        position: {
-          x: 0,
-          y: 0
-        }
-      } );
+    cy.startBatch();
+    ghostNode = this.ghostNode = cy.add({
+      group: 'nodes',
+      classes: 'eh-ghost eh-ghost-node',
+      position: { x: x, y: y }
+    });
 
-      ghostNode.style({
-        'background-color': 'blue',
-        'width': 0.0001,
-        'height': 0.0001,
-        'opacity': 0,
-        'events': 'no'
-      });
+    ghostNode.style({
+      'background-color': 'blue',
+      'width': 0.0001,
+      'height': 0.0001,
+      'opacity': 0
+    });
 
-      let ghostEdgeParams = options.ghostEdgeParams();
+    let ghostEdgeParams = options.ghostEdgeParams();
 
-      ghostEdge = cy.add( assign({}, ghostEdgeParams, {
-        group: 'edges',
-        data: assign({}, ghostEdgeParams.data, {
-          source: sourceNode.id(),
-          target: ghostNode.id()
-        })
-      }) );
+    ghostEdge = cy.add( assign({}, ghostEdgeParams, {
+      group: 'edges',
+      data: assign({}, ghostEdgeParams.data, {
+        source: sourceNode.id(),
+        target: ghostNode.id()
+      })
+    }) );
 
-      ghostEdge.addClass('eh-ghost eh-ghost-edge');
-
-      ghostEdge.style({
-        'events': 'no'
-      });
-    } );
+    ghostEdge.addClass('eh-ghost eh-ghost-edge');
 
     ghostEles.merge( ghostNode ).merge( ghostEdge );
-  }
 
-  ghostNode.position({ x, y });
+    ghostEles.style('events', 'no');
+
+    cy.endBatch();
+  }
+  else
+  {
+    ghostNode.position({ x, y });
+  }
 
   return this;
 }
 
 module.exports = {
-  makeEdges, makePreview, removePreview, previewShown,
+  makeEdges, makePreview, removePreview,
   updateEdge,
-  handleShown, setHandleFor, removeHandle
+  handleShown, makeHandle, removeHandle
 };

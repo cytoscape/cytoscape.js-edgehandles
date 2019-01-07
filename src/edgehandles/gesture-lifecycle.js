@@ -3,10 +3,10 @@ const memoize = require('lodash.memoize');
 function canStartOn( node ){
   const { options, previewEles, ghostEles, handleNodes } = this;
   const isPreview = el => previewEles.anySame(el);
-  const isGhost = el => ghostEles.anySame(el);
-  const userFilter = el => el.filter( options.handleNodes ).length > 0;
   const isHandle = el => handleNodes.anySame(el);
+  const isGhost = el => ghostEles.anySame(el);
   const isTemp = el => isPreview(el) || isHandle(el) || isGhost(el);
+  const userFilter = el => el.filter( options.selector ).length > 0;
 
   const { enabled, active, grabbingNode } = this;
 
@@ -31,7 +31,7 @@ function show( node ){
 
   this.sourceNode = node;
 
-  this.setHandleFor( node );
+  this.makeHandle( node );
 
   this.emit( 'show', this.hp(), this.sourceNode );
 
@@ -78,7 +78,7 @@ function snap(){
   if( !this.active || !this.options.snap ){ return false; }
 
   let cy = this.cy;
-  let tgt = this.targetNode;
+  let target = this.targetNode;
   let threshold = this.options.snapThreshold;
   let sqThreshold = n => { let r = getRadius(n); let t = r + threshold; return t * t; };
   let mousePos = this.mp();
@@ -92,14 +92,14 @@ function snap(){
   let nodesByDist = cy.nodes(isWithinTheshold).sort(cmpSqDist);
   let snapped = false;
 
-  if( tgt.nonempty() && !isWithinTheshold(tgt) ){
-    this.unpreview(tgt);
+  if( target.nonempty() && !isWithinTheshold(target) ){
+    this.unpreview(target);
   }
 
   for(let i = 0; i < nodesByDist.length; i++){
     let n = nodesByDist[i];
 
-    if( n.same(tgt) || this.preview(n, allowHoverDelay) ){
+    if( n.same(target) || this.preview(n, allowHoverDelay) ){
       snapped = true;
       break;
     }
@@ -161,19 +161,19 @@ function preview( target, allowHoverDelay = true ){
 function unpreview( target ) {
   if( !this.active || target.anySame( this.handleNodes ) ){ return; }
 
-  let { previewTimeout, sourceNode, previewEles, ghostEles, cy } = this;
-  clearTimeout( previewTimeout );
+  let { ghostEles, previewEles, cy } = this;
+  let source = this.sourceNode;
+
+  clearTimeout( this.previewTimeout );
   this.previewTimeout = null;
 
-  let source = sourceNode;
-
-  target.removeClass('eh-preview eh-target eh-presumptive-target eh-preview-active');
+  source.removeClass('eh-preview-active');
+  target.removeClass('eh-preview-active eh-preview eh-target eh-presumptive-target');
   ghostEles.removeClass('eh-preview-active');
-  sourceNode.removeClass('eh-preview-active');
 
   this.targetNode = cy.collection();
 
-  this.removePreview( source, target );
+  this.removePreview();
 
   this.emit( 'hoverout', this.mp(), source, target );
   this.emit( 'previewoff', this.mp(), source, target, previewEles );
@@ -184,17 +184,17 @@ function unpreview( target ) {
 function stop(){
   if( !this.active ){ return; }
 
-  let { sourceNode, targetNode, ghostEles, presumptiveTargets } = this;
+  let { sourceNode } = this;
 
   clearTimeout( this.previewTimeout );
 
-  sourceNode.removeClass('eh-source');
-  targetNode.removeClass('eh-target eh-preview eh-hover');
-  presumptiveTargets.removeClass('eh-presumptive-target');
+  this.sourceNode.removeClass('eh-source');
+  this.targetNode.removeClass('eh-target eh-preview eh-hover');
+  this.presumptiveTargets.removeClass('eh-presumptive-target');
+
+  this.ghostEles.remove();
 
   this.removeHandle();
-
-  ghostEles.remove();
 
   this.makeEdges();
 

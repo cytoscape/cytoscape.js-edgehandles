@@ -91,7 +91,7 @@ let defaults = {
   },
   nodeLoopOffset: -50, // offset for edgeType: 'node' loops
   nodeParams: function( sourceNode, targetNode ){
-    // for edges between the specified source and target
+    // for node between the specified source and target
     // return element object to be passed to cy.add() for intermediary node
     return {};
   },
