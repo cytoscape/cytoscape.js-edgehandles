@@ -29,6 +29,7 @@ function addCytoscapeListeners(){
     let node = e.target;
 
     if( node.anySame( this.handleNodes ) ){
+      this.handleNode = node.intersection( this.handleNodes );
       this.start( this.sourceNode );
     } else if( this.drawMode ){
       this.start( node );

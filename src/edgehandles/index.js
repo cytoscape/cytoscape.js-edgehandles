@@ -27,11 +27,6 @@ function Edgehandles( options ){
   this.handleNodes = cy.collection();
   this.clearCollections();
 
-  // handle
-  this.hx = 0;
-  this.hy = 0;
-  this.hr = 0;
-
   // mouse position
   this.mx = 0;
   this.my = 0;
@@ -78,16 +73,13 @@ proto.mp = function(){
   return { x: this.mx, y: this.my };
 };
 
-proto.hp = function(){
-  return { x: this.hx, y: this.hy };
-};
-
 proto.clearCollections = function(){
   let { cy } = this;
 
+  this.handleNode = cy.collection();
   this.previewEles = cy.collection();
-  this.ghostEles = cy.collection();
   this.ghostNode = cy.collection();
+  this.ghostEles = cy.collection();
   this.sourceNode = cy.collection();
   this.targetNode = cy.collection();
   this.presumptiveTargets = cy.collection();

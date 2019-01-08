@@ -31,17 +31,17 @@ function show( node ){
 
   this.sourceNode = node;
 
-  this.makeHandle( node );
+  this.makeHandles( node );
 
-  this.emit( 'show', this.hp(), this.sourceNode );
+  this.emit( 'show', this.mp(), node, this.handleNodes);
 
   return this;
 }
 
 function hide(){
-  this.removeHandle();
+  this.removeHandles();
 
-  this.emit( 'hide', this.hp(), this.sourceNode );
+  this.emit( 'hide', this.mp(), this.sourceNode );
 
   return this;
 }
@@ -57,7 +57,7 @@ function start( node ){
   this.disableGestures();
   this.disableEdgeEvents();
 
-  this.emit( 'start', this.hp(), node );
+  this.emit( 'start', this.mp(), node, this.handleNode);
 }
 
 function update( pos ){
@@ -109,12 +109,12 @@ function snap(){
 }
 
 function preview( target, allowHoverDelay = true ){
-  let { options, sourceNode, ghostNode, ghostEles, presumptiveTargets, previewEles, active } = this;
+  let { options, sourceNode, ghostNode, handleNode, ghostEles, presumptiveTargets, previewEles, active } = this;
   let source = sourceNode;
   let isLoop = target.same( source );
-  let loopAllowed = options.loopAllowed( target );
+  let loopAllowed = options.loopAllowed( target, handleNode );
   let isGhost = target.same( ghostNode );
-  let noEdge = !options.edgeType( source, target );
+  let noEdge = !options.edgeType( source, target, handleNode );
   let isHandle = target.anySame( this.handleNodes );
   let isExistingTgt = target.same( this.targetNode );
 
@@ -194,7 +194,7 @@ function stop(){
 
   this.ghostEles.remove();
 
-  this.removeHandle();
+  this.removeHandles();
 
   this.makeEdges();
 

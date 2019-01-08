@@ -1,4 +1,5 @@
 const assign = require('../assign');
+const isArray = obj => Array.isArray ? Array.isArray( obj ) : obj != null && obj instanceof Array;
 
 function makeEdges( preview = false ) {
   // can't make edges outside of regular gesture lifecycle
@@ -9,7 +10,7 @@ function makeEdges( preview = false ) {
   // can't make preview if disabled
   if( preview && !options.preview ){ return; }
 
-  let { sourceNode, targetNode } = this;
+  let { sourceNode, targetNode, handleNode } = this;
 
   // detect cancel
   if( !targetNode || targetNode.length === 0 ){
@@ -31,7 +32,7 @@ function makeEdges( preview = false ) {
     return;
   }
 
-  let edgeType = options.edgeType( sourceNode, targetNode );
+  let edgeType = options.edgeType( sourceNode, targetNode, handleNode );
 
   // must have a non-empty edge type
   if( !edgeType ){ return; }
@@ -53,13 +54,13 @@ function makeEdges( preview = false ) {
   }
 
   let added = cy.collection();
-  let edgeParams = options.edgeParams( sourceNode, targetNode, 0 );
+  let edgeParams = options.edgeParams( sourceNode, targetNode, 0, handleNode );
 
   cy.startBatch();
 
   if( edgeType === 'node' ){
-    let interNodeParams = options.nodeParams( sourceNode, targetNode );
-    let edgeParams2 = options.edgeParams( sourceNode, targetNode, 1 );
+    let interNodeParams = options.nodeParams( sourceNode, targetNode, handleNode );
+    let edgeParams2 = options.edgeParams( sourceNode, targetNode, 1, handleNode );
 
     let interNode = cy.add( assign({}, interNodeParams, {
       group: 'nodes',
@@ -128,7 +129,7 @@ function handleShown(){
   return this.handleNodes.length > 0;
 }
 
-function removeHandle(){
+function removeHandles(){
   if( this.handleNodes.length > 0 ){
     this.handleNodes.remove();
     this.handleNodes = this.cy.collection();
@@ -137,11 +138,9 @@ function removeHandle(){
   return this;
 }
 
-function makeHandle( node ) {
+function handlePosition( node ) {
   let { options, cy } = this;
-
   let handlePosition = typeof options.handlePosition === typeof '' ? () => options.handlePosition : options.handlePosition;
-
   let p = node.position();
   let h = node.outerHeight();
   let w = node.outerWidth();
@@ -167,39 +166,65 @@ function makeHandle( node ) {
   }
 
   // set handle x and y based on adjusted positions
-  let hx = this.hx = p.x + moveX;
-  let hy = this.hy = p.y + moveY;
+  let hx = p.x + moveX;
+  let hy = p.y + moveY;
   let pos = { x: hx, y: hy };
 
+  return pos;
+}
+
+function makeHandles( node ) {
+  let { options, cy } = this;
+
+  let handleParams = options.handleParams( node );
+  if (!isArray( handleParams ))
+  {
+    handleParams = [ handleParams ];
+  }
+
   cy.startBatch();
-  this.removeHandle();
-  this.handleNodes = cy.add([
-    {
-      classes: 'eh-handle',
-      position: pos,
+
+  this.removeHandles();
+
+  let handles = [];
+  for( let i = 0; i < handleParams.length; i++ ){
+    let handle = assign({}, handleParams[i], {
+      group: 'nodes',
       grabbable: false,
       selectable: false
+    });
+
+    if (!handle.hasOwnProperty('position'))
+    {
+      handle.position = this.handlePosition( node );
     }
-  ]);
+
+    handles.push( handle );
+  }
+
+  this.handleNodes = cy.add( handles );
   this.handleNodes.style('z-index', 9007199254740991);
+  this.handleNodes.addClass('eh-handle');
+
   cy.endBatch();
 
   return this;
 }
 
 function updateEdge() {
-  let { sourceNode, ghostNode, cy, mx, my, options } = this;
-  let x = mx;
-  let y = my;
-  let ghostEdge, ghostEles;
+  let { sourceNode, ghostNode } = this;
+  let x = this.mx;
+  let y = this.my;
 
   // can't draw a line without having the starting node
   if( !sourceNode ){ return; }
 
   if( ghostNode.length === 0 || ghostNode.removed() ) {
-    ghostEles = this.ghostEles = cy.collection();
+    let { handleNode, options, cy } = this;
+    let ghostEdge, ghostEles;
 
     cy.startBatch();
+
     ghostNode = this.ghostNode = cy.add({
       group: 'nodes',
       classes: 'eh-ghost eh-ghost-node',
@@ -210,10 +235,11 @@ function updateEdge() {
       'background-color': 'blue',
       'width': 0.0001,
       'height': 0.0001,
-      'opacity': 0
+      'opacity': 0,
+      'events': 'no'
     });
 
-    let ghostEdgeParams = options.ghostEdgeParams();
+    let ghostEdgeParams = options.ghostEdgeParams( sourceNode, handleNode );
 
     ghostEdge = cy.add( assign({}, ghostEdgeParams, {
       group: 'edges',
@@ -224,16 +250,16 @@ function updateEdge() {
     }) );
 
     ghostEdge.addClass('eh-ghost eh-ghost-edge');
+    ghostEdge.style('events', 'no');
 
+    ghostEles = this.ghostEles = cy.collection();
     ghostEles.merge( ghostNode ).merge( ghostEdge );
-
-    ghostEles.style('events', 'no');
 
     cy.endBatch();
   }
   else
   {
-    ghostNode.position({ x, y });
+    this.ghostNode.position({ x, y });
   }
 
   return this;
@@ -242,5 +268,5 @@ function updateEdge() {
 module.exports = {
   makeEdges, makePreview, removePreview,
   updateEdge,
-  handleShown, makeHandle, removeHandle
+  handleShown, handlePosition, makeHandles, removeHandles
 };
