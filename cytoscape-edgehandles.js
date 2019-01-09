@@ -634,7 +634,6 @@ function makeHandles(node) {
   }
 
   this.handleNodes = cy.add(handles);
-  this.handleNodes.style('z-index', 9007199254740991);
   this.handleNodes.addClass('eh-handle');
 
   cy.endBatch();
