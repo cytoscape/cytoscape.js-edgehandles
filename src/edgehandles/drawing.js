@@ -13,7 +13,7 @@ function makeEdges( preview = false ) {
   let { sourceNode, targetNode, handleNode } = this;
 
   // detect cancel
-  if( !targetNode || targetNode.length === 0 ){
+  if( !targetNode || targetNode.empty() ){
     this.removePreview();
 
     this.emit( 'cancel', this.mp(), sourceNode, presumptiveTargets );
@@ -22,7 +22,7 @@ function makeEdges( preview = false ) {
   }
 
   // just remove preview class if we already have the edges
-  if( !preview && previewEles.length > 0 ) {
+  if( !preview && previewEles.nonempty() ) {
     cy.startBatch();
     previewEles.removeClass('eh-preview').style('events', '');
     cy.endBatch();
@@ -117,7 +117,7 @@ function makePreview(){
 }
 
 function removePreview(){
-  if( this.previewEles.length > 0 ){
+  if( this.previewEles.nonempty() ){
     this.previewEles.remove();
     this.previewEles = this.cy.collection();
   }
@@ -126,11 +126,11 @@ function removePreview(){
 }
 
 function handleShown(){
-  return this.handleNodes.length > 0;
+  return this.handleNodes.nonempty();
 }
 
 function removeHandles(){
-  if( this.handleNodes.length > 0 ){
+  if( this.handleNodes.nonempty() ){
     this.handleNodes.remove();
     this.handleNodes = this.cy.collection();
   }
@@ -218,7 +218,7 @@ function updateEdge() {
   // can't draw a line without having the starting node
   if( !sourceNode ){ return; }
 
-  if( ghostNode.length === 0 || ghostNode.removed() ) {
+  if( ghostNode.empty() || ghostNode.removed() ) {
     let { handleNode, options, cy } = this;
     let ghostEdge, ghostEles;
 

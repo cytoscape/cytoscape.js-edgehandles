@@ -6,7 +6,7 @@ function canStartOn( node ){
   const isHandle = el => handleNodes.anySame(el);
   const isGhost = el => ghostEles.anySame(el);
   const isTemp = el => isPreview(el) || isHandle(el) || isGhost(el);
-  const userFilter = el => el.filter( options.selector ).length > 0;
+  const userFilter = el => el.filter( options.selector ).nonempty();
 
   const { enabled, active, grabbingNode } = this;
 
