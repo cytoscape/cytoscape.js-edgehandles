@@ -182,10 +182,6 @@ function makeHandles( node ) {
     handleParams = [ handleParams ];
   }
 
-  cy.startBatch();
-
-  this.removeHandles();
-
   let handles = [];
   for( let i = 0; i < handleParams.length; i++ ){
     let handle = assign({}, handleParams[i], {
@@ -202,9 +198,10 @@ function makeHandles( node ) {
     handles.push( handle );
   }
 
+  cy.startBatch();
+  this.removeHandles();
   this.handleNodes = cy.add( handles );
   this.handleNodes.addClass('eh-handle');
-
   cy.endBatch();
 
   return this;
