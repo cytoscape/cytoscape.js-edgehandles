@@ -438,7 +438,7 @@ function makeEdges() {
 
   // detect cancel
 
-  if (!targetNode || targetNode.length === 0) {
+  if (!targetNode || targetNode.empty()) {
     this.removePreview();
 
     this.emit('cancel', this.mp(), sourceNode, presumptiveTargets);
@@ -447,7 +447,7 @@ function makeEdges() {
   }
 
   // just remove preview class if we already have the edges
-  if (!preview && previewEles.length > 0) {
+  if (!preview && previewEles.nonempty()) {
     cy.startBatch();
     previewEles.removeClass('eh-preview').style('events', '');
     cy.endBatch();
@@ -544,7 +544,7 @@ function makePreview() {
 }
 
 function removePreview() {
-  if (this.previewEles.length > 0) {
+  if (this.previewEles.nonempty()) {
     this.previewEles.remove();
     this.previewEles = this.cy.collection();
   }
@@ -553,11 +553,11 @@ function removePreview() {
 }
 
 function handleShown() {
-  return this.handleNodes.length > 0;
+  return this.handleNodes.nonempty();
 }
 
 function removeHandles() {
-  if (this.handleNodes.length > 0) {
+  if (this.handleNodes.nonempty()) {
     this.handleNodes.remove();
     this.handleNodes = this.cy.collection();
   }
@@ -614,10 +614,6 @@ function makeHandles(node) {
     handleParams = [handleParams];
   }
 
-  cy.startBatch();
-
-  this.removeHandles();
-
   var handles = [];
   for (var i = 0; i < handleParams.length; i++) {
     var handle = assign({}, handleParams[i], {
@@ -633,9 +629,10 @@ function makeHandles(node) {
     handles.push(handle);
   }
 
+  cy.startBatch();
+  this.removeHandles();
   this.handleNodes = cy.add(handles);
   this.handleNodes.addClass('eh-handle');
-
   cy.endBatch();
 
   return this;
@@ -653,7 +650,7 @@ function updateEdge() {
     return;
   }
 
-  if (ghostNode.length === 0 || ghostNode.removed()) {
+  if (ghostNode.empty() || ghostNode.removed()) {
     var handleNode = this.handleNode,
         options = this.options,
         cy = this.cy;
@@ -785,7 +782,7 @@ function canStartOn(node) {
     return isPreview(el) || isHandle(el) || isGhost(el);
   };
   var userFilter = function userFilter(el) {
-    return el.filter(options.selector).length > 0;
+    return el.filter(options.selector).nonempty();
   };
 
   var enabled = this.enabled,

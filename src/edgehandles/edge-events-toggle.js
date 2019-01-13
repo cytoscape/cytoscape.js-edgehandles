@@ -8,7 +8,7 @@ function disableEdgeEvents(){
 
 function enableEdgeEvents(){
   if( this.options.noEdgeEventsInDraw ){
-    this.cy.edges().style('events', '');
+    this.cy.edges().removeStyle('events');
   }
 
   return this;

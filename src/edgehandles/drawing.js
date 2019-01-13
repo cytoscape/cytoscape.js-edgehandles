@@ -24,7 +24,7 @@ function makeEdges( preview = false ) {
   // just remove preview class if we already have the edges
   if( !preview && previewEles.nonempty() ) {
     cy.startBatch();
-    previewEles.removeClass('eh-preview').style('events', '');
+    previewEles.removeClass('eh-preview').removeStyle('events');
     cy.endBatch();
 
     this.emit( 'complete', this.mp(), sourceNode, targetNode, previewEles );
