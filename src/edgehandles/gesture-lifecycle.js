@@ -33,7 +33,7 @@ function show( node ){
 
   this.makeHandles( node );
 
-  this.emit( 'show', this.mp(), node, this.handleNodes);
+  this.emit( 'show', this.mp(), node, this.handleNodes );
 
   return this;
 }
