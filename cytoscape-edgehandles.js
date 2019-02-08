@@ -449,7 +449,7 @@ function makeEdges() {
   // just remove preview class if we already have the edges
   if (!preview && previewEles.nonempty()) {
     cy.startBatch();
-    previewEles.removeClass('eh-preview').style('events', '');
+    previewEles.removeClass('eh-preview').removeStyle('events');
     cy.endBatch();
 
     this.emit('complete', this.mp(), sourceNode, targetNode, previewEles);
@@ -566,8 +566,7 @@ function removeHandles() {
 }
 
 function handlePosition(node) {
-  var options = this.options,
-      cy = this.cy;
+  var options = this.options;
 
   var handlePosition = _typeof(options.handlePosition) === _typeof('') ? function () {
     return options.handlePosition;
@@ -599,9 +598,8 @@ function handlePosition(node) {
   // set handle x and y based on adjusted positions
   var hx = p.x + moveX;
   var hy = p.y + moveY;
-  var pos = { x: hx, y: hy };
 
-  return pos;
+  return { x: hx, y: hy };
 }
 
 function makeHandles(node) {
@@ -721,7 +719,7 @@ function disableEdgeEvents() {
 
 function enableEdgeEvents() {
   if (this.options.noEdgeEventsInDraw) {
-    this.cy.edges().style('events', '');
+    this.cy.edges().removeStyle('events');
   }
 
   return this;
@@ -1097,7 +1095,9 @@ function Edgehandles(options) {
     });
 
     window.addEventListener('test', null, opts);
-  } catch (err) {}
+  } catch (err) {
+    // empty
+  }
 
   if (supportsPassive) {
     this.windowListenerOptions = { capture: true, passive: false };
