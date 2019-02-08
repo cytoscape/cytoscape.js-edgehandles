@@ -49,7 +49,9 @@ function Edgehandles( options ){
     } );
 
     window.addEventListener( 'test', null, opts );
-  } catch( err ){}
+  } catch( err ){
+    // empty
+  }
 
   if( supportsPassive ){
     this.windowListenerOptions = { capture: true, passive: false };
