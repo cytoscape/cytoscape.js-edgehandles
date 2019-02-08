@@ -139,7 +139,7 @@ function removeHandles(){
 }
 
 function handlePosition( node ) {
-  let { options, cy } = this;
+  let { options } = this;
   let handlePosition = typeof options.handlePosition === typeof '' ? () => options.handlePosition : options.handlePosition;
   let p = node.position();
   let h = node.outerHeight();
@@ -168,9 +168,8 @@ function handlePosition( node ) {
   // set handle x and y based on adjusted positions
   let hx = p.x + moveX;
   let hy = p.y + moveY;
-  let pos = { x: hx, y: hy };
 
-  return pos;
+  return { x: hx, y: hy };
 }
 
 function makeHandles( node ) {
