@@ -83,9 +83,12 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 // Simple, internal Object.assign() polyfill for options objects etc.
 
-module.exports = Object.assign != null ? Object.assign.bind(Object) : function (tgt) {
+exports.default = Object.assign != null ? Object.assign.bind(Object) : function (t) {
   for (var _len = arguments.length, srcs = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
     srcs[_key - 1] = arguments[_key];
   }
@@ -94,11 +97,10 @@ module.exports = Object.assign != null ? Object.assign.bind(Object) : function (
     return src != null;
   }).forEach(function (src) {
     Object.keys(src).forEach(function (k) {
-      return tgt[k] = src[k];
+      return t[k] = src[k];
     });
   });
-
-  return tgt;
+  return t;
 };
 
 /***/ }),
@@ -108,10 +110,11 @@ module.exports = Object.assign != null ? Object.assign.bind(Object) : function (
 "use strict";
 
 
-var Edgehandles = __webpack_require__(10);
-var assign = __webpack_require__(0);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-module.exports = function (options) {
+exports.default = function (options) {
   var cy = this;
 
   if (options.hasOwnProperty('handleNodes')) {
@@ -119,8 +122,14 @@ module.exports = function (options) {
     delete options.handleNodes;
   }
 
-  return new Edgehandles(assign({ cy: cy }, options));
+  return new _edgehandles2.default(cy, options);
 };
+
+var _edgehandles = __webpack_require__(10);
+
+var _edgehandles2 = _interopRequireDefault(_edgehandles);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ }),
 /* 2 */
@@ -129,6 +138,9 @@ module.exports = function (options) {
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 function disableGestures() {
   this.saveGestureState();
 
@@ -170,7 +182,7 @@ function saveGestureState() {
   return this;
 }
 
-module.exports = { disableGestures: disableGestures, resetGestures: resetGestures, saveGestureState: saveGestureState };
+exports.default = { disableGestures: disableGestures, resetGestures: resetGestures, saveGestureState: saveGestureState };
 
 /***/ }),
 /* 3 */
@@ -179,6 +191,9 @@ module.exports = { disableGestures: disableGestures, resetGestures: resetGesture
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 function addCytoscapeListeners() {
   var _this = this;
 
@@ -261,7 +276,7 @@ function addCytoscapeListeners() {
   return this;
 }
 
-module.exports = { addCytoscapeListeners: addCytoscapeListeners };
+exports.default = { addCytoscapeListeners: addCytoscapeListeners };
 
 /***/ }),
 /* 4 */
@@ -270,6 +285,9 @@ module.exports = { addCytoscapeListeners: addCytoscapeListeners };
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 /* eslint-disable no-unused-vars */
 var defaults = {
   selector: 'node', // selector/filter function for whether edges can be made from a given node
@@ -351,10 +369,9 @@ var defaults = {
   drawoff: function drawoff() {
     // fired when draw mode disabled
   }
-};
-/* eslint-enable */
+  /* eslint-enable */
 
-module.exports = defaults;
+};exports.default = defaults;
 
 /***/ }),
 /* 5 */
@@ -363,6 +380,9 @@ module.exports = defaults;
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 function toggleDrawMode(bool) {
   var cy = this.cy,
       options = this.options;
@@ -397,7 +417,7 @@ function disableDrawMode() {
   return this.toggleDrawMode(false);
 }
 
-module.exports = { toggleDrawMode: toggleDrawMode, enableDrawMode: enableDrawMode, disableDrawMode: disableDrawMode };
+exports.default = { toggleDrawMode: toggleDrawMode, enableDrawMode: enableDrawMode, disableDrawMode: disableDrawMode };
 
 /***/ }),
 /* 6 */
@@ -406,9 +426,18 @@ module.exports = { toggleDrawMode: toggleDrawMode, enableDrawMode: enableDrawMod
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var assign = __webpack_require__(0);
+var _assign = __webpack_require__(0);
+
+var _assign2 = _interopRequireDefault(_assign);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var isArray = function isArray(obj) {
   return Array.isArray ? Array.isArray(obj) : obj != null && obj instanceof Array;
 };
@@ -489,22 +518,22 @@ function makeEdges() {
     var interNodeParams = options.nodeParams(sourceNode, targetNode, handleNode);
     var edgeParams2 = options.edgeParams(sourceNode, targetNode, 1, handleNode);
 
-    var interNode = cy.add(assign({}, interNodeParams, {
+    var interNode = cy.add((0, _assign2.default)({}, interNodeParams, {
       group: 'nodes',
       position: p
     }));
 
-    var sourceEdge = cy.add(assign({}, edgeParams, {
+    var sourceEdge = cy.add((0, _assign2.default)({}, edgeParams, {
       group: 'edges',
-      data: assign({}, edgeParams.data, {
+      data: (0, _assign2.default)({}, edgeParams.data, {
         source: sourceNode.id(),
         target: interNode.id()
       })
     }));
 
-    var targetEdge = cy.add(assign({}, edgeParams2, {
+    var targetEdge = cy.add((0, _assign2.default)({}, edgeParams2, {
       group: 'edges',
-      data: assign({}, edgeParams2.data, {
+      data: (0, _assign2.default)({}, edgeParams2.data, {
         source: interNode.id(),
         target: targetNode.id()
       })
@@ -513,9 +542,9 @@ function makeEdges() {
     added = added.merge(interNode).merge(sourceEdge).merge(targetEdge);
   } else {
     // flat
-    added = cy.add(assign({}, edgeParams, {
+    added = cy.add((0, _assign2.default)({}, edgeParams, {
       group: 'edges',
-      data: assign({}, edgeParams.data, {
+      data: (0, _assign2.default)({}, edgeParams.data, {
         source: sourceNode.id(),
         target: targetNode.id()
       })
@@ -589,7 +618,8 @@ function handlePosition(node) {
     moveX = -(w / 2);
   } else if (axisX === 'right') {
     moveX = w / 2;
-  }if (axisY === 'top') {
+  }
+  if (axisY === 'top') {
     moveY = -(h / 2);
   } else if (axisY === 'bottom') {
     moveY = h / 2;
@@ -614,7 +644,7 @@ function makeHandles(node) {
 
   var handles = [];
   for (var i = 0; i < handleParams.length; i++) {
-    var handle = assign({}, handleParams[i], {
+    var handle = (0, _assign2.default)({}, handleParams[i], {
       group: 'nodes',
       grabbable: false,
       selectable: false
@@ -674,9 +704,9 @@ function updateEdge() {
 
     var ghostEdgeParams = options.ghostEdgeParams(sourceNode, handleNode);
 
-    ghostEdge = cy.add(assign({}, ghostEdgeParams, {
+    ghostEdge = cy.add((0, _assign2.default)({}, ghostEdgeParams, {
       group: 'edges',
-      data: assign({}, ghostEdgeParams.data, {
+      data: (0, _assign2.default)({}, ghostEdgeParams.data, {
         source: sourceNode.id(),
         target: ghostNode.id()
       })
@@ -696,7 +726,7 @@ function updateEdge() {
   return this;
 }
 
-module.exports = {
+exports.default = {
   makeEdges: makeEdges, makePreview: makePreview, removePreview: removePreview,
   updateEdge: updateEdge,
   handleShown: handleShown, handlePosition: handlePosition, makeHandles: makeHandles, removeHandles: removeHandles
@@ -709,6 +739,9 @@ module.exports = {
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 function disableEdgeEvents() {
   if (this.options.noEdgeEventsInDraw) {
     this.cy.edges().style('events', 'no');
@@ -725,7 +758,7 @@ function enableEdgeEvents() {
   return this;
 }
 
-module.exports = { disableEdgeEvents: disableEdgeEvents, enableEdgeEvents: enableEdgeEvents };
+exports.default = { disableEdgeEvents: disableEdgeEvents, enableEdgeEvents: enableEdgeEvents };
 
 /***/ }),
 /* 8 */
@@ -734,6 +767,9 @@ module.exports = { disableEdgeEvents: disableEdgeEvents, enableEdgeEvents: enabl
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 function enable() {
   this.enabled = true;
 
@@ -750,7 +786,7 @@ function disable() {
   return this;
 }
 
-module.exports = { enable: enable, disable: disable };
+exports.default = { enable: enable, disable: disable };
 
 /***/ }),
 /* 9 */
@@ -759,7 +795,15 @@ module.exports = { enable: enable, disable: disable };
 "use strict";
 
 
-var memoize = __webpack_require__(13);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _lodash = __webpack_require__(13);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function canStartOn(node) {
   var options = this.options,
@@ -866,7 +910,9 @@ function snap() {
   var target = this.targetNode;
   var threshold = this.options.snapThreshold;
   var sqThreshold = function sqThreshold(n) {
-    var r = getRadius(n);var t = r + threshold;return t * t;
+    var r = getRadius(n);
+    var t = r + threshold;
+    return t * t;
   };
   var mousePos = this.mp();
   var sqDist = function sqDist(p1, p2) {
@@ -875,7 +921,7 @@ function snap() {
   var getRadius = function getRadius(n) {
     return (n.outerWidth() + n.outerHeight()) / 4;
   };
-  var nodeSqDist = memoize(function (n) {
+  var nodeSqDist = (0, _lodash2.default)(function (n) {
     return sqDist(n.position(), mousePos);
   }, function (n) {
     return n.id();
@@ -1030,7 +1076,7 @@ function stop() {
   return this;
 }
 
-module.exports = {
+exports.default = {
   show: show, hide: hide, start: start, update: update, preview: preview, unpreview: unpreview, stop: stop, snap: snap,
   canStartOn: canStartOn, canStartDrawModeOn: canStartDrawModeOn, canStartNonDrawModeOn: canStartNonDrawModeOn
 };
@@ -1042,22 +1088,57 @@ module.exports = {
 "use strict";
 
 
-var defaults = __webpack_require__(4);
-var assign = __webpack_require__(0);
-var throttle = __webpack_require__(14);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-var cyGesturesToggle = __webpack_require__(2);
-var cyListeners = __webpack_require__(3);
-var drawMode = __webpack_require__(5);
-var drawing = __webpack_require__(6);
-var enabling = __webpack_require__(8);
-var gestureLifecycle = __webpack_require__(9);
-var listeners = __webpack_require__(11);
-var edgeEvents = __webpack_require__(7);
+var _defaults = __webpack_require__(4);
 
-function Edgehandles(options) {
-  var cy = options.cy;
+var _defaults2 = _interopRequireDefault(_defaults);
 
+var _assign = __webpack_require__(0);
+
+var _assign2 = _interopRequireDefault(_assign);
+
+var _lodash = __webpack_require__(14);
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
+var _cyGesturesToggle = __webpack_require__(2);
+
+var _cyGesturesToggle2 = _interopRequireDefault(_cyGesturesToggle);
+
+var _cyListeners = __webpack_require__(3);
+
+var _cyListeners2 = _interopRequireDefault(_cyListeners);
+
+var _drawMode = __webpack_require__(5);
+
+var _drawMode2 = _interopRequireDefault(_drawMode);
+
+var _drawing = __webpack_require__(6);
+
+var _drawing2 = _interopRequireDefault(_drawing);
+
+var _enabling = __webpack_require__(8);
+
+var _enabling2 = _interopRequireDefault(_enabling);
+
+var _gestureLifecycle = __webpack_require__(9);
+
+var _gestureLifecycle2 = _interopRequireDefault(_gestureLifecycle);
+
+var _listeners = __webpack_require__(11);
+
+var _listeners2 = _interopRequireDefault(_listeners);
+
+var _edgeEventsToggle = __webpack_require__(7);
+
+var _edgeEventsToggle2 = _interopRequireDefault(_edgeEventsToggle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function Edgehandles(cy, options) {
   this.cy = cy;
   this.listeners = [];
 
@@ -1075,12 +1156,12 @@ function Edgehandles(options) {
   this.mx = 0;
   this.my = 0;
 
-  this.options = assign({}, defaults, options);
+  this.options = (0, _assign2.default)({}, _defaults2.default, options);
 
   this.saveGestureState();
   this.addListeners();
 
-  this.throttledSnap = throttle(this.snap.bind(this), 1000 / options.snapFrequency);
+  this.throttledSnap = (0, _lodash2.default)(this.snap.bind(this), 1000 / options.snapFrequency);
 
   this.preventDefault = function (e) {
     return e.preventDefault();
@@ -1107,16 +1188,13 @@ function Edgehandles(options) {
 }
 
 var proto = Edgehandles.prototype = {};
-var extend = function extend(obj) {
-  return assign(proto, obj);
-};
 
 proto.destroy = function () {
   this.removeListeners();
 };
 
 proto.setOptions = function (options) {
-  assign(this.options, options);
+  (0, _assign2.default)(this.options, options);
 };
 
 proto.mp = function () {
@@ -1136,9 +1214,13 @@ proto.clearCollections = function () {
   this.presumptiveTargets = cy.collection();
 };
 
-[cyGesturesToggle, cyListeners, drawMode, drawing, enabling, gestureLifecycle, listeners, edgeEvents].forEach(extend);
+var extend = function extend(obj) {
+  return (0, _assign2.default)(proto, obj);
+};
+var fn = [_cyGesturesToggle2.default, _cyListeners2.default, _drawMode2.default, _drawing2.default, _enabling2.default, _gestureLifecycle2.default, _listeners2.default, _edgeEventsToggle2.default];
+fn.forEach(extend);
 
-module.exports = Edgehandles;
+exports.default = Edgehandles;
 
 /***/ }),
 /* 11 */
@@ -1146,6 +1228,10 @@ module.exports = Edgehandles;
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -1252,7 +1338,7 @@ function emit(type, position) {
   return this;
 }
 
-module.exports = { addListener: addListener, addListeners: addListeners, removeListener: removeListener, removeListeners: removeListeners, emit: emit };
+exports.default = { addListener: addListener, addListeners: addListeners, removeListener: removeListener, removeListeners: removeListeners, emit: emit };
 
 /***/ }),
 /* 12 */
@@ -1261,7 +1347,15 @@ module.exports = { addListener: addListener, addListeners: addListeners, removeL
 "use strict";
 
 
-var impl = __webpack_require__(1);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _core = __webpack_require__(1);
+
+var _core2 = _interopRequireDefault(_core);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // registers the extension on a cytoscape lib ref
 var register = function register(cytoscape) {
@@ -1269,7 +1363,7 @@ var register = function register(cytoscape) {
     return;
   } // can't register if cytoscape unspecified
 
-  cytoscape('core', 'edgehandles', impl); // register with cytoscape.js
+  cytoscape('core', 'edgehandles', _core2.default); // register with cytoscape.js
 };
 
 if (typeof cytoscape !== 'undefined') {
@@ -1277,7 +1371,7 @@ if (typeof cytoscape !== 'undefined') {
   register(cytoscape); // eslint-disable-line no-undef
 }
 
-module.exports = register;
+exports.default = register;
 
 /***/ }),
 /* 13 */

@@ -1,93 +1,90 @@
-const defaults = require('./defaults');
-const assign = require('../assign');
-const throttle = require('lodash.throttle');
+import defaults from './defaults'
+import assign from '../assign'
+import throttle from 'lodash.throttle'
+import cyGesturesToggle from './cy-gestures-toggle'
+import cyListeners from './cy-listeners'
+import drawMode from './draw-mode'
+import drawing from './drawing'
+import enabling from './enabling'
+import gestureLifecycle from './gesture-lifecycle'
+import listeners from './listeners'
+import edgeEvents from './edge-events-toggle'
 
-const cyGesturesToggle = require('./cy-gestures-toggle');
-const cyListeners = require('./cy-listeners');
-const drawMode = require('./draw-mode');
-const drawing = require('./drawing');
-const enabling = require('./enabling');
-const gestureLifecycle = require('./gesture-lifecycle');
-const listeners = require('./listeners');
-const edgeEvents = require('./edge-events-toggle');
-
-function Edgehandles( options ){
-  let cy = options.cy;
-
-  this.cy = cy;
-  this.listeners = [];
+function Edgehandles (cy, options) {
+  this.cy = cy
+  this.listeners = []
 
   // edgehandles gesture state
-  this.enabled = true;
-  this.drawMode = false;
-  this.active = false;
-  this.grabbingNode = false;
+  this.enabled = true
+  this.drawMode = false
+  this.active = false
+  this.grabbingNode = false
 
   // edgehandles elements
-  this.handleNodes = cy.collection();
-  this.clearCollections();
+  this.handleNodes = cy.collection()
+  this.clearCollections()
 
   // mouse position
-  this.mx = 0;
-  this.my = 0;
+  this.mx = 0
+  this.my = 0
 
-  this.options = assign( {}, defaults, options );
+  this.options = assign({}, defaults, options)
 
-  this.saveGestureState();
-  this.addListeners();
+  this.saveGestureState()
+  this.addListeners()
 
-  this.throttledSnap = throttle( this.snap.bind(this), 1000/options.snapFrequency );
+  this.throttledSnap = throttle(this.snap.bind(this), 1000 / options.snapFrequency)
 
-  this.preventDefault = e => e.preventDefault();
+  this.preventDefault = e => e.preventDefault()
 
-  let supportsPassive = false;
+  let supportsPassive = false
   try {
-    let opts = Object.defineProperty( {}, 'passive', {
-      get: function(){
-        supportsPassive = true;
+    let opts = Object.defineProperty({}, 'passive', {
+      get: function () {
+        supportsPassive = true
       }
-    } );
+    })
 
-    window.addEventListener( 'test', null, opts );
-  } catch( err ){
+    window.addEventListener('test', null, opts)
+  } catch (err) {
     // empty
   }
 
-  if( supportsPassive ){
-    this.windowListenerOptions = { capture: true, passive: false };
+  if (supportsPassive) {
+    this.windowListenerOptions = { capture: true, passive: false }
   } else {
-    this.windowListenerOptions = true;
+    this.windowListenerOptions = true
   }
 }
 
-let proto = Edgehandles.prototype = {};
-let extend = obj => assign( proto, obj );
+let proto = Edgehandles.prototype = {}
 
-proto.destroy = function(){
-  this.removeListeners();
-};
+proto.destroy = function () {
+  this.removeListeners()
+}
 
-proto.setOptions = function( options ){
-  assign( this.options, options );
-};
+proto.setOptions = function (options) {
+  assign(this.options, options)
+}
 
-proto.mp = function(){
-  return { x: this.mx, y: this.my };
-};
+proto.mp = function () {
+  return { x: this.mx, y: this.my }
+}
 
-proto.clearCollections = function(){
-  let { cy } = this;
+proto.clearCollections = function () {
+  let { cy } = this
 
-  this.handleNode = cy.collection();
-  this.previewEles = cy.collection();
-  this.ghostNode = cy.collection();
-  this.ghostEles = cy.collection();
-  this.sourceNode = cy.collection();
-  this.targetNode = cy.collection();
-  this.presumptiveTargets = cy.collection();
-};
+  this.handleNode = cy.collection()
+  this.previewEles = cy.collection()
+  this.ghostNode = cy.collection()
+  this.ghostEles = cy.collection()
+  this.sourceNode = cy.collection()
+  this.targetNode = cy.collection()
+  this.presumptiveTargets = cy.collection()
+}
 
-[
+let extend = obj => assign(proto, obj)
+let fn = [
   cyGesturesToggle,
   cyListeners,
   drawMode,
@@ -96,6 +93,7 @@ proto.clearCollections = function(){
   gestureLifecycle,
   listeners,
   edgeEvents
-].forEach( extend );
+]
+fn.forEach(extend)
 
-module.exports = Edgehandles;
+export default Edgehandles

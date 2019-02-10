@@ -1,33 +1,33 @@
-function toggleDrawMode( bool ){
-  let { cy, options } = this;
+function toggleDrawMode (bool) {
+  let { cy, options } = this
 
-  this.drawMode = bool != null ? bool : !this.drawMode;
+  this.drawMode = bool != null ? bool : !this.drawMode
 
-  if( this.drawMode ){
-    this.prevUngrabifyState = cy.autoungrabify();
+  if (this.drawMode) {
+    this.prevUngrabifyState = cy.autoungrabify()
 
-    cy.autoungrabify( true );
+    cy.autoungrabify(true)
 
-    if( !options.handleInDrawMode && this.handleShown() ){
-      this.hide();
+    if (!options.handleInDrawMode && this.handleShown()) {
+      this.hide()
     }
 
-    this.emit('drawon');
+    this.emit('drawon')
   } else {
-    cy.autoungrabify( this.prevUngrabifyState );
+    cy.autoungrabify(this.prevUngrabifyState)
 
-    this.emit('drawoff');
+    this.emit('drawoff')
   }
 
-  return this;
+  return this
 }
 
-function enableDrawMode(){
-  return this.toggleDrawMode( true );
+function enableDrawMode () {
+  return this.toggleDrawMode(true)
 }
 
-function disableDrawMode(){
-  return this.toggleDrawMode( false );
+function disableDrawMode () {
+  return this.toggleDrawMode(false)
 }
 
-module.exports = { toggleDrawMode, enableDrawMode, disableDrawMode };
+export default { toggleDrawMode, enableDrawMode, disableDrawMode }
