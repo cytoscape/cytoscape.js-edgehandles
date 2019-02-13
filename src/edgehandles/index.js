@@ -42,10 +42,11 @@ function Edgehandles (cy, options) {
     let opts = Object.defineProperty({}, 'passive', {
       get: function () {
         supportsPassive = true
+        return undefined
       }
     })
 
-    window.addEventListener('test', null, opts)
+    window.addEventListener('_', null, opts)
   } catch (err) {
     // empty
   }
