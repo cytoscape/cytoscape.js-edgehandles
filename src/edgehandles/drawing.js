@@ -79,8 +79,7 @@ function makeEdges( preview = false ) {
       getEleJson(
         {
           group: 'nodes',
-          position: p,
-          style: { 'events': 'no' }
+          position: p
         },
         options.nodeParams( source, target ),
         classes
@@ -94,8 +93,7 @@ function makeEdges( preview = false ) {
           data: {
             source: source.id(),
             target: interNode.id()
-          },
-          style: { 'events': 'no' }
+          }
         },
         options.edgeParams( source, target, 0 ),
         classes
@@ -109,8 +107,7 @@ function makeEdges( preview = false ) {
           data: {
             source: interNode.id(),
             target: target.id()
-          },
-          style: { 'events': 'no' }
+          }
         },
         options.edgeParams( source, target, 1 ),
         classes
@@ -126,8 +123,7 @@ function makeEdges( preview = false ) {
           data: {
             source: source.id(),
             target: target.id()
-          },
-          style: { 'events': 'no' }
+          }
         },
         options.edgeParams( source, target, 0 ),
         classes
@@ -139,6 +135,8 @@ function makeEdges( preview = false ) {
 
   if( preview ) {
     this.previewEles = added;
+
+    added.style('events', 'no');
   } else {
     added.style('events', '');
 
