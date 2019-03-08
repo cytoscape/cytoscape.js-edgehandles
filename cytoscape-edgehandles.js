@@ -496,8 +496,7 @@ function makeEdges() {
   if (edgeType === 'node') {
     var interNode = cy.add(getEleJson({
       group: 'nodes',
-      position: p,
-      style: { 'events': 'no' }
+      position: p
     }, options.nodeParams(source, target), classes));
 
     var source2inter = cy.add(getEleJson({
@@ -505,8 +504,7 @@ function makeEdges() {
       data: {
         source: source.id(),
         target: interNode.id()
-      },
-      style: { 'events': 'no' }
+      }
     }, options.edgeParams(source, target, 0), classes));
 
     var inter2target = cy.add(getEleJson({
@@ -514,8 +512,7 @@ function makeEdges() {
       data: {
         source: interNode.id(),
         target: target.id()
-      },
-      style: { 'events': 'no' }
+      }
     }, options.edgeParams(source, target, 1), classes));
 
     added = added.merge(interNode).merge(source2inter).merge(inter2target);
@@ -526,8 +523,7 @@ function makeEdges() {
       data: {
         source: source.id(),
         target: target.id()
-      },
-      style: { 'events': 'no' }
+      }
     }, options.edgeParams(source, target, 0), classes));
 
     added = added.merge(source2target);
@@ -535,6 +531,8 @@ function makeEdges() {
 
   if (preview) {
     this.previewEles = added;
+
+    added.style('events', 'no');
   } else {
     added.style('events', '');
 
