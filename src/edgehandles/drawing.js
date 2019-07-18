@@ -265,10 +265,9 @@ function updateEdge() {
         data: assign({}, ghostEdgeParams.data, {
           source: sourceNode.id(),
           target: ghostNode.id()
-        })
+        }),
+        classes: 'eh-ghost eh-ghost-edge'
       }) );
-
-      ghostEdge.addClass('eh-ghost eh-ghost-edge');
 
       ghostEdge.style({
         'events': 'no'
