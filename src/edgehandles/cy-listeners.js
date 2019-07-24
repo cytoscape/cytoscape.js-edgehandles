@@ -48,12 +48,16 @@ function addCytoscapeListeners(){
 
   // hover over preview
   this.addListener( cy, 'tapdragover', 'node', e => {
-    this.preview( e.target );
+    if( options.snap ){
+      // then ignore events like mouseover
+    } else {
+      this.preview( e.target );
+    }
   } );
 
   // hover out unpreview
   this.addListener( cy, 'tapdragout', 'node', e => {
-    if( options.snap && e.target.same(this.targetNode) ){
+    if( options.snap ){
       // then keep the preview
     } else {
       this.unpreview( e.target );
