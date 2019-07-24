@@ -232,12 +232,16 @@ function addCytoscapeListeners() {
 
   // hover over preview
   this.addListener(cy, 'tapdragover', 'node', function (e) {
-    _this.preview(e.target);
+    if (options.snap) {
+      // then ignore events like mouseover
+    } else {
+      _this.preview(e.target);
+    }
   });
 
   // hover out unpreview
   this.addListener(cy, 'tapdragout', 'node', function (e) {
-    if (options.snap && e.target.same(_this.targetNode)) {
+    if (options.snap) {
       // then keep the preview
     } else {
       _this.unpreview(e.target);
@@ -678,10 +682,9 @@ function updateEdge() {
         data: assign({}, ghostEdgeParams.data, {
           source: sourceNode.id(),
           target: ghostNode.id()
-        })
+        }),
+        classes: 'eh-ghost eh-ghost-edge'
       }));
-
-      ghostEdge.addClass('eh-ghost eh-ghost-edge');
 
       ghostEdge.style({
         'events': 'no'
@@ -760,6 +763,7 @@ module.exports = { enable: enable, disable: disable };
 
 
 var memoize = __webpack_require__(13);
+var sqrt2 = Math.sqrt(2);
 
 function canStartOn(node) {
   var options = this.options,
@@ -865,30 +869,112 @@ function snap() {
   var cy = this.cy;
   var tgt = this.targetNode;
   var threshold = this.options.snapThreshold;
-  var sqThreshold = function sqThreshold(n) {
-    var r = getRadius(n);var t = r + threshold;return t * t;
-  };
   var mousePos = this.mp();
-  var sqDist = function sqDist(p1, p2) {
-    return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y);
+  var handleNode = this.handleNode,
+      previewEles = this.previewEles,
+      ghostNode = this.ghostNode;
+
+
+  var radius = function radius(n) {
+    return sqrt2 * Math.max(n.outerWidth(), n.outerHeight()) / 2;
+  }; // worst-case enclosure of bb by circle
+  var sqDist = function sqDist(x1, y1, x2, y2) {
+    var dx = x2 - x1;var dy = y2 - y1;return dx * dx + dy * dy;
   };
-  var getRadius = function getRadius(n) {
-    return (n.outerWidth() + n.outerHeight()) / 4;
+  var sqDistByPt = function sqDistByPt(p1, p2) {
+    return sqDist(p1.x, p1.y, p2.x, p2.y);
   };
-  var nodeSqDist = memoize(function (n) {
-    return sqDist(n.position(), mousePos);
-  }, function (n) {
-    return n.id();
-  });
+  var nodeSqDist = function nodeSqDist(n) {
+    return sqDistByPt(n.position(), mousePos);
+  };
+
+  var sqThreshold = function sqThreshold(n) {
+    var r = radius(n);var t = r + threshold;return t * t;
+  };
   var isWithinTheshold = function isWithinTheshold(n) {
     return nodeSqDist(n) <= sqThreshold(n);
   };
-  var cmpSqDist = function cmpSqDist(n1, n2) {
-    return nodeSqDist(n1) - nodeSqDist(n2);
+
+  var bbSqDist = function bbSqDist(n) {
+    var p = n.position();
+    var halfW = n.outerWidth() / 2;
+    var halfH = n.outerHeight() / 2;
+
+    // node and mouse positions, line is formed from node to mouse
+    var nx = p.x;
+    var ny = p.y;
+    var mx = mousePos.x;
+    var my = mousePos.y;
+
+    // bounding box
+    var x1 = nx - halfW;
+    var x2 = nx + halfW;
+    var y1 = ny - halfH;
+    var y2 = ny + halfH;
+
+    var insideXBounds = x1 <= mx && mx <= x2;
+    var insideYBounds = y1 <= my && my <= y2;
+
+    if (insideXBounds && insideYBounds) {
+      // inside box
+      return 0;
+    } else if (insideXBounds) {
+      // perpendicular distance to box, top or bottom
+      var dy1 = my - y1;
+      var dy2 = my - y2;
+
+      return Math.min(dy1 * dy1, dy2 * dy2);
+    } else if (insideYBounds) {
+      // perpendicular distance to box, left or right
+      var dx1 = mx - x1;
+      var dx2 = mx - x2;
+
+      return Math.min(dx1 * dx1, dx2 * dx2);
+    } else if (mx < x1 && my < y1) {
+      // top-left corner distance
+      return sqDist(mx, my, x1, y1);
+    } else if (mx > x2 && my < y1) {
+      // top-right corner distance
+      return sqDist(mx, my, x2, y1);
+    } else if (mx < x1 && my > y2) {
+      // bottom-left corner distance
+      return sqDist(mx, my, x1, y2);
+    } else {
+      // bottom-right corner distance
+      return sqDist(mx, my, x2, y2);
+    }
   };
+
+  var cmpBbSqDist = function cmpBbSqDist(n1, n2) {
+    return bbSqDist(n1) - bbSqDist(n2);
+  };
+
+  var cmp = cmpBbSqDist;
+
   var allowHoverDelay = false;
 
-  var nodesByDist = cy.nodes(isWithinTheshold).sort(cmpSqDist);
+  var mouseIsInside = function mouseIsInside(n) {
+    var mp = mousePos;
+    var w = n.outerWidth();
+    var halfW = w / 2;
+    var h = n.outerHeight();
+    var halfH = h / 2;
+    var p = n.position();
+    var x1 = p.x - halfW;
+    var x2 = p.x + halfW;
+    var y1 = p.y - halfH;
+    var y2 = p.y + halfH;
+
+    return x1 <= mp.x && mp.x <= x2 && y1 <= mp.y && mp.y <= y2;
+  };
+
+  var isEhEle = function isEhEle(n) {
+    return n.same(handleNode) || n.same(previewEles) || n.same(ghostNode);
+  };
+
+  var nodesByDist = cy.nodes(function (n) {
+    return !isEhEle(n) && isWithinTheshold(n);
+  }).sort(cmp);
   var snapped = false;
 
   if (tgt.nonempty() && !isWithinTheshold(tgt)) {
@@ -897,6 +983,16 @@ function snap() {
 
   for (var i = 0; i < nodesByDist.length; i++) {
     var n = nodesByDist[i];
+
+    // skip a parent node when the mouse is inside it
+    if (n.isParent() && mouseIsInside(n)) {
+      continue;
+    }
+
+    // skip a child node when the mouse is not inside the parent
+    if (n.isChild() && !mouseIsInside(n.parent())) {
+      continue;
+    }
 
     if (n.same(tgt) || this.preview(n, allowHoverDelay)) {
       snapped = true;
@@ -927,9 +1023,11 @@ function preview(target) {
   var isHandle = target.same(this.handleNode);
   var isExistingTgt = target.same(this.targetNode);
 
-  if (!active || isHandle || isGhost || noEdge || isExistingTgt || isLoop && !loopAllowed) {
-    return false;
-  }
+  if (!active || isHandle || isGhost || noEdge || isExistingTgt || isLoop && !loopAllowed
+  // || (target.isParent())
+  ) {
+      return false;
+    }
 
   if (this.targetNode.nonempty()) {
     this.unpreview(this.targetNode);
