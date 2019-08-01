@@ -33,7 +33,7 @@ function Edgehandles (cy, options) {
   this.saveGestureState()
   this.addListeners()
 
-  this.throttledSnap = throttle(this.snap.bind(this), 1000 / options.snapFrequency)
+  this.throttledSnap = throttle(this.snap.bind(this), 1000 / this.options.snapFrequency)
 
   this.preventDefault = e => e.preventDefault()
 
