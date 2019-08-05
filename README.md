@@ -79,7 +79,7 @@ let defaults = {
   handleParams: function( node ){
     // returns element or array of elements to be passed to cy.add() for the handle nodes
     // (default classes are always added for you)
-    return [];
+    return [{}];
   },
   handlePosition: function( node ){
     return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
