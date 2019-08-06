@@ -1,0 +1,259 @@
+<!DOCTYPE>
+
+<html>
+
+<head>
+  <title>cytoscape-edgehandles.js demo</title>
+
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+
+  <!-- for testing with local version of cytoscape.js -->
+  <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
+  <script src="cytoscape-edgehandles.js"></script>
+
+  <style>
+    body {
+      font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+      font-size: 14px;
+    }
+
+    #cy {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 999;
+    }
+
+    h1 {
+      opacity: 0.5;
+      font-size: 1em;
+      font-weight: bold;
+    }
+
+    #buttons {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      z-index: 99999;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const cy = window.cy = cytoscape({
+        container: document.getElementById('cy'),
+        layout: {
+          name: 'grid',
+          rows: 2,
+          cols: 2
+        },
+        style: [
+          {
+            selector: 'node[name]',
+            style: {
+              'content': 'data(name)',
+              'width': 50,
+              'height': 50,
+
+              'color': 'black',
+              'font-family': 'sans serif',
+              'font-size': '16',
+            }
+          },
+
+          {
+            selector: 'edge',
+            style: {
+              'curve-style': 'bezier',
+              'target-arrow-shape': 'triangle'
+            }
+          },
+          {
+            selector: 'edge[name]',
+            style: {
+              'label': 'data(name)',
+              'color': 'white',
+              'font-family': 'sans serif',
+              'font-size': '14',
+              'text-outline-color': 'black',
+              'text-outline-opacity': 1,
+              'text-outline-width': 1
+            }
+          },
+          {
+            selector: '.no',
+            style: {
+              'line-color': 'red',
+              'target-arrow-color': 'red'
+            }
+          },
+          {
+            selector: '.yes',
+            style: {
+              'line-color': 'green',
+              'target-arrow-color': 'green'
+            }
+          },
+
+          {
+            selector: '.eh-handle',
+            style: {
+              'background-color': 'red',
+              'width': 16,
+              'height': 16
+            }
+          },
+
+          {
+            selector: '.eh-handle[name]',
+            style: {
+              'width': 20,
+              'height': 20,
+              'overlay-opacity': 0,
+              'border-width': 12, // makes the handle easier to hit
+              'border-opacity': 0,
+              'font-size': '8',
+              'font-weight': 'bold',
+              'color': 'white',
+              'text-halign': 'center',
+              'text-valign': 'center',
+            }
+          },
+
+          {
+            selector: '.eh-source',
+            style: {
+              'border-width': 2,
+              'border-color': 'red'
+            }
+          },
+
+          {
+            selector: '.eh-target',
+            style: {
+              'border-width': 2,
+              'border-color': 'red'
+            }
+          },
+
+          {
+            selector: '.eh-no',
+            style: {
+              'background-color': 'red'
+            }
+          },
+
+          {
+            selector: '.eh-yes',
+            style: {
+              'background-color': 'green'
+            }
+          },
+
+          {
+            selector: '.eh-ghost-edge.eh-preview-active',
+            style: {
+              'opacity': 0
+            }
+          }
+        ],
+        elements: [
+          { // node a
+            data: { id: 'a', name: 'Jerry' }
+          },
+          { // node b
+            data: { id: 'b', name: 'Elaine' }
+          },
+          { // node c
+            data: { id: 'c', name: 'Kramer' }
+          },
+          { // node d
+            data: { id: 'd', name: 'Den' }
+          },
+          { // edge ab
+            classes: 'yes',
+            data: { source: 'a', target: 'b', name: 'yes', type: 'yes' }
+          },
+          { // edge ab
+            classes: 'no',
+            data: { source: 'a', target: 'c', name: 'no', type: 'no' }
+          },
+          { // edge dc
+            data: { source: 'd', target: 'c' }
+          }
+        ],
+        boxSelectionEnabled: true,
+      })
+
+      const eh = cy.edgehandles({
+        handleParams: (node) => {
+          let p = node.position()
+          /* prevent tremor on selected/not selected node  */
+          let h = 50 // let h = node.outerHeight()
+          let w = 50 // let w = node.outerWidth()
+          let hy = p.y + h / 2 - 5
+          let handles = []
+
+          switch (node.data('id')) {
+            case 'a' :
+              handles = [
+                {
+                  position: { x: p.x - w / 2 + 10, y: hy },
+                  classes: 'eh-yes',
+                  data: { type: 'yes', name: 'yes' }
+                },
+                {
+                  position: { x: p.x + w / 2 - 10, y: hy },
+                  classes: 'eh-no',
+                  data: { type: 'no', name: 'no' }
+                }
+              ]
+              return handles
+          }
+        },
+        edgeParams (source, target, i, handle) {
+          return {
+            classes: handle.data('name'),
+            data: {
+              type: handle.data('type'),
+              name: handle.data('name')
+            }
+          }
+        },
+        ghostEdgeParams (source, handle) {
+          return {
+            classes: handle.data('name'),
+            data: {
+              type: handle.data('type'),
+              name: handle.data('name')
+            }
+          }
+        },
+        complete (source, target, added) {
+          switch (source.data('id')) {
+            case 'a':
+              source.connectedEdges().filter((e) => {
+                return e.source().same(source) && e.data('type') === added.data('type')
+              }).difference(added).remove()
+              break
+          }
+        }
+      })
+    })
+  </script>
+</head>
+
+<body>
+<h1>cytoscape-edgehandles demo multi handle</h1>
+
+<div id="cy"></div>
+
+</body>
+
+</html>
