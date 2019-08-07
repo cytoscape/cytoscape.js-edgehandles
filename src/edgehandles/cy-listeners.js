@@ -45,16 +45,14 @@ function addCytoscapeListeners () {
 
   // hover over preview
   this.addListener(cy, 'tapdragover', 'node', e => {
-    this.preview(e.target)
+    // then ignore events like mouseover
+    if (!options.snap) { this.preview(e.target) }
   })
 
   // hover out unpreview
   this.addListener(cy, 'tapdragout', 'node', e => {
-    if (options.snap && e.target.same(this.targetNode)) {
-      // then keep the preview
-    } else {
-      this.unpreview(e.target)
-    }
+    // then keep the preview
+    if (!options.snap) { this.unpreview(e.target) }
   })
 
   // stop gesture on tapend
