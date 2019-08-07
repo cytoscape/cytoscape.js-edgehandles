@@ -1,4 +1,5 @@
 import memoize from 'lodash.memoize'
+const sqrt2 = Math.sqrt(2)
 
 function canStartOn (node) {
   const { options, previewEles, ghostEles, handleNodes } = this
@@ -80,20 +81,87 @@ function snap () {
   let cy = this.cy
   let target = this.targetNode
   let threshold = this.options.snapThreshold
-  let sqThreshold = n => {
-    let r = getRadius(n)
-    let t = r + threshold
-    return t * t
-  }
   let mousePos = this.mp()
-  let sqDist = (p1, p2) => (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y)
-  let getRadius = n => (n.outerWidth() + n.outerHeight()) / 4
-  let nodeSqDist = memoize(n => sqDist(n.position(), mousePos), n => n.id())
+  let { handleNode, previewEles, ghostNode } = this
+
+  let radius = n => sqrt2 * Math.max(n.outerWidth(), n.outerHeight())/2 // worst-case enclosure of bb by circle
+  let sqDist = (x1, y1, x2, y2) => { let dx = x2 - x1; let dy = y2 - y1; return dx*dx + dy*dy; }
+  let sqDistByPt = (p1, p2) => sqDist(p1.x, p1.y, p2.x, p2.y)
+  let nodeSqDist = n => sqDistByPt(n.position(), mousePos)
+
+  let sqThreshold = n => { let r = radius(n); let t = r + threshold; return t * t; }
   let isWithinTheshold = n => nodeSqDist(n) <= sqThreshold(n)
-  let cmpSqDist = (n1, n2) => nodeSqDist(n1) - nodeSqDist(n2)
+
+  let bbSqDist = n => {
+    let p = n.position()
+    let halfW = n.outerWidth() / 2
+    let halfH = n.outerHeight() / 2
+
+    // node and mouse positions, line is formed from node to mouse
+    let nx = p.x
+    let ny = p.y
+    let mx = mousePos.x
+    let my = mousePos.y
+
+    // bounding box
+    let x1 = nx - halfW
+    let x2 = nx + halfW
+    let y1 = ny - halfH
+    let y2 = ny + halfH
+
+    let insideXBounds = x1 <= mx && mx <= x2
+    let insideYBounds = y1 <= my && my <= y2
+
+    if( insideXBounds && insideYBounds ){ // inside box
+      return 0
+    } else if( insideXBounds ){ // perpendicular distance to box, top or bottom
+      let dy1 = my - y1
+      let dy2 = my - y2
+
+      return Math.min(dy1 * dy1, dy2 * dy2)
+    } else if( insideYBounds ){ // perpendicular distance to box, left or right
+      let dx1 = mx - x1
+      let dx2 = mx - x2
+
+      return Math.min(dx1 * dx1, dx2 * dx2)
+    } else if( mx < x1 && my < y1 ){ // top-left corner distance
+      return sqDist(mx, my, x1, y1)
+    } else if( mx > x2 && my < y1 ){ // top-right corner distance
+      return sqDist(mx, my, x2, y1)
+    } else if( mx < x1 && my > y2 ){ // bottom-left corner distance
+      return sqDist(mx, my, x1, y2)
+    } else { // bottom-right corner distance
+      return sqDist(mx, my, x2, y2)
+    }
+  };
+
+  let cmpBbSqDist = (n1, n2) => bbSqDist(n1) - bbSqDist(n2);
+
+  let cmp = cmpBbSqDist;
+
   let allowHoverDelay = false
 
-  let nodesByDist = cy.nodes(isWithinTheshold).sort(cmpSqDist)
+  let mouseIsInside = n => {
+    let mp = mousePos;
+    let w = n.outerWidth();
+    let halfW = w/2;
+    let h = n.outerHeight();
+    let halfH = h/2;
+    let p = n.position();
+    let x1 = p.x - halfW;
+    let x2 = p.x + halfW;
+    let y1 = p.y - halfH;
+    let y2 = p.y + halfH;
+
+    return (
+      x1 <= mp.x && mp.x <= x2
+      && y1 <= mp.y && mp.y <= y2
+    );
+  };
+
+  let isEhEle = n => n.same(handleNode) || n.same(previewEles) || n.same(ghostNode)
+
+  let nodesByDist = cy.nodes(n => !isEhEle(n) && isWithinTheshold(n)).sort(cmp)
   let snapped = false
 
   if (target.nonempty() && !isWithinTheshold(target)) {
@@ -102,6 +170,12 @@ function snap () {
 
   for (let i = 0; i < nodesByDist.length; i++) {
     let n = nodesByDist[i]
+
+    // skip a parent node when the mouse is inside it
+    if( n.isParent() && mouseIsInside(n) ){ continue }
+
+    // skip a child node when the mouse is not inside the parent
+    if( n.isChild() && !mouseIsInside(n.parent()) ){ continue }
 
     if (n.same(target) || this.preview(n, allowHoverDelay)) {
       snapped = true
