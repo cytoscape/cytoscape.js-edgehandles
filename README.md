@@ -192,7 +192,7 @@ During the course of a user's interaction with the extension, several events are
 * `ehstart` : when the edge creation gesture starts
   * `(event, sourceNode)`
   * `event.position` : handle position
-* `ehcomplete` : when the edge creation gesture is successfully completed
+* `ehcomplete` : when the edge is created
   * `(event, sourceNode, targetNode, addedEles)`
   * `event.position` : cursor/finger position
 * `ehstop` : when the edge creation gesture is stopped (either successfully completed or cancelled)
