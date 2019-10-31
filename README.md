@@ -68,51 +68,56 @@ let cy = cytoscape({
 
 // the default values of each option are outlined below:
 let defaults = {
+  selector: 'node', // selector/filter function for whether edges can be made from a given node
   preview: true, // whether to show added edges preview before releasing selection
   hoverDelay: 150, // time spent hovering over a target node before it is considered selected
-  handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
-  snap: false, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
+  snap: false, // when enabled, the edge can be drawn by just moving close to a target node
   snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
   snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
   noEdgeEventsInDraw: false, // set events:no to edges during draws, prevents mouseouts on compounds
   disableBrowserGestures: true, // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
+  handleParams: function( node ){
+    // returns element or array of elements to be passed to cy.add() for the handle nodes
+    // (default classes are always added for you)
+    return [{}];
+  },
   handlePosition: function( node ){
     return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
   },
   handleInDrawMode: false, // whether to show the handle in draw mode
-  edgeType: function( sourceNode, targetNode ){
+  edgeType: function( sourceNode, targetNode, handleNode ){
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
     // returning null/undefined means an edge can't be added between the two nodes
     return 'flat';
   },
-  loopAllowed: function( node ){
+  loopAllowed: function( node, handleNode ){
     // for the specified node, return whether edges from itself to itself are allowed
     return false;
   },
   nodeLoopOffset: -50, // offset for edgeType: 'node' loops
-  nodeParams: function( sourceNode, targetNode ){
-    // for edges between the specified source and target
+  nodeParams: function( sourceNode, targetNode, handleNode ){
+    // for node between the specified source and target
     // return element object to be passed to cy.add() for intermediary node
     return {};
   },
-  edgeParams: function( sourceNode, targetNode, i ){
+  edgeParams: function( sourceNode, targetNode, i, handleNode ){
     // for edges between the specified source and target
     // return element object to be passed to cy.add() for edge
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
-  ghostEdgeParams: function(){
+  ghostEdgeParams: function( sourceNode, handleNode ){
     // return element object to be passed to cy.add() for the ghost edge
     // (default classes are always added for you)
     return {};
   },
-  show: function( sourceNode ){
-    // fired when handle is shown
+  show: function( sourceNode, handleNodes ){
+    // fired when handles is shown
   },
   hide: function( sourceNode ){
-    // fired when the handle is hidden
+    // fired when the handles is hidden
   },
-  start: function( sourceNode ){
+  start: function( sourceNode, handleNode ){
     // fired when edgehandles interaction starts (drag on handle)
   },
   complete: function( sourceNode, targetNode, addedEles ){
@@ -182,15 +187,15 @@ These classes can be used for styling the graph as it interacts with the extensi
 During the course of a user's interaction with the extension, several events are generated and triggered on the core.  Each event callback has a number of extra parameters, and certain events have associated positions.
 
 * `ehshow` : when the handle is shown
-  * `(event, sourceNode)`
-  * `event.position` : handle position
+  * `(event, sourceNode, handleNodes)`
+  * `event.position` : cursor/finger position
 * `ehhide` : when the handle is hidden
   * `(event, sourceNode)`
-  * `event.position` : handle position
+  * `event.position` : cursor/finger position
 * `ehstart` : when the edge creation gesture starts
-  * `(event, sourceNode)`
-  * `event.position` : handle position
-* `ehcomplete` : when the edge creation gesture is successfully completed
+  * `(event, sourceNode, handleNode)`
+  * `event.position` : cursor/finger position
+* `ehcomplete` : when the edge is created
   * `(event, sourceNode, targetNode, addedEles)`
   * `event.position` : cursor/finger position
 * `ehstop` : when the edge creation gesture is stopped (either successfully completed or cancelled)

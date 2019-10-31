@@ -1,17 +1,17 @@
-function enable(){
-  this.enabled = true;
+function enable () {
+  this.enabled = true
 
-  this.emit('enable');
+  this.emit('enable')
 
-  return this;
+  return this
 }
 
-function disable(){
-  this.enabled = false;
+function disable () {
+  this.enabled = false
 
-  this.emit('disable');
+  this.emit('disable')
 
-  return this;
+  return this
 }
 
-module.exports = { enable, disable };
+export default { enable, disable }
