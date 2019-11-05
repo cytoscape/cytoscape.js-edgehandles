@@ -15,11 +15,9 @@ function addCytoscapeListeners () {
     this.show(e.target)
   })
 
-  // hide handle when source node moved
-  this.addListener(cy, 'position', 'node', e => {
-    if (e.target.same(this.sourceNode)) {
-      this.hide()
-    }
+  // hide handle when any node moved
+  this.addListener(cy, 'position', 'node', () => {
+    this.hide()
   })
 
   // start on tapstart handle
