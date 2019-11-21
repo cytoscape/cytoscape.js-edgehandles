@@ -19,12 +19,14 @@ function addCytoscapeListeners(){
     }
   } );
 
-  // hide handle when source node moved
-  this.addListener( cy, 'position', 'node', e => {
-    if( e.target.same( this.sourceNode ) ){
-      this.hide();
-    }
-  } );
+  if ( options.hideHandleOnSourceNodeMove ){
+    // hide handle when source node moved
+    this.addListener( cy, 'position', 'node', e => {
+      if( e.target.same( this.sourceNode ) ){
+        this.hide();
+      }
+    } );
+  }
 
   // start on tapstart handle
   // start on tapstart node (draw mode)
