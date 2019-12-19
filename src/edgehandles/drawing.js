@@ -16,9 +16,7 @@ function makeEdges (preview = false) {
   // detect cancel
   if (!targetNode || targetNode.empty()) {
     this.removePreview()
-
     this.emit('cancel', this.mp(), sourceNode, presumptiveTargets)
-
     return
   }
 
@@ -130,15 +128,6 @@ function handleShown () {
   return this.handleNodes.nonempty()
 }
 
-function removeHandles () {
-  if (this.handleNodes.nonempty()) {
-    this.handleNodes.remove()
-    this.handleNodes = this.cy.collection()
-  }
-
-  return this
-}
-
 function handlePosition (node) {
   let { options } = this
   let handlePosition = typeof options.handlePosition === typeof '' ? () => options.handlePosition : options.handlePosition
@@ -198,7 +187,7 @@ function makeHandles (node) {
   }
 
   cy.startBatch()
-  this.removeHandles()
+  this.hide()
   this.handleNodes = cy.add(handles)
   this.handleNodes.addClass('eh-handle')
   cy.endBatch()
@@ -261,5 +250,5 @@ function updateEdge () {
 export default {
   makeEdges, makePreview, removePreview,
   updateEdge,
-  handleShown, handlePosition, makeHandles, removeHandles
+  handleShown, handlePosition, makeHandles
 }

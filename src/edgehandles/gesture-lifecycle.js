@@ -28,21 +28,24 @@ function canStartNonDrawModeOn (node) {
 function show (node) {
   let { options, drawMode } = this
 
-  if (!this.canStartOn(node) || (drawMode && !options.handleInDrawMode)) { return }
+  if (!this.canStartOn(node) || (drawMode && !options.handleInDrawMode) || (this.sourceNode === node)) { return }
 
   this.sourceNode = node
-
   this.makeHandles(node)
 
-  this.emit('show', this.mp(), node, this.handleNodes)
+  if (this.handleNodes.nonempty()) {
+    this.emit('show', this.mp(), this.sourceNode, this.handleNodes)
+  }
 
   return this
 }
 
 function hide () {
-  this.removeHandles()
-
-  this.emit('hide', this.mp(), this.sourceNode)
+  if (this.handleNodes.nonempty()) {
+    this.handleNodes.remove()
+    this.handleNodes = this.cy.collection()
+    this.emit('hide', this.mp(), this.sourceNode)
+  }
 
   return this
 }
@@ -272,7 +275,7 @@ function stop () {
 
   this.ghostEles.remove()
 
-  this.removeHandles()
+  this.hide()
 
   this.makeEdges()
 
