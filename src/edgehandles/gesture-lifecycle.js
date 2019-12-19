@@ -30,8 +30,8 @@ function show (node) {
 
   if (!this.canStartOn(node) || (drawMode && !options.handleInDrawMode) || (this.sourceNode === node)) { return }
 
-  this.sourceNode = node
   this.makeHandles(node)
+  this.sourceNode = node
 
   if (this.handleNodes.nonempty()) {
     this.emit('show', this.mp(), this.sourceNode, this.handleNodes)
