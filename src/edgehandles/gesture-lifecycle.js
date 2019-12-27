@@ -28,7 +28,7 @@ function canStartNonDrawModeOn (node) {
 function show (node) {
   let { options, drawMode } = this
 
-  if (!this.canStartOn(node) || (drawMode && !options.handleInDrawMode) || (this.sourceNode === node)) { return }
+  if (!this.canStartOn(node) || (drawMode && !options.handleInDrawMode)) { return }
 
   this.makeHandles(node)
   this.sourceNode = node
