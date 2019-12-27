@@ -1,4 +1,3 @@
-import memoize from 'lodash.memoize'
 const sqrt2 = Math.sqrt(2)
 
 function canStartOn (node) {
@@ -138,9 +137,7 @@ function snap () {
     }
   };
 
-  let cmpBbSqDist = (n1, n2) => bbSqDist(n1) - bbSqDist(n2);
-
-  let cmp = cmpBbSqDist;
+  let cmp = (n1, n2) => bbSqDist(n1) - bbSqDist(n2);
 
   let allowHoverDelay = false
 
