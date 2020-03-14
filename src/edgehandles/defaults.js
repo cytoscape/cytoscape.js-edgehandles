@@ -27,16 +27,28 @@ let defaults = {
     // return element object to be passed to cy.add() for intermediary node
     return {};
   },
+  nodeClasses: function () {
+    return [];
+  },
   edgeParams: function( sourceNode, targetNode, i ){
     // for edges between the specified source and target
     // return element object to be passed to cy.add() for edge
     // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
+  edgeClasses: function () {
+    return [];
+  },
   ghostEdgeParams: function(){
     // return element object to be passed to cy.add() for the ghost edge
     // (default classes are always added for you)
     return {};
+  },
+  ghostEdgeClasses: function () {
+    return [];
+  },
+  ghostNodeClasses: function () {
+    return [];
   },
   show: function( sourceNode ){
     // fired when handle is shown

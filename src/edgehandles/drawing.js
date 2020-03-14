@@ -27,7 +27,7 @@ function makeEdges( preview = false ) {
 
   let source = this.sourceNode;
   let target = this.targetNode;
-  let classes = preview ? 'eh-preview' : '';
+  let classes = preview ? ['eh-preview'] : [];
   let added = cy.collection();
   let edgeType = options.edgeType( source, target );
 
@@ -82,7 +82,7 @@ function makeEdges( preview = false ) {
           position: p
         },
         options.nodeParams( source, target ),
-        classes
+        classes.concat(options.nodeClasses())
       )
     );
 
@@ -96,7 +96,7 @@ function makeEdges( preview = false ) {
           }
         },
         options.edgeParams( source, target, 0 ),
-        classes
+        classes.concat(options.edgeClasses())
       )
     );
 
@@ -110,7 +110,7 @@ function makeEdges( preview = false ) {
           }
         },
         options.edgeParams( source, target, 1 ),
-        classes
+        classes.concat(options.edgeClasses())
       )
     );
 
@@ -126,7 +126,7 @@ function makeEdges( preview = false ) {
           }
         },
         options.edgeParams( source, target, 0 ),
-        classes
+        classes.concat(options.edgeClasses())
       )
     );
 
@@ -243,7 +243,7 @@ function updateEdge() {
     cy.batch( () => {
       ghostNode = this.ghostNode = cy.add( {
         group: 'nodes',
-        classes: 'eh-ghost eh-ghost-node',
+        classes: ['eh-ghost', 'eh-ghost-node'].concat(options.ghostNodeClasses()),
         position: {
           x: 0,
           y: 0
@@ -266,7 +266,7 @@ function updateEdge() {
           source: sourceNode.id(),
           target: ghostNode.id()
         }),
-        classes: 'eh-ghost eh-ghost-edge'
+        classes: ['eh-ghost', 'eh-ghost-edge'].concat(options.ghostEdgeClasses())
       }) );
 
       ghostEdge.style({
