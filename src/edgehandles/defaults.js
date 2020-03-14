@@ -11,6 +11,9 @@ let defaults = {
   handlePosition: function( node ){
     return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
   },
+  handleClasses: function( ) {
+    return [];
+  },
   handleInDrawMode: false, // whether to show the handle in draw mode
   edgeType: function( sourceNode, targetNode ){
     // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
@@ -27,9 +30,6 @@ let defaults = {
     // return element object to be passed to cy.add() for intermediary node
     return {};
   },
-  nodeClasses: function () {
-    return [];
-  },
   edgeParams: function( sourceNode, targetNode, i ){
     // for edges between the specified source and target
     // return element object to be passed to cy.add() for edge
@@ -45,9 +45,6 @@ let defaults = {
     return {};
   },
   ghostEdgeClasses: function () {
-    return [];
-  },
-  ghostNodeClasses: function () {
     return [];
   },
   show: function( sourceNode ){

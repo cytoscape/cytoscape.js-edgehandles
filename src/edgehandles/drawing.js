@@ -215,12 +215,13 @@ function setHandleFor( node ){
   } else {
     cy.batch( () => {
       this.handleNode = cy.add({
-        classes: 'eh-handle',
+        classes: ['eh-handle'].concat(options.handleClasses()),
         position: pos,
         grabbable: false,
         selectable: false
       });
-
+      console.log(this.handleNode);
+      
       this.handleNode.style('z-index', 9007199254740991);
     } );
   }
@@ -243,7 +244,7 @@ function updateEdge() {
     cy.batch( () => {
       ghostNode = this.ghostNode = cy.add( {
         group: 'nodes',
-        classes: ['eh-ghost', 'eh-ghost-node'].concat(options.ghostNodeClasses()),
+        classes: 'eh-ghost eh-ghost-node',
         position: {
           x: 0,
           y: 0
