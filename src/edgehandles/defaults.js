@@ -47,6 +47,9 @@ let defaults = {
   ghostEdgeClasses: function () {
     return [];
   },
+  handleParams: function () {
+    return {};
+  },
   show: function( sourceNode ){
     // fired when handle is shown
   },

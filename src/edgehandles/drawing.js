@@ -214,12 +214,12 @@ function setHandleFor( node ){
     this.handleNode.position( pos );
   } else {
     cy.batch( () => {
-      this.handleNode = cy.add({
+      this.handleNode = cy.add(Object.assign({
         classes: ['eh-handle'].concat(options.handleClasses()),
         position: pos,
         grabbable: false,
-        selectable: false
-      });
+        selectable: false,
+      }, options.handleParams()));
       console.log(this.handleNode);
       
       this.handleNode.style('z-index', 9007199254740991);
