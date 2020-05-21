@@ -44,6 +44,9 @@ let defaults = {
   hide: function( sourceNode ){
     // fired when the handle is hidden
   },
+  restart: function restart(sourceNode) {
+    // fired when edgehandles interaction restarts (drag on edge)
+  },
   start: function( sourceNode ){
     // fired when edgehandles interaction starts (drag on handle)
   },

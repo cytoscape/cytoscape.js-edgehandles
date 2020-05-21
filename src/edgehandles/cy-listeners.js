@@ -41,6 +41,20 @@ function addCytoscapeListeners(){
     }
   } );
 
+  this.addListener( cy, 'tapstart', 'edge', e => {
+    const edge = e.target;
+
+    const source = edge.source();
+
+    edge.remove();
+
+    this.start( source );
+
+    // almost, just need the targets to accept it
+
+    // this.emit('restart', this.hp(), source);
+  } );
+
   // update line on drag
   this.addListener( cy, 'tapdrag', e => {
     this.update( e.position );
