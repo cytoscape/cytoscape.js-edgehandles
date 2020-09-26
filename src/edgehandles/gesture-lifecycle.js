@@ -87,10 +87,6 @@ function snap(){
   let radius = n => sqrt2 * Math.max(n.outerWidth(), n.outerHeight())/2; // worst-case enclosure of bb by circle
   let sqDist = (x1, y1, x2, y2) => { let dx = x2 - x1; let dy = y2 - y1; return dx*dx + dy*dy; };
   let sqDistByPt = (p1, p2) => sqDist(p1.x, p1.y, p2.x, p2.y);
-  let nodeSqDist = n => sqDistByPt(n.position(), mousePos);
-
-  let sqThreshold = n => { let r = radius(n); let t = r + threshold; return t * t; };
-  let isWithinTheshold = n => nodeSqDist(n) <= sqThreshold(n);
 
   let bbSqDist = n => {
     let p = n.position();
@@ -134,6 +130,7 @@ function snap(){
       return sqDist(mx, my, x2, y2);
     }
   };
+  let isWithinTheshold = n => bbSqDist(n) <= threshold*threshold;
 
   let cmpBbSqDist = (n1, n2) => bbSqDist(n1) - bbSqDist(n2);
 
