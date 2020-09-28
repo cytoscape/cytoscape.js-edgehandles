@@ -272,8 +272,8 @@ function stop(){
 
   clearTimeout( this.previewTimeout );
 
-  sourceNode.removeClass('eh-source');
-  targetNode.removeClass('eh-target eh-preview eh-hover');
+  sourceNode.removeClass('eh-source eh-preview-active');
+  targetNode.removeClass('eh-target eh-preview eh-hover eh-preview-active');
   presumptiveTargets.removeClass('eh-presumptive-target');
 
   this.makeEdges();
