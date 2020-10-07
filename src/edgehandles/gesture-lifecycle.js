@@ -90,7 +90,7 @@ function snap(){
   let nodeSqDist = n => sqDistByPt(n.position(), mousePos);
 
   let sqThreshold = n => { let r = radius(n); let t = r + threshold; return t * t; };
-  let isWithinTheshold = n => nodeSqDist(n) <= sqThreshold(n);
+  let isWithinThreshold = n => nodeSqDist(n) <= sqThreshold(n);
 
   let bbSqDist = n => {
     let p = n.position();
@@ -161,10 +161,10 @@ function snap(){
 
   let isEhEle = n => n.same(handleNode) || n.same(previewEles) || n.same(ghostNode);
 
-  let nodesByDist = cy.nodes(n => !isEhEle(n) && isWithinTheshold(n)).sort(cmp);
+  let nodesByDist = cy.nodes(n => !isEhEle(n) && isWithinThreshold(n)).sort(cmp);
   let snapped = false;
 
-  if( tgt.nonempty() && !isWithinTheshold(tgt) ){
+  if( tgt.nonempty() && !isWithinThreshold(tgt) ){
     this.unpreview(tgt);
   }
 
