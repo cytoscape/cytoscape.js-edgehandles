@@ -196,13 +196,9 @@ function preview( target, allowHoverDelay = true ){
   let isHandle = target.same( this.handleNode );
   let isExistingTgt = target.same( this.targetNode );
 
-  if(
-    !active || isHandle || isGhost || noEdge || isExistingTgt
-    || (isLoop && !loopAllowed)
-    // || (target.isParent())
-  ){
-      return false;
-    }
+  if (!active || isHandle || isGhost || noEdge || isExistingTgt || (isLoop && !loopAllowed) || (!options.canConnect(source, target))){
+    return false;
+  }
 
   if( this.targetNode.nonempty() ){
     this.unpreview( this.targetNode );

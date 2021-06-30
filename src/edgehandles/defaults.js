@@ -21,6 +21,10 @@ let defaults = {
     // for the specified node, return whether edges from itself to itself are allowed
     return false;
   },
+  canConnect: function canConnect(sourceNode, targetNode) {
+    // determines if the can the source node connect to the target node
+    return true;
+  },
   nodeLoopOffset: -50, // offset for edgeType: 'node' loops
   nodeParams: function( sourceNode, targetNode ){
     // for edges between the specified source and target
