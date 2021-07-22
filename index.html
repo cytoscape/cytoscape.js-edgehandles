@@ -15,6 +15,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js"></script>
     <script src="cytoscape-edgehandles.js"></script>
 
+    <!-- for popper handles -->
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+	  <script src="https://unpkg.com/cytoscape-popper@2.0.0/cytoscape-popper.js"></script>
+
     <style>
       body {
         font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
@@ -39,8 +43,17 @@
       #buttons {
         position: absolute;
         right: 0;
-        bottom: 0;
+        top: 0;
         z-index: 99999;
+        margin: 1em;
+      }
+
+      .popper-handle {
+        width: 20px;
+        height: 20px;
+        background: red;
+        border-radius: 20px;
+        z-index: 9999;
       }
     </style>
 
@@ -163,6 +176,101 @@
           eh.start( cy.$('node:selected') );
         });
 
+        var popperEnabled = false;
+
+        document.querySelector('#popper').addEventListener('click', function() {
+          if (popperEnabled) { return; }
+
+          popperEnabled = true;
+
+          // example code for making your own handles -- customise events and presentation where fitting
+          // var popper;
+          var popperNode;
+          var popper;
+          var popperDiv;
+          var started = false;
+          
+          function start() {
+            eh.start(popperNode);
+          }
+
+          function stop() {
+            eh.stop();
+          }
+
+          function setHandleOn(node) {
+            if (started) { return; }
+
+            removeHandle(); // rm old handle
+
+            popperNode = node;
+
+            popperDiv = document.createElement('div');
+            popperDiv.classList.add('popper-handle');
+            popperDiv.addEventListener('mousedown', start);
+            document.body.appendChild(popperDiv);
+
+            popper = node.popper({
+              content: popperDiv,
+              popper: {
+                placement: 'top',
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, -10],
+                    },
+                  },
+                ]
+              }
+            });
+          }
+
+          function removeHandle() {
+            if (popper){
+              popper.destroy();
+              popper = null;
+            }
+
+            if (popperDiv) {
+              document.body.removeChild(popperDiv);
+              popperDiv = null;
+            }
+
+            popperNode = null;
+          }
+
+          cy.on('mouseover', 'node', function(e) {
+            setHandleOn(e.target);
+          });
+
+          cy.on('grab', 'node', function(){
+            removeHandle();
+          });
+
+          cy.on('tap', function(e){
+            if (e.target === cy) {
+              removeHandle();
+            }
+          });
+
+          cy.on('zoom pan', function(){
+            removeHandle();
+          });
+
+          window.addEventListener('mouseup', function(e){
+            stop();
+          });
+
+          cy.on('ehstart', function(){
+            started = true;
+          });
+
+          cy.on('ehstop', function(){
+            started = false;
+          });
+        });
+
       });
     </script>
   </head>
@@ -176,6 +284,7 @@
       <button id="start">Start on selected</button>
       <button id="draw-on">Draw mode on</button>
       <button id="draw-off">Draw mode off</button>
+      <button id="popper">Use custom popper handles</button>
     </div>
 
   </body>
