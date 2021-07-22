@@ -8,7 +8,7 @@ cytoscape-edgehandles
 ## Description
 
 
-This extension creates handles on nodes that can be dragged to create edges between nodes ([demo](https://cytoscape.github.io/cytoscape.js-edgehandles/), [snapping demo](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-snap.html), [compound demo](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound.html), [compound snapping demo](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound-snap.html))
+This extension creates handles on nodes that can be dragged to create edges between nodes ([demo](https://cytoscape.github.io/cytoscape.js-edgehandles/), [demo (snapping disabled)](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-snap.html), [compound demo](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound.html), [compound demo (snapping disabled)](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound-snap.html))
 
 
 ## Dependencies
@@ -68,80 +68,21 @@ let cy = cytoscape({
 
 // the default values of each option are outlined below:
 let defaults = {
-  preview: true, // whether to show added edges preview before releasing selection
-  hoverDelay: 150, // time spent hovering over a target node before it is considered selected
-  handleNodes: 'node', // selector/filter function for whether edges can be made from a given node
-  snap: false, // when enabled, the edge can be drawn by just moving close to a target node
-  snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
-  snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
-  noEdgeEventsInDraw: false, // set events:no to edges during draws, prevents mouseouts on compounds
-  disableBrowserGestures: true, // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
-  handlePosition: function( node ){
-    return 'middle top'; // sets the position of the handle in the format of "X-AXIS Y-AXIS" such as "left top", "middle top"
+  canConnect: function( sourceNode, targetNode ){
+    // whether an edge can be created between source and target
+    return !sourceNode.same(targetNode); // e.g. disallow loops
   },
-  handleInDrawMode: false, // whether to show the handle in draw mode
-  edgeType: function( sourceNode, targetNode ){
-    // can return 'flat' for flat edges between nodes or 'node' for intermediate node between them
-    // returning null/undefined means an edge can't be added between the two nodes
-    return 'flat';
-  },
-  loopAllowed: function( node ){
-    // for the specified node, return whether edges from itself to itself are allowed
-    return false;
-  },
-  nodeLoopOffset: -50, // offset for edgeType: 'node' loops
-  nodeParams: function( sourceNode, targetNode ){
-    // for edges between the specified source and target
-    // return element object to be passed to cy.add() for intermediary node
-    return {};
-  },
-  edgeParams: function( sourceNode, targetNode, i ){
+  edgeParams: function( sourceNode, targetNode ){
     // for edges between the specified source and target
     // return element object to be passed to cy.add() for edge
-    // NB: i indicates edge index in case of edgeType: 'node'
     return {};
   },
-  ghostEdgeParams: function(){
-    // return element object to be passed to cy.add() for the ghost edge
-    // (default classes are always added for you)
-    return {};
-  },
-  show: function( sourceNode ){
-    // fired when handle is shown
-  },
-  hide: function( sourceNode ){
-    // fired when the handle is hidden
-  },
-  start: function( sourceNode ){
-    // fired when edgehandles interaction starts (drag on handle)
-  },
-  complete: function( sourceNode, targetNode, addedEles ){
-    // fired when edgehandles is done and elements are added
-  },
-  stop: function( sourceNode ){
-    // fired when edgehandles interaction is stopped (either complete with added edges or incomplete)
-  },
-  cancel: function( sourceNode, cancelledTargets ){
-    // fired when edgehandles are cancelled (incomplete gesture)
-  },
-  hoverover: function( sourceNode, targetNode ){
-    // fired when a target is hovered
-  },
-  hoverout: function( sourceNode, targetNode ){
-    // fired when a target isn't hovered anymore
-  },
-  previewon: function( sourceNode, targetNode, previewEles ){
-    // fired when preview is shown
-  },
-  previewoff: function( sourceNode, targetNode, previewEles ){
-    // fired when preview is hidden
-  },
-  drawon: function(){
-    // fired when draw mode enabled
-  },
-  drawoff: function(){
-    // fired when draw mode disabled
-  }
+  hoverDelay: 150, // time spent hovering over a target node before it is considered selected
+  snap: true, // when enabled, the edge can be drawn by just moving close to a target node (can be confusing on compound graphs)
+  snapThreshold: 50, // the target node must be less than or equal to this many pixels away from the cursor/finger
+  snapFrequency: 15, // the number of times per second (Hz) that snap checks done (lower is less expensive)
+  noEdgeEventsInDraw: true, // set events:no to edges during draws, prevents mouseouts on compounds
+  disableBrowserGestures: true // during an edge drawing gesture, disable browser gestures such as two-finger trackpad swipe and pinch-to-zoom
 };
 
 let eh = cy.edgehandles( defaults );
@@ -155,7 +96,6 @@ The object returned by `cy.edgehandles()` has several functions available on it:
 
 * `start( sourceNode )` : manually start the gesture (as if the handle were already held)
 * `stop()` : manually completes or cancels the gesture
-* `hide()` : remove the handle node from the graph
 * `disable()` : disables edgehandles behaviour
 * `enable()` : enables edgehandles behaviour
 * `enableDrawMode()` : turn on draw mode (the entire node body acts like the handle)
@@ -167,13 +107,12 @@ The object returned by `cy.edgehandles()` has several functions available on it:
 
 These classes can be used for styling the graph as it interacts with the extension:
 
-* `eh-handle` : The handle node
 * `eh-source` : The source node
 * `eh-target` : A target node
-* `eh-preview` : Preview elements (used with `options.preview: true`)
+* `eh-preview` : Preview edges (i.e. shown before releasing the mouse button and the edge creation is confirmed)
 * `eh-hover` : Added to nodes as they are hovered over as targets
-* `eh-ghost-node` : The ghost node (target)
-* `eh-ghost-edge` : The ghost handle line edge
+* `eh-ghost-node` : The ghost node (target), used when the cursor isn't pointed at a target node yet (i.e. in place of a target node)
+* `eh-ghost-edge` : The ghost handle line edge, used when the cursor isn't pointed at a target node yet (i.e. the edge is pointing to empty space)
 * `eh-ghost` : A ghost element
 * `eh-presumptive-target` : A node that, during an edge drag, may become a target when released
 * `eh-preview-active` : Applied to the source, target, and ghost edge when the preview is active
@@ -183,17 +122,11 @@ These classes can be used for styling the graph as it interacts with the extensi
 
 During the course of a user's interaction with the extension, several events are generated and triggered on the core.  Each event callback has a number of extra parameters, and certain events have associated positions.
 
-* `ehshow` : when the handle is shown
-  * `(event, sourceNode)`
-  * `event.position` : handle position
-* `ehhide` : when the handle is hidden
-  * `(event, sourceNode)`
-  * `event.position` : handle position
 * `ehstart` : when the edge creation gesture starts
   * `(event, sourceNode)`
   * `event.position` : handle position
 * `ehcomplete` : when the edge is created
-  * `(event, sourceNode, targetNode, addedEles)`
+  * `(event, sourceNode, targetNode, addedEdge)`
   * `event.position` : cursor/finger position
 * `ehstop` : when the edge creation gesture is stopped (either successfully completed or cancelled)
   * `(event, sourceNode)`
@@ -208,10 +141,10 @@ During the course of a user's interaction with the extension, several events are
   * `(event, sourceNode, targetNode)`
   * `event.position` : cursor/finger position
 * `ehpreviewon` : when a preview is shown
-  * `(event, sourceNode, targetNode, previewEles)`
+  * `(event, sourceNode, targetNode, previewEdge)`
   * `event.position` : cursor/finger position
 * `ehpreviewoff` : when the preview is removed
-  * `(event, sourceNode, targetNode, previewEles)`
+  * `(event, sourceNode, targetNode, previewEdge)`
   * `event.position` : cursor/finger position
 * `ehdrawon` : when draw mode is enabled
   * `(event)`
@@ -221,7 +154,7 @@ During the course of a user's interaction with the extension, several events are
 Example binding:
 
 ```js
-cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
+cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
 	let { position } = event;
 
   // ...

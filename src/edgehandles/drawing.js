@@ -29,16 +29,13 @@ function makeEdges( preview = false ) {
   let target = this.targetNode;
   let classes = preview ? 'eh-preview' : '';
   let added = cy.collection();
-  let edgeType = options.edgeType( source, target );
+  let canConnect = this.canConnect(target);
 
   // can't make edges outside of regular gesture lifecycle
   if( !active ){ return; }
 
-  // must have a non-empty edge type
-  if( !edgeType ){ return; }
-
-  // can't make preview if disabled
-  if( preview && !options.preview ){ return; }
+  // must be able to connect
+  if( !canConnect ){ return; }
 
   // detect cancel
   if( !target || target.size() === 0 ){
@@ -50,7 +47,7 @@ function makeEdges( preview = false ) {
   }
 
   // just remove preview class if we already have the edges
-  if( !preview && options.preview ) {
+  if( !preview ) {
     previewEles.removeClass('eh-preview').style('events', '');
 
     this.emit( 'complete', this.mp(), source, target, previewEles );
@@ -58,80 +55,21 @@ function makeEdges( preview = false ) {
     return;
   }
 
-  let p1 = source.position();
-  let p2 = target.position();
+  let source2target = cy.add(
+    getEleJson(
+      {
+        group: 'edges',
+        data: {
+          source: source.id(),
+          target: target.id()
+        }
+      },
+      this.edgeParams( target ),
+      classes
+    )
+  );
 
-  let p;
-  if( source.same( target ) ) {
-    p = {
-      x: p1.x + options.nodeLoopOffset,
-      y: p1.y + options.nodeLoopOffset
-    };
-  } else {
-    p = {
-      x: ( p1.x + p2.x ) / 2,
-      y: ( p1.y + p2.y ) / 2
-    };
-  }
-
-  if( edgeType === 'node' ){
-    let interNode = cy.add(
-      getEleJson(
-        {
-          group: 'nodes',
-          position: p
-        },
-        options.nodeParams( source, target ),
-        classes
-      )
-    );
-
-    let source2inter = cy.add(
-      getEleJson(
-        {
-          group: 'edges',
-          data: {
-            source: source.id(),
-            target: interNode.id()
-          }
-        },
-        options.edgeParams( source, target, 0 ),
-        classes
-      )
-    );
-
-    let inter2target = cy.add(
-      getEleJson(
-        {
-          group: 'edges',
-          data: {
-            source: interNode.id(),
-            target: target.id()
-          }
-        },
-        options.edgeParams( source, target, 1 ),
-        classes
-      )
-    );
-
-    added = added.merge( interNode ).merge( source2inter ).merge( inter2target );
-  } else { // flat
-    let source2target = cy.add(
-      getEleJson(
-        {
-          group: 'edges',
-          data: {
-            source: source.id(),
-            target: target.id()
-          }
-        },
-        options.edgeParams( source, target, 0 ),
-        classes
-      )
-    );
-
-    added = added.merge( source2target );
-  }
+  added = added.merge( source2target );
 
   if( preview ) {
     this.previewEles = added;
@@ -164,72 +102,8 @@ function removePreview() {
   return this;
 }
 
-function handleShown(){
-  return this.handleNode.nonempty() && this.handleNode.inside();
-}
-
-function removeHandle(){
-  if( this.handleShown() ){
-    this.handleNode.remove();
-  }
-
-  return this;
-}
-
-function setHandleFor( node ){
-  let { options, cy } = this;
-
-  let handlePosition = typeof options.handlePosition === typeof '' ? () => options.handlePosition : options.handlePosition;
-
-  let p = node.position();
-  let h = node.outerHeight();
-  let w = node.outerWidth();
-
-  // store how much we should move the handle from origin(p.x, p.y)
-  let moveX = 0;
-  let moveY = 0;
-
-  // grab axes
-  let axes = handlePosition( node ).toLowerCase().split(/\s+/);
-  let axisX = axes[0];
-  let axisY = axes[1];
-
-  // based on handlePosition move left/right/top/bottom. Middle/middle will just be normal
-  if( axisX === 'left' ){
-    moveX = -(w / 2);
-  } else if( axisX === 'right' ){
-    moveX = w / 2;
-  } if( axisY === 'top' ){
-    moveY = -(h / 2);
-  } else if( axisY === 'bottom' ){
-    moveY = h / 2;
-  }
-
-  // set handle x and y based on adjusted positions
-  let hx = this.hx = p.x + moveX;
-  let hy = this.hy = p.y + moveY;
-  let pos = { x: hx, y: hy };
-
-  if( this.handleShown() ){
-    this.handleNode.position( pos );
-  } else {
-    cy.batch( () => {
-      this.handleNode = cy.add({
-        classes: 'eh-handle',
-        position: pos,
-        grabbable: false,
-        selectable: false
-      });
-
-      this.handleNode.style('z-index', 9007199254740991);
-    } );
-  }
-
-  return this;
-}
-
 function updateEdge() {
-  let { sourceNode, ghostNode, cy, mx, my, options } = this;
+  let { sourceNode, ghostNode, cy, mx, my } = this;
   let x = mx;
   let y = my;
   let ghostEdge, ghostEles;
@@ -258,7 +132,7 @@ function updateEdge() {
         'events': 'no'
       });
 
-      let ghostEdgeParams = options.ghostEdgeParams();
+      let ghostEdgeParams = {};
 
       ghostEdge = cy.add( assign({}, ghostEdgeParams, {
         group: 'edges',
@@ -284,6 +158,5 @@ function updateEdge() {
 
 module.exports = {
   makeEdges, makePreview, removePreview, previewShown,
-  updateEdge,
-  handleShown, setHandleFor, removeHandle
+  updateEdge
 };

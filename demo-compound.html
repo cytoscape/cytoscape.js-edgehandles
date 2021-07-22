@@ -39,8 +39,9 @@
       #buttons {
         position: absolute;
         right: 0;
-        bottom: 0;
+        top: 0;
         z-index: 99999;
+        margin: 1em;
       }
     </style>
 
@@ -1122,7 +1123,6 @@
         });
 
         var eh = cy.edgehandles({
-          noEdgeEventsInDraw: true
         });
 
         document.querySelector('#draw-on').addEventListener('click', function() {

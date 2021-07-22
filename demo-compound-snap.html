@@ -39,8 +39,9 @@
       #buttons {
         position: absolute;
         right: 0;
-        bottom: 0;
+        top: 0;
         z-index: 99999;
+        margin: 1em;
       }
     </style>
 
@@ -1289,8 +1290,7 @@
         });
 
         var eh = cy.edgehandles({
-          noEdgeEventsInDraw: true,
-          snap: true
+          snap: false
         });
 
         document.querySelector('#draw-on').addEventListener('click', function() {
@@ -1310,7 +1310,7 @@
   </head>
 
   <body>
-    <h1>cytoscape-edgehandles compound snapping demo</h1>
+    <h1>cytoscape-edgehandles compound (snapping disabled)</h1>
 
     <div id="cy"></div>
 

@@ -2,18 +2,16 @@ const memoize = require('lodash.memoize');
 const sqrt2 = Math.sqrt(2);
 
 function canStartOn( node ){
-  const { options, previewEles, ghostEles, handleNode } = this;
+  const { previewEles, ghostEles } = this;
   const isPreview = el => previewEles.anySame(el);
   const isGhost = el => ghostEles.anySame(el);
-  const userFilter = el => el.filter( options.handleNodes ).length > 0;
-  const isHandle = el => handleNode.same(el);
-  const isTemp = el => isPreview(el) || isHandle(el) || isGhost(el);
+  const isTemp = el => isPreview(el) || isGhost(el);
 
   const { enabled, active, grabbingNode } = this;
 
   return (
     enabled && !active && !grabbingNode
-    && ( node == null || (!isTemp(node) && userFilter(node)) )
+    && node != null && node.nonempty() && !isTemp(node)
   );
 }
 
@@ -23,28 +21,6 @@ function canStartDrawModeOn( node ){
 
 function canStartNonDrawModeOn( node ){
   return this.canStartOn( node ) && !this.drawMode;
-}
-
-function show( node ){
-  let { options, drawMode } = this;
-
-  if( !this.canStartOn(node) || ( drawMode && !options.handleInDrawMode ) ){ return; }
-
-  this.sourceNode = node;
-
-  this.setHandleFor( node );
-
-  this.emit( 'show', this.hp(), this.sourceNode );
-
-  return this;
-}
-
-function hide(){
-  this.removeHandle();
-
-  this.emit( 'hide', this.hp(), this.sourceNode );
-
-  return this;
 }
 
 function start( node ){
@@ -57,6 +33,16 @@ function start( node ){
 
   this.disableGestures();
   this.disableEdgeEvents();
+
+  const getId = n => n.id();
+
+  this.canConnect = memoize(target => {
+    return this.options.canConnect(this.sourceNode, target);
+  }, getId);
+
+  this.edgeParams = memoize(target => {
+    return this.options.edgeParams(this.sourceNode, target);
+  }, getId);
 
   this.emit( 'start', this.hp(), node );
 }
@@ -82,7 +68,7 @@ function snap(){
   let tgt = this.targetNode;
   let threshold = this.options.snapThreshold;
   let mousePos = this.mp();
-  let { handleNode, previewEles, ghostNode } = this;
+  let { previewEles, ghostNode } = this;
 
   let radius = n => sqrt2 * Math.max(n.outerWidth(), n.outerHeight())/2; // worst-case enclosure of bb by circle
   let sqDist = (x1, y1, x2, y2) => { let dx = x2 - x1; let dy = y2 - y1; return dx*dx + dy*dy; };
@@ -159,7 +145,7 @@ function snap(){
     );
   };
 
-  let isEhEle = n => n.same(handleNode) || n.same(previewEles) || n.same(ghostNode);
+  let isEhEle = n => n.same(previewEles) || n.same(ghostNode);
 
   let nodesByDist = cy.nodes(n => !isEhEle(n) && isWithinThreshold(n)).sort(cmp);
   let snapped = false;
@@ -189,16 +175,12 @@ function snap(){
 function preview( target, allowHoverDelay = true ){
   let { options, sourceNode, ghostNode, ghostEles, presumptiveTargets, previewEles, active } = this;
   let source = sourceNode;
-  let isLoop = target.same( source );
-  let loopAllowed = options.loopAllowed( target );
   let isGhost = target.same( ghostNode );
-  let noEdge = !options.edgeType( source, target );
-  let isHandle = target.same( this.handleNode );
+  let noEdge = !this.canConnect( target );
   let isExistingTgt = target.same( this.targetNode );
 
   if(
-    !active || isHandle || isGhost || noEdge || isExistingTgt
-    || (isLoop && !loopAllowed)
+    !active || isGhost || noEdge || isExistingTgt
     // || (target.isParent())
   ){
       return false;
@@ -220,17 +202,15 @@ function preview( target, allowHoverDelay = true ){
 
     this.emit( 'hoverover', this.mp(), source, target );
 
-    if( options.preview ){
-      target.addClass('eh-preview');
+    target.addClass('eh-preview');
 
-      ghostEles.addClass('eh-preview-active');
-      sourceNode.addClass('eh-preview-active');
-      target.addClass('eh-preview-active');
+    ghostEles.addClass('eh-preview-active');
+    sourceNode.addClass('eh-preview-active');
+    target.addClass('eh-preview-active');
 
-      this.makePreview();
+    this.makePreview();
 
-      this.emit( 'previewon', this.mp(), source, target, previewEles );
-    }
+    this.emit( 'previewon', this.mp(), source, target, previewEles );
   };
 
   if( allowHoverDelay && options.hoverDelay > 0 ){
@@ -243,7 +223,7 @@ function preview( target, allowHoverDelay = true ){
 }
 
 function unpreview( target ) {
-  if( !this.active || target.same( this.handleNode ) ){ return; }
+  if( !this.active ){ return; }
 
   let { previewTimeout, sourceNode, previewEles, ghostEles, cy } = this;
   clearTimeout( previewTimeout );
@@ -278,8 +258,6 @@ function stop(){
 
   this.makeEdges();
 
-  this.removeHandle();
-
   ghostEles.remove();
 
   this.clearCollections();
@@ -295,6 +273,6 @@ function stop(){
 }
 
 module.exports = {
-  show, hide, start, update, preview, unpreview, stop, snap,
+  start, update, preview, unpreview, stop, snap,
   canStartOn, canStartDrawModeOn, canStartNonDrawModeOn
 };

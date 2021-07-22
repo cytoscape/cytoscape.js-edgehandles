@@ -24,13 +24,7 @@ function Edgehandles( options ){
   this.grabbingNode = false;
 
   // edgehandles elements
-  this.handleNode = cy.collection();
   this.clearCollections();
-
-  // handle
-  this.hx = 0;
-  this.hy = 0;
-  this.hr = 0;
 
   // mouse position
   this.mx = 0;
@@ -54,7 +48,9 @@ function Edgehandles( options ){
     } );
 
     window.addEventListener( 'test', null, opts );
-  } catch( err ){}
+  } catch( err ){
+    // swallow
+  }
 
   if( supportsPassive ){
     this.windowListenerOptions = { capture: true, passive: false };

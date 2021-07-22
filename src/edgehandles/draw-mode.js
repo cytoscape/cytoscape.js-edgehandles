@@ -1,5 +1,5 @@
 function toggleDrawMode( bool ){
-  let { cy, options } = this;
+  let { cy } = this;
 
   this.drawMode = bool != null ? bool : !this.drawMode;
 
@@ -7,10 +7,6 @@ function toggleDrawMode( bool ){
     this.prevUngrabifyState = cy.autoungrabify();
 
     cy.autoungrabify( true );
-
-    if( !options.handleInDrawMode && this.handleShown() ){
-      this.hide();
-    }
 
     this.emit('drawon');
   } else {
