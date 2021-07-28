@@ -944,6 +944,11 @@ function Edgehandles(options) {
     return e.preventDefault();
   };
 
+  // disabled until start()
+  this.canConnect = function () {
+    return false;
+  };
+
   var supportsPassive = false;
   try {
     var opts = Object.defineProperty({}, 'passive', {
