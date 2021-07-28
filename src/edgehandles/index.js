@@ -39,6 +39,9 @@ function Edgehandles( options ){
 
   this.preventDefault = e => e.preventDefault();
 
+  // disabled until start()
+  this.canConnect = () => false;
+
   let supportsPassive = false;
   try {
     let opts = Object.defineProperty( {}, 'passive', {
