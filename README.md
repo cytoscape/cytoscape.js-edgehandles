@@ -13,7 +13,10 @@ This extension creates handles on nodes that can be dragged to create edges betw
 
 ## Dependencies
 
- * Cytoscape.js ^3.2.0
+ * Cytoscape.js 3.x, >= 3.2.0
+ * Lodash 4.x, >= 4.1
+   * memoize
+   * throttle
 
 
 ## Usage instructions
