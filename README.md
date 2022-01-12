@@ -8,7 +8,9 @@ cytoscape-edgehandles
 ## Description
 
 
-This extension creates handles on nodes that can be dragged to create edges between nodes ([demo](https://cytoscape.github.io/cytoscape.js-edgehandles/), [demo (snapping disabled)](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-snap.html), [compound demo](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound.html), [compound demo (snapping disabled)](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound-snap.html))
+This extension allows for drawing edges between nodes ([demo](https://cytoscape.github.io/cytoscape.js-edgehandles/), [demo (snapping disabled)](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-snap.html), [compound demo](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound.html), [compound demo (snapping disabled)](https://cytoscape.github.io/cytoscape.js-edgehandles/demo-compound-snap.html))
+
+You can use [Popper](https://github.com/cytoscape/cytoscape.js-popper) to create your own handles, as shown in the [demo](https://cytoscape.github.io/cytoscape.js-edgehandles/).
 
 
 ## Dependencies
